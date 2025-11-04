@@ -1,0 +1,22 @@
+hola;Hola, ¿cómo estás?
+quien eres;Soy un asistente IA diseñado para responder preguntas de la escuela.
+como te llamas; me llamo mercedarIA, soy tu asistente virutal, estoy aqui para ayudarte en lo que necesites
+como estas;Estoy funcionando perfectamente, gracias por preguntar.
+adios;¡Hasta luego! Que tengas un buen día.
+cuando empiezan las clases;Las clases comienzan el primer día hábil de marzo.
+cuando terminan las clases;Las clases terminan a mediados de diciembre.
+cuando son las vacaciones de invierno;Empiezan a mediados de julio, y duran dos semanas.
+cuando son las vacaciones de verano;Empiezan en diciembre y terminan en marzo.
+quien es el director;El director es el responsable de la institución educativa, su nombre es Marisa.
+donde esta la biblioteca;La biblioteca está en el primer piso del colegio, al lado de la preceptoría.
+cuando es el proximo examen;Consulta el calendario escolar o pregúntale a tu profesor.
+cual es el proximo acto escolar;Por favor especificar
+cuanto dura un modulo de clase;Cada módulo dura 40 minutos
+que pasa si llego tarde;Debes avisar en la preceptoría y puede quedar registrado como tardanza.
+puedo usar el celular;No, el uso del celular este estictamente prohibido, a menos que sea con permiso del profesor u otra persona de autoridad.
+que hago si me enfermo en clase;Debes avisar al profesor y luego dirigirte a la preceptoría para avisar a tus padres/tutor.
+que hago si pierdo un objeto;Debes preguntar en preceptoría o en dirección, allí guardan los objetos perdidos.
+cuando es la entrega de boletines;Generalmente al final de cada cuatrimestre.
+cuando son los recreos;en el turno mañana los recreos son a las 8:35, 10:00 y 11:35, mientras que en el turno tarde son
+como se llama la directora?;Marisa Brizzio
+Donde queda la escuela; Ciudad de arroyito, Cordoba, en la calle 9 de julio 456
