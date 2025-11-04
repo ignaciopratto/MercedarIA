@@ -7,24 +7,22 @@ import streamlit as st
 # CONFIGURACIÓN
 # ==============================
 ARCHIVO = "preguntas_respuestas.txt"
-DEEPSEEK_API_KEY = "TU_API_KEY_AQUI"  # ⚠️ Reemplaza con tu clave de DeepSeek
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # tu API Key de DeepSeek
 
 # ==============================
-# FUNCIONES PRINCIPALES
+# FUNCIONES BASE
 # ==============================
-
 def cargar_preguntas_respuestas(nombre_archivo):
-    preguntas, respuestas = [], []
+    lista = []
     if not os.path.exists(nombre_archivo):
-        return preguntas, respuestas
+        return lista
     with open(nombre_archivo, "r", encoding="utf-8") as archivo:
         for linea in archivo:
             if ";" in linea:
                 partes = linea.strip().split(";", 1)
                 if len(partes) == 2:
-                    preguntas.append(partes[0].strip().lower().replace(" ", ""))
-                    respuestas.append(partes[1].strip())
-    return preguntas, respuestas
+                    lista.append((partes[0].strip(), partes[1].strip()))
+    return lista
 
 
 def guardar_preguntas_respuestas(nombre_archivo, lista):
@@ -43,24 +41,33 @@ def obtener_contexto_archivo(nombre_archivo):
             if ";" in linea:
                 partes = linea.strip().split(";", 1)
                 if len(partes) == 2:
-                    contexto += f"Pregunta {i}: {partes[0].strip()}\nRespuesta {i}: {partes[1].strip()}\n\n"
+                    contexto += f"Pregunta {i}: {partes[0].strip()}\n"
+                    contexto += f"Respuesta {i}: {partes[1].strip()}\n\n"
     return contexto
 
 
 def consultar_deepseek(pregunta, api_key, contexto=""):
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
+
+    mensaje_completo = pregunta if not contexto else f"{contexto}\n\nPregunta del usuario: {pregunta}"
+
     data = {
         "model": "deepseek-chat",
         "messages": [
-            {"role": "system",
-             "content": """Eres un asistente educativo del Colegio Mercedaria. 
-             Usa la base local para responder primero; si no hay respuesta, usa tu conocimiento general. 
-             Sé amable, educativo y breve."""},
-            {"role": "user", "content": f"{contexto}\n\nPregunta: {pregunta}"}
+            {
+                "role": "system",
+                "content": (
+                    "Eres un asistente educativo del Colegio Mercedaria. "
+                    "Usa la base de conocimiento para responder. "
+                    "Si no sabes algo, usa tu conocimiento general. "
+                    "Sé amable, breve y educativo."
+                ),
+            },
+            {"role": "user", "content": mensaje_completo},
         ],
         "max_tokens": 500,
-        "temperature": 0.7
+        "temperature": 0.7,
     }
 
     try:
@@ -74,55 +81,55 @@ def consultar_deepseek(pregunta, api_key, contexto=""):
 
 def mostrar_fecha_hora():
     ahora = datetime.now()
-    return ahora.strftime("Hoy es %A %d de %B de %Y, %H:%M:%S")
-
+    return ahora.strftime("📅 %A %d de %B de %Y - 🕒 %H:%M:%S")
 
 # ==============================
 # INTERFAZ STREAMLIT
 # ==============================
-
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="centered")
+st.title("🎓 MercedarIA - Chatbot del Colegio")
 
-# Tabs: Chatbot y Editor
-tab1, tab2 = st.tabs(["💬 Chatbot", "✏️ Editor de Preguntas"])
+# Inicialización segura del estado
+if "datos" not in st.session_state:
+    st.session_state.datos = cargar_preguntas_respuestas(ARCHIVO)
+if not isinstance(st.session_state.datos, list):
+    st.session_state.datos = []
+if "historial" not in st.session_state:
+    st.session_state.historial = []
 
-# =====================================
-# TAB 1 - CHATBOT
-# =====================================
-with tab1:
-    st.title("🤖 Chatbot del Colegio Mercedaria")
-    st.markdown("Conocimiento Local + DeepSeek AI")
+# Sidebar
+st.sidebar.header("🛠 Menú principal")
+modo = st.sidebar.radio("Seleccioná modo:", ["💬 Chat IA", "✏️ Modificar base de datos"])
 
-    preguntas, respuestas = cargar_preguntas_respuestas(ARCHIVO)
-    contexto = obtener_contexto_archivo(ARCHIVO)
-
-    if "historial" not in st.session_state:
-        st.session_state.historial = []
-
+# ==============================
+# MODO CHATBOT
+# ==============================
+if modo == "💬 Chat IA":
+    st.subheader("💬 Chat con la IA del Colegio Mercedaria")
     usuario = st.text_input("Escribí tu pregunta:")
+
     if st.button("Enviar"):
         if usuario.strip():
             st.session_state.historial.append(("👨‍🎓 Vos", usuario))
             usuario_normalizado = usuario.lower().replace(" ", "")
-            respuesta = None
 
-            # Buscar en base local
-            for i, preg in enumerate(preguntas):
-                if preg in usuario_normalizado:
-                    respuesta = respuestas[i]
+            # Buscar respuesta local
+            respuesta = None
+            for preg, resp in st.session_state.datos:
+                if preg.lower().replace(" ", "") in usuario_normalizado:
+                    respuesta = resp
                     break
 
             if respuesta:
                 st.session_state.historial.append(("🤖 MercedarIA", respuesta))
-            elif DEEPSEEK_API_KEY.strip():
+            else:
                 st.session_state.historial.append(("🤖 MercedarIA", "Pensando..."))
+                contexto = obtener_contexto_archivo(ARCHIVO)
                 respuesta = consultar_deepseek(usuario, DEEPSEEK_API_KEY, contexto)
                 st.session_state.historial.pop()
                 st.session_state.historial.append(("🤖 MercedarIA", respuesta))
-            else:
-                st.session_state.historial.append(("🤖 MercedarIA", "⚠️ No tengo información para eso."))
 
-    st.divider()
+    # Mostrar historial
     for rol, msg in st.session_state.historial:
         if rol == "👨‍🎓 Vos":
             st.markdown(f"**{rol}:** {msg}")
@@ -130,74 +137,53 @@ with tab1:
             st.markdown(f"<span style='color:#00FFAA'><b>{rol}:</b></span> {msg}", unsafe_allow_html=True)
 
     st.divider()
-    st.caption(f"🕐 {mostrar_fecha_hora()}")
+    if st.button("🗑 Limpiar conversación"):
+        st.session_state.historial = []
+        st.success("Conversación reiniciada.")
 
-# =====================================
-# TAB 2 - EDITOR
-# =====================================
-with tab2:
-    st.title("✏️ Editor de Preguntas y Respuestas")
-    st.caption("Modificá la base local `preguntas_respuestas.txt` que usa el chatbot")
+# ==============================
+# MODO GESTOR DE PREGUNTAS
+# ==============================
+else:
+    st.subheader("📘 Gestor de Preguntas y Respuestas")
+    st.info("Editá directamente las preguntas y respuestas usadas por la IA.")
 
-    if "datos" not in st.session_state:
-        st.session_state.datos = cargar_preguntas_respuestas(ARCHIVO)
-
-    st.subheader("📋 Preguntas actuales")
+    # Mostrar la lista
     if not st.session_state.datos:
-        st.info("No hay preguntas cargadas todavía.")
+        st.warning("No hay preguntas cargadas. Podés agregar nuevas abajo.")
     else:
         for i, (preg, resp) in enumerate(st.session_state.datos, start=1):
-            with st.expander(f"{i}. {preg}"):
-                st.markdown(f"**Respuesta:** {resp}")
+            with st.expander(f"🔹 {i}. {preg}"):
+                nueva_preg = st.text_input(f"Editar pregunta {i}", preg, key=f"preg_{i}")
+                nueva_resp = st.text_area(f"Editar respuesta {i}", resp, key=f"resp_{i}")
+                st.session_state.datos[i - 1] = (nueva_preg, nueva_resp)
 
-    st.divider()
+    # Botones
+    st.markdown("---")
     st.subheader("➕ Agregar nueva pregunta")
-    col1, col2 = st.columns(2)
+    nueva_pregunta = st.text_input("Nueva pregunta:")
+    nueva_respuesta = st.text_area("Nueva respuesta:")
+
+    col1, col2, col3 = st.columns(3)
     with col1:
-        nueva_preg = st.text_input("Nueva pregunta:")
+        if st.button("Agregar"):
+            if nueva_pregunta and nueva_respuesta:
+                st.session_state.datos.append((nueva_pregunta, nueva_respuesta))
+                guardar_preguntas_respuestas(ARCHIVO, st.session_state.datos)
+                st.success("✅ Pregunta agregada.")
+            else:
+                st.warning("Completá ambos campos.")
+
     with col2:
-        nueva_resp = st.text_input("Nueva respuesta:")
-
-    if st.button("Guardar nueva pregunta"):
-        if nueva_preg and nueva_resp:
-            st.session_state.datos.append((nueva_preg.strip(), nueva_resp.strip()))
+        if st.button("💾 Guardar cambios"):
             guardar_preguntas_respuestas(ARCHIVO, st.session_state.datos)
-            st.success("✅ Pregunta agregada correctamente.")
-            st.experimental_rerun()
-        else:
-            st.warning("⚠️ Completá ambos campos antes de guardar.")
+            st.success("Cambios guardados correctamente.")
+
+    with col3:
+        if st.button("🔄 Recargar archivo"):
+            st.session_state.datos = cargar_preguntas_respuestas(ARCHIVO)
+            st.success("Archivo recargado.")
 
     st.divider()
-    st.subheader("✏️ Modificar o eliminar")
+    st.caption("Todos los cambios se guardan en el archivo preguntas_respuestas.txt")
 
-    if st.session_state.datos:
-        indices = [f"{i+1}. {preg}" for i, (preg, _) in enumerate(st.session_state.datos)]
-        seleccion = st.selectbox("Seleccioná la pregunta:", indices)
-
-        if seleccion:
-            idx = int(seleccion.split(".")[0]) - 1
-            preg_actual, resp_actual = st.session_state.datos[idx]
-
-            nueva_pregunta = st.text_input("Modificar pregunta:", preg_actual, key="mod_preg")
-            nueva_respuesta = st.text_area("Modificar respuesta:", resp_actual, key="mod_resp")
-
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("💾 Guardar cambios"):
-                    st.session_state.datos[idx] = (nueva_pregunta, nueva_respuesta)
-                    guardar_preguntas_respuestas(ARCHIVO, st.session_state.datos)
-                    st.success("✅ Cambios guardados.")
-                    st.experimental_rerun()
-
-            with col2:
-                if st.button("🗑️ Eliminar"):
-                    st.session_state.datos.pop(idx)
-                    guardar_preguntas_respuestas(ARCHIVO, st.session_state.datos)
-                    st.success("🗑️ Pregunta eliminada correctamente.")
-                    st.experimental_rerun()
-
-    st.divider()
-    if st.button("🔄 Recargar archivo"):
-        st.session_state.datos = cargar_preguntas_respuestas(ARCHIVO)
-        st.info("Archivo recargado correctamente.")
-        st.experimental_rerun()
