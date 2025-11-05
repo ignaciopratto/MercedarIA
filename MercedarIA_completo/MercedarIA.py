@@ -32,12 +32,12 @@ def guardar_preguntas_respuestas(nombre_archivo, lista):
 
 
 def obtener_contexto_archivo(nombre_archivo):
+    """Convierte todo el archivo en un bloque de texto (prompt base)."""
     if not os.path.exists(nombre_archivo):
         return "No hay archivo de preguntas cargado."
     contexto = "BASE DE CONOCIMIENTO DEL COLEGIO:\n\n"
     with open(nombre_archivo, "r", encoding="utf-8") as archivo:
-        lineas = archivo.readlines()
-        for i, linea in enumerate(lineas, 1):
+        for i, linea in enumerate(archivo.readlines(), 1):
             if ";" in linea:
                 partes = linea.strip().split(";", 1)
                 if len(partes) == 2:
@@ -46,11 +46,10 @@ def obtener_contexto_archivo(nombre_archivo):
     return contexto
 
 
-def consultar_deepseek(pregunta, api_key, contexto=""):
+def consultar_deepseek(mensaje, api_key, contexto=""):
+    """Envía la pregunta (con contexto) a la API de DeepSeek."""
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
-
-    mensaje_completo = pregunta if not contexto else f"{contexto}\n\nPregunta del usuario: {pregunta}"
 
     data = {
         "model": "deepseek-chat",
@@ -59,22 +58,21 @@ def consultar_deepseek(pregunta, api_key, contexto=""):
                 "role": "system",
                 "content": (
                     "Eres un asistente educativo del Colegio Mercedaria. "
-                    "Usa la base de conocimiento para responder. "
-                    "Si no sabes algo, usa tu conocimiento general. "
-                    "Sé amable, breve y educativo."
+                    "Usa la base de conocimiento cargada para responder preguntas. "
+                    "Si algo no está en la base, usa conocimiento general. "
+                    "Nunca digas 'no lo sé', intenta dar una respuesta útil y educativa."
                 ),
             },
-            {"role": "user", "content": mensaje_completo},
+            {"role": "user", "content": mensaje if not contexto else f"{contexto}\n\n{mensaje}"},
         ],
-        "max_tokens": 500,
-        "temperature": 0.7,
+        "max_tokens": 600,
+        "temperature": 0.6,
     }
 
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=30)
-        response.raise_for_status()
-        result = response.json()
-        return result["choices"][0]["message"]["content"]
+        r = requests.post(url, headers=headers, json=data, timeout=30)
+        r.raise_for_status()
+        return r.json()["choices"][0]["message"]["content"]
     except Exception as e:
         return f"❌ Error al conectar con DeepSeek: {e}"
 
@@ -89,20 +87,37 @@ def mostrar_fecha_hora():
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="centered")
 st.title("🎓 MercedarIA - Chatbot del Colegio")
 
-# Inicialización segura del estado
+# Inicialización de estado
 if "datos" not in st.session_state:
     st.session_state.datos = cargar_preguntas_respuestas(ARCHIVO)
-if not isinstance(st.session_state.datos, list):
-    st.session_state.datos = []
 if "historial" not in st.session_state:
     st.session_state.historial = []
+if "contexto" not in st.session_state:
+    st.session_state.contexto = obtener_contexto_archivo(ARCHIVO)
+if "base_cargada" not in st.session_state:
+    st.session_state.base_cargada = False
 
-# Sidebar
+# ==============================
+# CARGA INICIAL DE CONTEXTO EN DEEPSEEK
+# ==============================
+if not st.session_state.base_cargada:
+    st.info("📚 Cargando base de conocimiento en DeepSeek...")
+    base = st.session_state.contexto + "\n\nConfirma que has cargado correctamente esta base de conocimiento."
+    respuesta_inicial = consultar_deepseek(base, DEEPSEEK_API_KEY)
+    if "✅" in respuesta_inicial or "cargada" in respuesta_inicial.lower():
+        st.success("✅ Base de conocimiento cargada correctamente.")
+    else:
+        st.warning("⚠️ No se pudo confirmar la carga, pero el contexto fue enviado.")
+    st.session_state.base_cargada = True
+
+# ==============================
+# SIDEBAR
+# ==============================
 st.sidebar.header("🛠 Menú principal")
 modo = st.sidebar.radio("Seleccioná modo:", ["💬 Chat IA", "✏️ Modificar base de datos"])
 
 # ==============================
-# MODO CHATBOT
+# CHATBOT
 # ==============================
 if modo == "💬 Chat IA":
     st.subheader("💬 Chat con la IA del Colegio Mercedaria")
@@ -111,44 +126,27 @@ if modo == "💬 Chat IA":
     if st.button("Enviar"):
         if usuario.strip():
             st.session_state.historial.append(("👨‍🎓 Vos", usuario))
-            usuario_normalizado = usuario.lower().replace(" ", "")
-
-            # Buscar respuesta local
-            respuesta = None
-            for preg, resp in st.session_state.datos:
-                if preg.lower().replace(" ", "") in usuario_normalizado:
-                    respuesta = resp
-                    break
-
-            if respuesta:
-                st.session_state.historial.append(("🤖 MercedarIA", respuesta))
-            else:
-                st.session_state.historial.append(("🤖 MercedarIA", "Pensando..."))
-                contexto = obtener_contexto_archivo(ARCHIVO)
-                respuesta = consultar_deepseek(usuario, DEEPSEEK_API_KEY, contexto)
-                st.session_state.historial.pop()
-                st.session_state.historial.append(("🤖 MercedarIA", respuesta))
+            contexto = st.session_state.contexto
+            respuesta = consultar_deepseek(usuario, DEEPSEEK_API_KEY, contexto)
+            st.session_state.historial.append(("🤖 MercedarIA", respuesta))
 
     # Mostrar historial
     for rol, msg in st.session_state.historial:
-        if rol == "👨‍🎓 Vos":
-            st.markdown(f"**{rol}:** {msg}")
-        else:
-            st.markdown(f"<span style='color:#00FFAA'><b>{rol}:</b></span> {msg}", unsafe_allow_html=True)
+        color = "#00FFAA" if rol != "👨‍🎓 Vos" else "#FFFFFF"
+        st.markdown(f"<span style='color:{color}'><b>{rol}:</b> {msg}</span>", unsafe_allow_html=True)
 
-    st.divider()
     if st.button("🗑 Limpiar conversación"):
         st.session_state.historial = []
         st.success("Conversación reiniciada.")
 
 # ==============================
-# MODO GESTOR DE PREGUNTAS
+# GESTOR DE PREGUNTAS
 # ==============================
 else:
     st.subheader("📘 Gestor de Preguntas y Respuestas")
-    st.info("Editá directamente las preguntas y respuestas usadas por la IA.")
+    st.info("Editá directamente las preguntas y respuestas que usa la IA como base de conocimiento.")
 
-    # Mostrar la lista
+    # Mostrar lista editable
     if not st.session_state.datos:
         st.warning("No hay preguntas cargadas. Podés agregar nuevas abajo.")
     else:
@@ -158,7 +156,6 @@ else:
                 nueva_resp = st.text_area(f"Editar respuesta {i}", resp, key=f"resp_{i}")
                 st.session_state.datos[i - 1] = (nueva_preg, nueva_resp)
 
-    # Botones
     st.markdown("---")
     st.subheader("➕ Agregar nueva pregunta")
     nueva_pregunta = st.text_input("Nueva pregunta:")
@@ -177,13 +174,15 @@ else:
     with col2:
         if st.button("💾 Guardar cambios"):
             guardar_preguntas_respuestas(ARCHIVO, st.session_state.datos)
-            st.success("Cambios guardados correctamente.")
+            st.session_state.contexto = obtener_contexto_archivo(ARCHIVO)
+            st.session_state.base_cargada = False
+            st.success("Cambios guardados. Se recargará la base de conocimiento al reiniciar.")
 
     with col3:
         if st.button("🔄 Recargar archivo"):
             st.session_state.datos = cargar_preguntas_respuestas(ARCHIVO)
-            st.success("Archivo recargado.")
+            st.session_state.contexto = obtener_contexto_archivo(ARCHIVO)
+            st.success("Archivo recargado correctamente.")
 
-    st.divider()
-    st.caption("Todos los cambios se guardan en el archivo preguntas_respuestas.txt")
-
+    st.markdown("---")
+    st.caption("🧠 Todos los cambios se guardan en preguntas_respuestas.txt y se cargan al iniciar la IA.")
