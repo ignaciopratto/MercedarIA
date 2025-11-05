@@ -1,19 +1,21 @@
 import os
+import json
 import requests
-from datetime import datetime
 import streamlit as st
+from datetime import datetime
 
 # ==============================
 # CONFIGURACIÓN
 # ==============================
-ARCHIVO = "preguntas_respuestas.txt"
-DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # tu API Key de DeepSeek
+ARCHIVO = "preguntas_respuestas.txt"  # archivo local
+DEEPSEEK_API_KEY = "TU_API_KEY_AQUI"  # 🔑 reemplazá con tu API Key real
 
 # ==============================
-# FUNCIONES BASE
+# FUNCIONES DE BASE DE CONOCIMIENTO
 # ==============================
+
 def cargar_preguntas_respuestas(nombre_archivo):
-    """Lee las preguntas y respuestas del archivo local."""
+    """Carga todas las preguntas y respuestas del archivo."""
     lista = []
     if not os.path.exists(nombre_archivo):
         return lista
@@ -26,20 +28,33 @@ def cargar_preguntas_respuestas(nombre_archivo):
     return lista
 
 
-def obtener_contexto_archivo(nombre_archivo):
-    """Convierte todo el archivo en texto legible para el prompt."""
+def obtener_contexto_completo(nombre_archivo):
+    """Convierte toda la base de conocimiento en un bloque de texto para el prompt."""
     if not os.path.exists(nombre_archivo):
-        return "No hay archivo de preguntas cargado."
+        return "No hay base de conocimiento cargada."
     contexto = "BASE DE CONOCIMIENTO DEL COLEGIO:\n\n"
     with open(nombre_archivo, "r", encoding="utf-8") as archivo:
-        for i, linea in enumerate(archivo.readlines(), 1):
+        for i, linea in enumerate(archivo, start=1):
             if ";" in linea:
                 partes = linea.strip().split(";", 1)
                 if len(partes) == 2:
                     contexto += f"Pregunta {i}: {partes[0].strip()}\n"
                     contexto += f"Respuesta {i}: {partes[1].strip()}\n\n"
-    return contexto
+    return contexto.strip()
 
+
+def guardar_pregunta_respuesta(pregunta, respuesta):
+    """Guarda una nueva pregunta y respuesta al archivo."""
+    try:
+        with open(ARCHIVO, "a", encoding="utf-8") as f:
+            f.write(f"\n{pregunta};{respuesta}")
+        return True
+    except Exception:
+        return False
+
+# ==============================
+# CONSULTA A DEEPSEEK (STREAMING)
+# ==============================
 
 def consultar_deepseek_streaming(pregunta, api_key, contexto):
     """Envía la base completa + pregunta al modelo DeepSeek y muestra respuesta en streaming."""
@@ -54,9 +69,9 @@ def consultar_deepseek_streaming(pregunta, api_key, contexto):
             "role": "system",
             "content": (
                 "Sos MercedarIA, asistente educativo del Colegio Mercedaria. "
-                "Respondé de forma clara, educativa y breve. "
-                "Usá el contexto local del colegio para dar prioridad a respuestas internas. "
-                "No menciones si la respuesta proviene del contexto."
+                "Respondé con lenguaje claro, educativo y breve. "
+                "Usá el contexto local del colegio cuando corresponda. "
+                "No menciones si la respuesta proviene de la base de conocimiento."
             )
         },
         {
@@ -69,122 +84,99 @@ def consultar_deepseek_streaming(pregunta, api_key, contexto):
         "model": "deepseek-chat",
         "messages": mensajes,
         "max_tokens": 500,
-        "temperature": 0.6,
+        "temperature": 0.7,
         "stream": True
     }
 
     try:
-        with requests.post(url, headers=headers, json=data, stream=True, timeout=60) as response:
-            response.raise_for_status()
-            respuesta = ""
-            message_placeholder = st.empty()
-            for line in response.iter_lines():
-                if line:
-                    if line.decode().startswith("data: "):
-                        chunk = line.decode().replace("data: ", "").strip()
-                        if chunk == "[DONE]":
-                            break
-                        try:
-                            content = requests.utils.json.loads(chunk)
-                            delta = content["choices"][0]["delta"].get("content", "")
-                            if delta:
-                                respuesta += delta
-                                message_placeholder.markdown(f"🤖 **MercedarIA:** {respuesta}")
-                        except Exception:
-                            continue
-            return respuesta or "No se recibió respuesta del modelo."
-    except Exception as e:
-        return f"❌ Error al conectar con DeepSeek: {e}"
+        respuesta = ""
+        message_placeholder = st.empty()
+        with requests.post(url, headers=headers, json=data, stream=True, timeout=60) as r:
+            r.raise_for_status()
+            for line in r.iter_lines(decode_unicode=True):
+                if not line or not line.startswith("data: "):
+                    continue
+                payload = line[len("data: "):].strip()
+                if payload == "[DONE]":
+                    break
+                try:
+                    chunk = json.loads(payload)
+                    delta = chunk["choices"][0]["delta"].get("content", "")
+                    if delta:
+                        respuesta += delta
+                        message_placeholder.markdown(f"🤖 **MercedarIA:** {respuesta}")
+                except json.JSONDecodeError:
+                    continue
 
+        if not respuesta.strip():
+            return "⚠️ No se recibió texto del modelo. Revisá tu API key o límites de uso."
+        return respuesta
+
+    except requests.exceptions.RequestException as e:
+        return f"❌ Error de conexión: {e}"
+
+# ==============================
+# FUNCIONES EXTRA
+# ==============================
 
 def mostrar_fecha_hora():
-    ahora = datetime.now()
-    return ahora.strftime("📅 %A %d de %B de %Y - 🕒 %H:%M:%S")
-
-
-def guardar_preguntas_respuestas(nombre_archivo, lista):
-    with open(nombre_archivo, "w", encoding="utf-8") as archivo:
-        for pregunta, respuesta in lista:
-            archivo.write(f"{pregunta};{respuesta}\n")
+    return datetime.now().strftime("📅 Hoy es %A %d de %B de %Y - %H:%M:%S")
 
 
 # ==============================
 # INTERFAZ STREAMLIT
 # ==============================
-st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="centered")
-st.title("🎓 MercedarIA - Chatbot del Colegio Mercedaria")
 
-# Inicialización
-if "datos" not in st.session_state:
-    st.session_state.datos = cargar_preguntas_respuestas(ARCHIVO)
-if "historial" not in st.session_state:
+st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="centered")
+
+st.title("🎓 Chatbot del Colegio Mercedaria")
+st.caption("IA con base de conocimiento local + DeepSeek AI")
+
+# Cargar base al iniciar
+if "contexto" not in st.session_state:
+    st.session_state.contexto = obtener_contexto_completo(ARCHIVO)
     st.session_state.historial = []
 
-# Sidebar
-st.sidebar.header("🛠 Menú principal")
-modo = st.sidebar.radio("Seleccioná modo:", ["💬 Chat IA", "✏️ Modificar base de datos"])
+st.divider()
+st.subheader("💬 Chat con MercedarIA")
 
-# ==============================
-# MODO CHAT
-# ==============================
-if modo == "💬 Chat IA":
-    st.subheader("💬 Chat con la IA del Colegio")
-    contexto = obtener_contexto_archivo(ARCHIVO)
-    st.caption("📚 El archivo de conocimiento se incluye automáticamente con cada pregunta.")
+pregunta_usuario = st.text_input("Escribí tu pregunta:")
 
-    usuario = st.text_input("Escribí tu pregunta:")
+if st.button("Enviar"):
+    if pregunta_usuario.strip():
+        st.session_state.historial.append(("👨‍🎓 Vos", pregunta_usuario))
+        respuesta = consultar_deepseek_streaming(
+            pregunta_usuario, DEEPSEEK_API_KEY, st.session_state.contexto
+        )
+        st.session_state.historial.append(("🤖 MercedarIA", respuesta))
 
-    if st.button("Enviar"):
-        if usuario.strip():
-            st.session_state.historial.append(("👨‍🎓 Vos", usuario))
-            respuesta = consultar_deepseek_streaming(usuario, DEEPSEEK_API_KEY, contexto)
-            st.session_state.historial.append(("🤖 MercedarIA", respuesta))
-
-    # Mostrar historial completo
-    for rol, msg in st.session_state.historial:
-        color = "#00FFAA" if rol != "👨‍🎓 Vos" else "#FFFFFF"
-        st.markdown(f"<span style='color:{color}'><b>{rol}:</b> {msg}</span>", unsafe_allow_html=True)
-
-    if st.button("🗑 Limpiar conversación"):
-        st.session_state.historial = []
-        st.success("Conversación reiniciada.")
-
-# ==============================
-# MODO EDITOR
-# ==============================
-else:
-    st.subheader("📘 Gestor de Preguntas y Respuestas")
-    if not st.session_state.datos:
-        st.warning("No hay preguntas cargadas.")
+# Mostrar historial
+for rol, msg in st.session_state.historial:
+    if rol == "👨‍🎓 Vos":
+        st.markdown(f"**{rol}:** {msg}")
     else:
-        for i, (preg, resp) in enumerate(st.session_state.datos, start=1):
-            with st.expander(f"🔹 {i}. {preg}"):
-                nueva_preg = st.text_input(f"Pregunta {i}", preg, key=f"preg_{i}")
-                nueva_resp = st.text_area(f"Respuesta {i}", resp, key=f"resp_{i}")
-                st.session_state.datos[i - 1] = (nueva_preg, nueva_resp)
+        st.markdown(f"<span style='color:#00FFAA'><b>{rol}:</b></span> {msg}", unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.subheader("➕ Agregar nueva pregunta")
-    nueva_pregunta = st.text_input("Nueva pregunta:")
-    nueva_respuesta = st.text_area("Nueva respuesta:")
+st.divider()
+st.subheader("🧩 Herramientas adicionales")
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("Agregar"):
-            if nueva_pregunta and nueva_respuesta:
-                st.session_state.datos.append((nueva_pregunta, nueva_respuesta))
-                guardar_preguntas_respuestas(ARCHIVO, st.session_state.datos)
-                st.success("✅ Pregunta agregada correctamente.")
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("Ver fecha y hora"):
+        st.success(mostrar_fecha_hora())
+
+with col2:
+    with st.expander("➕ Agregar nueva pregunta/respuesta"):
+        nueva_p = st.text_input("Nueva pregunta:")
+        nueva_r = st.text_area("Nueva respuesta:")
+        if st.button("Guardar en base"):
+            if nueva_p.strip() and nueva_r.strip():
+                if guardar_pregunta_respuesta(nueva_p, nueva_r):
+                    st.success("✅ Guardado correctamente.")
+                    st.session_state.contexto = obtener_contexto_completo(ARCHIVO)
+                else:
+                    st.error("❌ Error al guardar.")
             else:
-                st.warning("Completá ambos campos.")
+                st.warning("⚠️ Completá ambos campos.")
 
-    with col2:
-        if st.button("💾 Guardar cambios"):
-            guardar_preguntas_respuestas(ARCHIVO, st.session_state.datos)
-            st.success("Cambios guardados correctamente.")
-
-    with col3:
-        if st.button("🔄 Recargar archivo"):
-            st.session_state.datos = cargar_preguntas_respuestas(ARCHIVO)
-            st.success("Archivo recargado.")
-
+st.caption("Todos los datos locales se guardan en preguntas_respuestas.txt")
