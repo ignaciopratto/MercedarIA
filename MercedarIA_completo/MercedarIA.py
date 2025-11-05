@@ -8,7 +8,7 @@ from datetime import datetime
 # CONFIGURACIÓN
 # ==============================
 ARCHIVO = "preguntas_respuestas.txt"  # archivo local
-DEEPSEEK_API_KEY = "TU_API_KEY_AQUI"  # 🔑 reemplazá con tu API Key real
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # 🔑 reemplazá con tu API Key real
 
 # ==============================
 # FUNCIONES DE BASE DE CONOCIMIENTO
@@ -180,3 +180,4 @@ with col2:
                 st.warning("⚠️ Completá ambos campos.")
 
 st.caption("Todos los datos locales se guardan en preguntas_respuestas.txt")
+
