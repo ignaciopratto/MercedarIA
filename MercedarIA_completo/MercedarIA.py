@@ -5,7 +5,7 @@ from datetime import datetime
 # ==============================
 # CONFIGURACIÓN
 # ==============================
-DEEPSEEK_API_KEY = "TU_API_KEY_AQUI"  # 🔑 reemplazá con tu API Key real
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # 🔑 reemplazá con tu API Key real
 
 # ==============================
 # BASE DE CONOCIMIENTO LOCAL
@@ -123,3 +123,4 @@ with col2:
             st.success("✅ Base actualizada correctamente.")
 
 st.caption("Las preguntas y respuestas están guardadas dentro del programa (no en archivo externo).")
+
