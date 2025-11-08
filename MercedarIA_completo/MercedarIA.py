@@ -1,64 +1,73 @@
 import streamlit as st
 import requests
+import json
+import os
 from datetime import datetime
 
 # ==============================
 # CONFIGURACIÓN
 # ==============================
-DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # ⚠ reemplazá con tu API key real
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # ⚠ Reemplazá con tu API key real
+ARCHIVO_BD = "base_datos.json"
 
 # ==============================
-# BASE DE CONOCIMIENTO LOCAL (editable)
+# FUNCIONES DE BASE DE DATOS
 # ==============================
-BASE_INICIAL = [
-    ("hola", "Hola, ¿cómo estás?"),
-    ("quien eres", "Soy un asistente IA diseñado para responder preguntas de la escuela."),
-    ("como te llamas", "Me llamo MercedarIA, soy tu asistente virtual, estoy aquí para ayudarte en lo que necesites."),
-    ("como estas", "Estoy funcionando perfectamente, gracias por preguntar."),
-    ("adios", "¡Hasta luego! Que tengas un buen día."),
-    ("cuando empiezan las clases", "Las clases comienzan el primer día hábil de marzo."),
-    ("cuando terminan las clases", "Las clases terminan a mediados de diciembre."),
-    ("cuando son las vacaciones de invierno", "Empiezan a mediados de julio y duran dos semanas."),
-    ("cuando son las vacaciones de verano", "Empiezan en diciembre y terminan en marzo."),
-    ("quien es el director", "El director es el responsable de la institución educativa. Su nombre es Marisa."),
-    ("donde esta la biblioteca", "La biblioteca está en el primer piso del colegio, al lado de la preceptoría."),
-    ("cuando es el proximo examen", "Consultá el calendario escolar o preguntale a tu profesor."),
-    ("cual es el proximo acto escolar", "Por favor especificá."),
-    ("cuanto dura un modulo de clase", "Cada módulo dura 40 minutos."),
-    ("que pasa si llego tarde", "Debés avisar en la preceptoría y puede quedar registrado como tardanza."),
-    ("puedo usar el celular", "No, el uso del celular está estrictamente prohibido, salvo con permiso del profesor o autoridad."),
-    ("que hago si me enfermo en clase", "Debés avisar al profesor y luego dirigirte a la preceptoría para avisar a tus padres/tutor."),
-    ("que hago si pierdo un objeto", "Debés preguntar en preceptoría o en dirección, allí guardan los objetos perdidos."),
-    ("cuando es la entrega de boletines", "Generalmente al final de cada cuatrimestre."),
-    ("cuando son los recreos", "En el turno mañana los recreos son a las 8:35, 10:00 y 11:35; en el turno tarde son a las 14:40, 16:05 y 17:50."),
-    ("como se llama la directora", "Marisa Brizzio."),
-    ("donde queda la escuela", "Ciudad de Arroyito, Córdoba, en la calle 9 de Julio 456.")
-]
+def cargar_base():
+    """Carga la base desde JSON o usa la inicial si no existe."""
+    if os.path.exists(ARCHIVO_BD):
+        with open(ARCHIVO_BD, "r", encoding="utf-8") as f:
+            return json.load(f)
+    else:
+        return [
+            ("hola", "Hola, ¿cómo estás?"),
+            ("quien eres", "Soy un asistente IA diseñado para responder preguntas de la escuela."),
+            ("como te llamas", "Me llamo MercedarIA, soy tu asistente virtual."),
+            ("como estas", "Estoy funcionando perfectamente, gracias por preguntar."),
+            ("adios", "¡Hasta luego! Que tengas un buen día."),
+            ("cuando empiezan las clases", "Las clases comienzan el primer día hábil de marzo."),
+            ("cuando terminan las clases", "Las clases terminan a mediados de diciembre."),
+            ("cuando son las vacaciones de invierno", "Empiezan a mediados de julio y duran dos semanas."),
+            ("cuando son las vacaciones de verano", "Empiezan en diciembre y terminan en marzo."),
+            ("quien es el director", "El director es el responsable de la institución. Su nombre es Marisa."),
+            ("donde esta la biblioteca", "En el primer piso, al lado de la preceptoría."),
+            ("cuanto dura un modulo de clase", "Cada módulo dura 40 minutos."),
+            ("que pasa si llego tarde", "Debés avisar en la preceptoría y puede quedar registrado como tardanza."),
+            ("puedo usar el celular", "No, salvo con permiso del profesor o autoridad."),
+            ("que hago si me enfermo en clase", "Debés avisar al profesor y luego a preceptoría."),
+            ("cuando es la entrega de boletines", "Generalmente al final de cada cuatrimestre."),
+            ("cuando son los recreos", "Mañana: 8:35, 10:00 y 11:35. Tarde: 14:40, 16:05 y 17:50."),
+            ("como se llama la directora", "Marisa Brizzio."),
+            ("donde queda la escuela", "Ciudad de Arroyito, Córdoba, en la calle 9 de Julio 456.")
+        ]
 
-# ==============================
-# FUNCIONES
-# ==============================
+def guardar_base(lista):
+    """Guarda la base en JSON."""
+    with open(ARCHIVO_BD, "w", encoding="utf-8") as f:
+        json.dump(lista, f, ensure_ascii=False, indent=2)
+
 def obtener_contexto(lista):
     contexto = "BASE DE CONOCIMIENTO DEL COLEGIO:\n\n"
     for i, (p, r) in enumerate(lista, 1):
         contexto += f"Pregunta {i}: {p}\nRespuesta {i}: {r}\n\n"
     return contexto
 
-
+# ==============================
+# FUNCIÓN IA
+# ==============================
 def consultar_deepseek(pregunta, api_key, contexto):
     """Consulta a DeepSeek con la base de conocimiento como contexto"""
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-
     data = {
         "model": "deepseek-chat",
         "messages": [
             {
                 "role": "system",
                 "content": (
-                    "Sos MercedarIA, el asistente educativo oficial del Colegio Mercedaria. "
+                    "Sos MercedarIA, el asistente educativo del Colegio Mercedaria. "
                     "Usá la base de conocimiento local para responder preguntas sobre el colegio. "
-                    "Si la pregunta no está en la base, respondé con tu conocimiento general pero mantené un tono educativo."
+                    "Si la pregunta no está en la base, respondé con tu conocimiento general."
                 )
             },
             {"role": "user", "content": f"{contexto}\n\nPregunta: {pregunta}"}
@@ -66,15 +75,12 @@ def consultar_deepseek(pregunta, api_key, contexto):
         "max_tokens": 500,
         "temperature": 0.7
     }
-
     try:
         resp = requests.post(url, headers=headers, json=data, timeout=60)
         resp.raise_for_status()
-        data = resp.json()
-        return data["choices"][0]["message"]["content"].strip()
+        return resp.json()["choices"][0]["message"]["content"].strip()
     except Exception as e:
         return f"❌ Error al conectar con DeepSeek: {e}"
-
 
 def mostrar_fecha_hora():
     return datetime.now().strftime("📅 Hoy es %A %d de %B de %Y - %H:%M:%S")
@@ -85,11 +91,11 @@ def mostrar_fecha_hora():
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="centered")
 
 st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
-st.caption("Basado en conocimiento local + IA DeepSeek")
+st.caption("Conocimiento local + DeepSeek AI")
 
-# Inicializar datos persistentes
+# Cargar base persistente
 if "base_datos" not in st.session_state:
-    st.session_state.base_datos = BASE_INICIAL.copy()
+    st.session_state.base_datos = cargar_base()
 if "historial" not in st.session_state:
     st.session_state.historial = []
 
@@ -105,9 +111,8 @@ if st.button("Enviar"):
     if pregunta.strip():
         st.session_state.historial.append(("👨‍🎓 Vos", pregunta))
         pregunta_normalizada = pregunta.lower().strip()
-
-        # Buscar coincidencia en base local
         respuesta = None
+
         for p, r in st.session_state.base_datos:
             if p.lower() in pregunta_normalizada:
                 respuesta = r
@@ -118,7 +123,6 @@ if st.button("Enviar"):
 
         st.session_state.historial.append(("🤖 MercedarIA", respuesta))
 
-# Mostrar conversación
 for rol, msg in st.session_state.historial:
     if rol == "👨‍🎓 Vos":
         st.markdown(f"🧍 *{rol}:* {msg}")
@@ -131,7 +135,6 @@ st.divider()
 # SECCIÓN DE EDICIÓN DE BASE
 # ==============================
 st.subheader("🧩 Editar base de conocimiento")
-st.markdown("Cualquier usuario puede agregar, modificar o eliminar preguntas directamente desde aquí.")
 
 for i, (p, r) in enumerate(st.session_state.base_datos):
     col1, col2, col3 = st.columns([4, 5, 1])
@@ -143,21 +146,25 @@ for i, (p, r) in enumerate(st.session_state.base_datos):
     with col3:
         if st.button("🗑", key=f"del_{i}"):
             st.session_state.base_datos.pop(i)
+            guardar_base(st.session_state.base_datos)
             st.experimental_rerun()
 
-# Agregar nueva
 st.markdown("---")
 nueva_pregunta = st.text_input("➕ Nueva pregunta")
 nueva_respuesta = st.text_area("Respuesta")
 if st.button("Agregar a la base"):
     if nueva_pregunta and nueva_respuesta:
         st.session_state.base_datos.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
+        guardar_base(st.session_state.base_datos)
         st.success("✅ Pregunta agregada correctamente.")
         st.experimental_rerun()
     else:
         st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
 
-st.markdown("---")
+if st.button("💾 Guardar cambios"):
+    guardar_base(st.session_state.base_datos)
+    st.success("✅ Base guardada permanentemente en disco.")
+
 if st.button("🧹 Limpiar chat"):
     st.session_state.historial = []
     st.rerun()
@@ -165,4 +172,4 @@ if st.button("🧹 Limpiar chat"):
 if st.button("📅 Ver fecha y hora"):
     st.info(mostrar_fecha_hora())
 
-st.caption("💡 Todos los cambios se guardan temporalmente mientras la aplicación esté activa.")
+st.caption("💾 Todos los cambios se guardan automáticamente en base_datos.json")
