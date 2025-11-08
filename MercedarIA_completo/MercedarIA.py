@@ -147,7 +147,7 @@ for i, (p, r) in enumerate(st.session_state.base_datos):
         if st.button("🗑", key=f"del_{i}"):
             st.session_state.base_datos.pop(i)
             guardar_base(st.session_state.base_datos)
-            st.experimental_rerun()
+            st.rerun()
 
 st.markdown("---")
 nueva_pregunta = st.text_input("➕ Nueva pregunta")
@@ -157,7 +157,7 @@ if st.button("Agregar a la base"):
         st.session_state.base_datos.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
         guardar_base(st.session_state.base_datos)
         st.success("✅ Pregunta agregada correctamente.")
-        st.experimental_rerun()
+        st.rerun()
     else:
         st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
 
@@ -173,3 +173,4 @@ if st.button("📅 Ver fecha y hora"):
     st.info(mostrar_fecha_hora())
 
 st.caption("💾 Todos los cambios se guardan automáticamente en base_datos.json")
+
