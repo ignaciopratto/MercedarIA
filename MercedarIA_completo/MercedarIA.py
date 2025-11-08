@@ -1,23 +1,16 @@
-import requests
 import streamlit as st
+import requests
 from datetime import datetime
 
-# ==========================
+# ==============================
 # CONFIGURACIÓN
-# ==========================
-DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # opcional, dejar vacío si no usas IA
+# ==============================
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # ⚠ reemplazá con tu API key real
 
-COLORES = {
-    "primario": "#FF6B6B",
-    "secundario": "#4ECDC4",
-    "texto": "#2C3E50",
-    "fondo": "#F8F9FA"
-}
-
-# ==========================
-# BASE DE CONOCIMIENTO
-# ==========================
-BASE_CONOCIMIENTO = [
+# ==============================
+# BASE DE CONOCIMIENTO LOCAL (editable)
+# ==============================
+BASE_INICIAL = [
     ("hola", "Hola, ¿cómo estás?"),
     ("quien eres", "Soy un asistente IA diseñado para responder preguntas de la escuela."),
     ("como te llamas", "Me llamo MercedarIA, soy tu asistente virtual, estoy aquí para ayudarte en lo que necesites."),
@@ -27,133 +20,149 @@ BASE_CONOCIMIENTO = [
     ("cuando terminan las clases", "Las clases terminan a mediados de diciembre."),
     ("cuando son las vacaciones de invierno", "Empiezan a mediados de julio y duran dos semanas."),
     ("cuando son las vacaciones de verano", "Empiezan en diciembre y terminan en marzo."),
-    ("quien es el director", "El director es el responsable de la institución educativa, su nombre es Marisa."),
+    ("quien es el director", "El director es el responsable de la institución educativa. Su nombre es Marisa."),
     ("donde esta la biblioteca", "La biblioteca está en el primer piso del colegio, al lado de la preceptoría."),
-    ("cuando es el proximo examen", "Consulta el calendario escolar o pregúntale a tu profesor."),
-    ("cual es el proximo acto escolar", "Por favor especificar."),
+    ("cuando es el proximo examen", "Consultá el calendario escolar o preguntale a tu profesor."),
+    ("cual es el proximo acto escolar", "Por favor especificá."),
     ("cuanto dura un modulo de clase", "Cada módulo dura 40 minutos."),
-    ("que pasa si llego tarde", "Debes avisar en la preceptoría y puede quedar registrado como tardanza."),
-    ("puedo usar el celular", "No, el uso del celular está estrictamente prohibido, a menos que sea con permiso del profesor u otra persona de autoridad."),
-    ("que hago si me enfermo en clase", "Debes avisar al profesor y luego dirigirte a la preceptoría para avisar a tus padres/tutor."),
-    ("que hago si pierdo un objeto", "Debes preguntar en preceptoría o en dirección, allí guardan los objetos perdidos."),
+    ("que pasa si llego tarde", "Debés avisar en la preceptoría y puede quedar registrado como tardanza."),
+    ("puedo usar el celular", "No, el uso del celular está estrictamente prohibido, salvo con permiso del profesor o autoridad."),
+    ("que hago si me enfermo en clase", "Debés avisar al profesor y luego dirigirte a la preceptoría para avisar a tus padres/tutor."),
+    ("que hago si pierdo un objeto", "Debés preguntar en preceptoría o en dirección, allí guardan los objetos perdidos."),
     ("cuando es la entrega de boletines", "Generalmente al final de cada cuatrimestre."),
-    ("cuando son los recreos", "En el turno mañana los recreos son a las 8:35, 10:00 y 11:35, mientras que en el turno tarde son más tarde."),
+    ("cuando son los recreos", "En el turno mañana los recreos son a las 8:35, 10:00 y 11:35; en el turno tarde son a las 14:40, 16:05 y 17:50."),
     ("como se llama la directora", "Marisa Brizzio."),
-    ("donde queda la escuela", "La escuela queda en la ciudad de Arroyito, Córdoba, en la calle 9 de julio 456.")
+    ("donde queda la escuela", "Ciudad de Arroyito, Córdoba, en la calle 9 de Julio 456.")
 ]
 
-# ==========================
-# FUNCIONES AUXILIARES
-# ==========================
-def aplicar_estilos():
-    st.markdown(f"""
-    <style>
-    .stApp {{
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }}
-    .chat-message {{
-        padding: 1rem; border-radius: 15px; margin: 0.8rem 0;
-    }}
-    .user-message {{
-        background: {COLORES['secundario']}; color: white; margin-left: 20%;
-    }}
-    .bot-message {{
-        background: {COLORES['primario']}; color: white; margin-right: 20%;
-    }}
-    </style>
-    """, unsafe_allow_html=True)
-
-
-def buscar_respuesta_local(consulta: str):
-    consulta = consulta.lower().strip()
-    for pregunta, respuesta in BASE_CONOCIMIENTO:
-        if any(palabra in consulta for palabra in pregunta.split()):
-            return respuesta
-    return None
-
-
-def generar_contexto():
-    contexto = "BASE DE CONOCIMIENTO DEL COLEGIO:\n"
-    for pregunta, respuesta in BASE_CONOCIMIENTO:
-        contexto += f"P: {pregunta}\nR: {respuesta}\n\n"
+# ==============================
+# FUNCIONES
+# ==============================
+def obtener_contexto(lista):
+    contexto = "BASE DE CONOCIMIENTO DEL COLEGIO:\n\n"
+    for i, (p, r) in enumerate(lista, 1):
+        contexto += f"Pregunta {i}: {p}\nRespuesta {i}: {r}\n\n"
     return contexto
 
 
-def consultar_ia(pregunta, api_key, contexto=""):
-    if not api_key:
-        return "⚠️ No hay clave API configurada para usar IA."
+def consultar_deepseek(pregunta, api_key, contexto):
+    """Consulta a DeepSeek con la base de conocimiento como contexto"""
+    url = "https://api.deepseek.com/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+
+    data = {
+        "model": "deepseek-chat",
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "Sos MercedarIA, el asistente educativo oficial del Colegio Mercedaria. "
+                    "Usá la base de conocimiento local para responder preguntas sobre el colegio. "
+                    "Si la pregunta no está en la base, respondé con tu conocimiento general pero mantené un tono educativo."
+                )
+            },
+            {"role": "user", "content": f"{contexto}\n\nPregunta: {pregunta}"}
+        ],
+        "max_tokens": 500,
+        "temperature": 0.7
+    }
 
     try:
-        res = requests.post(
-            "https://api.deepseek.com/v1/chat/completions",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}"
-            },
-            json={
-                "model": "deepseek-chat",
-                "messages": [
-                    {"role": "system", "content": "Sos un asistente educativo del Colegio Mercedaria."},
-                    {"role": "user", "content": f"{contexto}\nUsuario: {pregunta}"}
-                ]
-            },
-            timeout=30
-        )
-        res.raise_for_status()
-        return res.json()["choices"][0]["message"]["content"]
+        resp = requests.post(url, headers=headers, json=data, timeout=60)
+        resp.raise_for_status()
+        data = resp.json()
+        return data["choices"][0]["message"]["content"].strip()
     except Exception as e:
-        return f"❌ Error al consultar IA: {e}"
+        return f"❌ Error al conectar con DeepSeek: {e}"
 
 
-def obtener_fecha_hora():
-    ahora = datetime.now()
-    return f"📅 {ahora.strftime('%d/%m/%Y')} • 🕐 {ahora.strftime('%H:%M')}"
+def mostrar_fecha_hora():
+    return datetime.now().strftime("📅 Hoy es %A %d de %B de %Y - %H:%M:%S")
 
-# ==========================
-# INTERFAZ PRINCIPAL
-# ==========================
-def main():
-    st.set_page_config(page_title="MercedarIA", page_icon="🎓")
-    aplicar_estilos()
+# ==============================
+# INTERFAZ STREAMLIT
+# ==============================
+st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="centered")
 
-    st.markdown("<h1 style='text-align:center;'>🎓 MercedarIA</h1>", unsafe_allow_html=True)
+st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
+st.caption("Basado en conocimiento local + IA DeepSeek")
 
-    # Inicializar historial solo una vez
-    if "historial" not in st.session_state:
-        st.session_state.historial = [
-            ("bot", "¡Hola! Soy MercedarIA, tu asistente educativo del Colegio Mercedaria. ¿En qué puedo ayudarte hoy?")
-        ]
+# Inicializar datos persistentes
+if "base_datos" not in st.session_state:
+    st.session_state.base_datos = BASE_INICIAL.copy()
+if "historial" not in st.session_state:
+    st.session_state.historial = []
 
-    consulta = st.text_input("✏️ Escribí tu pregunta:", key="input_chat")
-    if st.button("📤 Enviar") and consulta.strip():
-        st.session_state.historial.append(("usuario", consulta))
-        respuesta_local = buscar_respuesta_local(consulta)
+contexto = obtener_contexto(st.session_state.base_datos)
 
-        if respuesta_local:
-            respuesta = f"{respuesta_local}\n\n📚 *Respuesta de base local*"
-        else:
-            contexto = generar_contexto()
-            respuesta = f"{consultar_ia(consulta, DEEPSEEK_API_KEY, contexto)}\n\n🤖 *Respuesta IA*"
+# ==============================
+# SECCIÓN DE CHAT
+# ==============================
+st.subheader("💬 Chat con MercedarIA")
+pregunta = st.text_input("Escribí tu pregunta:")
 
-        st.session_state.historial.append(("bot", respuesta))
-        st.rerun()
+if st.button("Enviar"):
+    if pregunta.strip():
+        st.session_state.historial.append(("👨‍🎓 Vos", pregunta))
+        pregunta_normalizada = pregunta.lower().strip()
 
-    # Mostrar historial
-    for rol, msg in st.session_state.historial:
-        clase = "user-message" if rol == "usuario" else "bot-message"
-        st.markdown(f"<div class='chat-message {clase}'>{msg}</div>", unsafe_allow_html=True)
+        # Buscar coincidencia en base local
+        respuesta = None
+        for p, r in st.session_state.base_datos:
+            if p.lower() in pregunta_normalizada:
+                respuesta = r
+                break
 
-    st.markdown(f"<div style='text-align:center;color:gray;margin-top:1rem;'>{obtener_fecha_hora()}</div>", unsafe_allow_html=True)
+        if not respuesta:
+            respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, contexto)
 
-    if st.button("🗑️ Limpiar chat"):
-        st.session_state.historial = [
-            ("bot", "¡Hola! Soy MercedarIA, tu asistente educativo del Colegio Mercedaria. ¿En qué puedo ayudarte hoy?")
-        ]
-        st.rerun()
+        st.session_state.historial.append(("🤖 MercedarIA", respuesta))
 
-# ==========================
-# EJECUCIÓN
-# ==========================
-if __name__ == "__main__":
-    main()
+# Mostrar conversación
+for rol, msg in st.session_state.historial:
+    if rol == "👨‍🎓 Vos":
+        st.markdown(f"🧍 *{rol}:* {msg}")
+    else:
+        st.markdown(f"🧠 <span style='color:#00FFAA'><b>{rol}:</b></span> {msg}", unsafe_allow_html=True)
 
+st.divider()
+
+# ==============================
+# SECCIÓN DE EDICIÓN DE BASE
+# ==============================
+st.subheader("🧩 Editar base de conocimiento")
+st.markdown("Cualquier usuario puede agregar, modificar o eliminar preguntas directamente desde aquí.")
+
+for i, (p, r) in enumerate(st.session_state.base_datos):
+    col1, col2, col3 = st.columns([4, 5, 1])
+    with col1:
+        st.session_state.base_datos[i] = (
+            st.text_input(f"Pregunta {i+1}", p, key=f"p_{i}"),
+            st.text_area(f"Respuesta {i+1}", r, key=f"r_{i}")
+        )
+    with col3:
+        if st.button("🗑", key=f"del_{i}"):
+            st.session_state.base_datos.pop(i)
+            st.experimental_rerun()
+
+# Agregar nueva
+st.markdown("---")
+nueva_pregunta = st.text_input("➕ Nueva pregunta")
+nueva_respuesta = st.text_area("Respuesta")
+if st.button("Agregar a la base"):
+    if nueva_pregunta and nueva_respuesta:
+        st.session_state.base_datos.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
+        st.success("✅ Pregunta agregada correctamente.")
+        st.experimental_rerun()
+    else:
+        st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
+
+st.markdown("---")
+if st.button("🧹 Limpiar chat"):
+    st.session_state.historial = []
+    st.rerun()
+
+if st.button("📅 Ver fecha y hora"):
+    st.info(mostrar_fecha_hora())
+
+st.caption("💡 Todos los cambios se guardan temporalmente mientras la aplicación esté activa.")
