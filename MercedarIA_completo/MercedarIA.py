@@ -5,7 +5,7 @@ from datetime import datetime
 # ==========================
 # CONFIGURACIÓN
 # ==========================
-DEEPSEEK_API_KEY = ""  # opcional, dejar vacío si no usas IA
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # opcional, dejar vacío si no usas IA
 
 COLORES = {
     "primario": "#FF6B6B",
@@ -156,3 +156,4 @@ def main():
 # ==========================
 if __name__ == "__main__":
     main()
+
