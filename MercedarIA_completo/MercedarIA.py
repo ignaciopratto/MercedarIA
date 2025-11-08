@@ -166,3 +166,4 @@ if st.button("📅 Ver fecha y hora"):
     st.info(mostrar_fecha_hora())
 
 st.caption("💡 Todos los cambios se guardan temporalmente mientras la aplicación esté activa.")
+
