@@ -91,7 +91,7 @@ def mostrar_fecha_hora():
 # ==============================
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="centered")
 
-st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
+st.title("🎓 MercedarIA - Asistente del Colegio INSM")
 st.caption("Conocimiento local + DeepSeek AI")
 
 # Cargar base persistente
@@ -174,5 +174,6 @@ if st.button("📅 Ver fecha y hora"):
     st.info(mostrar_fecha_hora())
 
 st.caption("💾 Todos los cambios se guardan automáticamente en base_datos.json")
+
 
 
