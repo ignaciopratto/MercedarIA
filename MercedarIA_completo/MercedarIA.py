@@ -68,6 +68,7 @@ def consultar_deepseek(pregunta, api_key, contexto):
                     "Sos MercedarIA, el asistente educativo del Colegio Mercedaria. "
                     "Usá la base de conocimiento local para responder preguntas sobre el colegio. "
                     "Si la pregunta no está en la base, respondé con tu conocimiento general."
+                    "no menciones tu base de datos, responde las preguntas de manera concisa"
                 )
             },
             {"role": "user", "content": f"{contexto}\n\nPregunta: {pregunta}"}
@@ -173,4 +174,5 @@ if st.button("📅 Ver fecha y hora"):
     st.info(mostrar_fecha_hora())
 
 st.caption("💾 Todos los cambios se guardan automáticamente en base_datos.json")
+
 
