@@ -2,13 +2,13 @@ import streamlit as st
 import requests
 import json
 import os
-from datetime import datetime
 
 # ==============================
 # CONFIGURACIÓN
 # ==============================
-DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # ⚠ Reemplazá con tu API key real
+DEEPSEEK_API_KEY = "TU_API_KEY_AQUI"  # ⚠ Reemplazá con tu API key real
 ARCHIVO_BD = "base_datos.json"
+CONTRASEÑA_EDICION = "mercedaria2025"  # 🔐 cambiá esta contraseña
 
 # ==============================
 # FUNCIONES DE BASE DE DATOS
@@ -52,15 +52,17 @@ def obtener_contexto(lista):
         contexto += f"Pregunta {i}: {p}\nRespuesta {i}: {r}\n\n"
     return contexto
 
+
 # ==============================
-# FUNCIÓN IA
+# FUNCIÓN IA CON STREAMING
 # ==============================
-def consultar_deepseek(pregunta, api_key, contexto):
-    """Consulta a DeepSeek con la base de conocimiento como contexto"""
+def consultar_deepseek_stream(pregunta, api_key, contexto):
+    """Consulta a DeepSeek con la base de conocimiento como contexto (modo streaming)."""
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     data = {
         "model": "deepseek-chat",
+        "stream": True,  # 🚀 Habilita streaming
         "messages": [
             {
                 "role": "system",
@@ -68,7 +70,6 @@ def consultar_deepseek(pregunta, api_key, contexto):
                     "Sos MercedarIA, el asistente educativo del Colegio Mercedaria. "
                     "Usá la base de conocimiento local para responder preguntas sobre el colegio. "
                     "Si la pregunta no está en la base, respondé con tu conocimiento general."
-                    "no menciones tu base de datos, responde las preguntas de manera concisa"
                 )
             },
             {"role": "user", "content": f"{contexto}\n\nPregunta: {pregunta}"}
@@ -76,29 +77,45 @@ def consultar_deepseek(pregunta, api_key, contexto):
         "max_tokens": 500,
         "temperature": 0.7
     }
+
     try:
-        resp = requests.post(url, headers=headers, json=data, timeout=60)
-        resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"].strip()
+        with requests.post(url, headers=headers, json=data, stream=True, timeout=60) as resp:
+            resp.raise_for_status()
+            respuesta = ""
+            message_placeholder = st.empty()
+            for line in resp.iter_lines():
+                if line and line.startswith(b"data: "):
+                    contenido = line.decode("utf-8")[6:]
+                    if contenido.strip() == "[DONE]":
+                        break
+                    try:
+                        fragmento = json.loads(contenido)
+                        texto = fragmento.get("choices", [{}])[0].get("delta", {}).get("content", "")
+                        if texto:
+                            respuesta += texto
+                            message_placeholder.markdown(f"🧠 <span style='color:#00FFAA'><b>MercedarIA:</b></span> {respuesta}", unsafe_allow_html=True)
+                    except json.JSONDecodeError:
+                        continue
+            return respuesta.strip() if respuesta else "⚠️ No se recibió respuesta del modelo."
     except Exception as e:
         return f"❌ Error al conectar con DeepSeek: {e}"
 
-def mostrar_fecha_hora():
-    return datetime.now().strftime("📅 Hoy es %A %d de %B de %Y - %H:%M:%S")
 
 # ==============================
 # INTERFAZ STREAMLIT
 # ==============================
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="centered")
 
-st.title("🎓 MercedarIA - Asistente del Colegio INSM")
-st.caption("Conocimiento local + DeepSeek AI")
+st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
+st.caption("Conocimiento local + DeepSeek AI (con streaming y seguridad)")
 
 # Cargar base persistente
 if "base_datos" not in st.session_state:
     st.session_state.base_datos = cargar_base()
 if "historial" not in st.session_state:
     st.session_state.historial = []
+if "acceso_edicion" not in st.session_state:
+    st.session_state.acceso_edicion = False
 
 contexto = obtener_contexto(st.session_state.base_datos)
 
@@ -120,7 +137,7 @@ if st.button("Enviar"):
                 break
 
         if not respuesta:
-            respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, contexto)
+            respuesta = consultar_deepseek_stream(pregunta, DEEPSEEK_API_KEY, contexto)
 
         st.session_state.historial.append(("🤖 MercedarIA", respuesta))
 
@@ -133,47 +150,54 @@ for rol, msg in st.session_state.historial:
 st.divider()
 
 # ==============================
-# SECCIÓN DE EDICIÓN DE BASE
+# ACCESO A EDICIÓN (CON CONTRASEÑA)
 # ==============================
 st.subheader("🧩 Editar base de conocimiento")
 
-for i, (p, r) in enumerate(st.session_state.base_datos):
-    col1, col2, col3 = st.columns([4, 5, 1])
-    with col1:
-        st.session_state.base_datos[i] = (
-            st.text_input(f"Pregunta {i+1}", p, key=f"p_{i}"),
-            st.text_area(f"Respuesta {i+1}", r, key=f"r_{i}")
-        )
-    with col3:
-        if st.button("🗑", key=f"del_{i}"):
-            st.session_state.base_datos.pop(i)
-            guardar_base(st.session_state.base_datos)
+if not st.session_state.acceso_edicion:
+    password = st.text_input("🔑 Ingresá la contraseña para editar:", type="password")
+    if st.button("Ingresar"):
+        if password == CONTRASEÑA_EDICION:
+            st.session_state.acceso_edicion = True
+            st.success("✅ Acceso concedido. Podés editar la base.")
             st.rerun()
+        else:
+            st.error("❌ Contraseña incorrecta.")
+else:
+    st.success("🔓 Acceso de edición habilitado.")
+    for i, (p, r) in enumerate(st.session_state.base_datos):
+        col1, col2, col3 = st.columns([4, 5, 1])
+        with col1:
+            st.session_state.base_datos[i] = (
+                st.text_input(f"Pregunta {i+1}", p, key=f"p_{i}"),
+                st.text_area(f"Respuesta {i+1}", r, key=f"r_{i}")
+            )
+        with col3:
+            if st.button("🗑", key=f"del_{i}"):
+                st.session_state.base_datos.pop(i)
+                guardar_base(st.session_state.base_datos)
+                st.rerun()
 
-st.markdown("---")
-nueva_pregunta = st.text_input("➕ Nueva pregunta")
-nueva_respuesta = st.text_area("Respuesta")
-if st.button("Agregar a la base"):
-    if nueva_pregunta and nueva_respuesta:
-        st.session_state.base_datos.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
+    st.markdown("---")
+    nueva_pregunta = st.text_input("➕ Nueva pregunta")
+    nueva_respuesta = st.text_area("Respuesta")
+    if st.button("Agregar a la base"):
+        if nueva_pregunta and nueva_respuesta:
+            st.session_state.base_datos.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
+            guardar_base(st.session_state.base_datos)
+            st.success("✅ Pregunta agregada correctamente.")
+            st.rerun()
+        else:
+            st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
+
+    if st.button("💾 Guardar cambios"):
         guardar_base(st.session_state.base_datos)
-        st.success("✅ Pregunta agregada correctamente.")
-        st.rerun()
-    else:
-        st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
+        st.success("✅ Base guardada permanentemente en disco.")
 
-if st.button("💾 Guardar cambios"):
-    guardar_base(st.session_state.base_datos)
-    st.success("✅ Base guardada permanentemente en disco.")
+st.divider()
 
 if st.button("🧹 Limpiar chat"):
     st.session_state.historial = []
     st.rerun()
 
-if st.button("📅 Ver fecha y hora"):
-    st.info(mostrar_fecha_hora())
-
 st.caption("💾 Todos los cambios se guardan automáticamente en base_datos.json")
-
-
-
