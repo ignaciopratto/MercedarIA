@@ -6,7 +6,7 @@ import os
 # ==============================
 # CONFIGURACIÓN
 # ==============================
-DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # ⚠ Reemplazá con tu API key real
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # ⚠ reemplazá con tu API key real
 ARCHIVO_BD = "base_datos.json"
 CONTRASEÑA_EDICION = "mercedaria2025"  # 🔐 cambiá esta contraseña
 
@@ -14,7 +14,6 @@ CONTRASEÑA_EDICION = "mercedaria2025"  # 🔐 cambiá esta contraseña
 # FUNCIONES DE BASE DE DATOS
 # ==============================
 def cargar_base():
-    """Carga la base desde JSON o usa la inicial si no existe."""
     if os.path.exists(ARCHIVO_BD):
         with open(ARCHIVO_BD, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -42,7 +41,6 @@ def cargar_base():
         ]
 
 def guardar_base(lista):
-    """Guarda la base en JSON."""
     with open(ARCHIVO_BD, "w", encoding="utf-8") as f:
         json.dump(lista, f, ensure_ascii=False, indent=2)
 
@@ -52,24 +50,21 @@ def obtener_contexto(lista):
         contexto += f"Pregunta {i}: {p}\nRespuesta {i}: {r}\n\n"
     return contexto
 
-
 # ==============================
-# FUNCIÓN IA CON STREAMING
+# FUNCIÓN IA (sin streaming)
 # ==============================
-def consultar_deepseek_stream(pregunta, api_key, contexto):
-    """Consulta a DeepSeek con la base de conocimiento como contexto (modo streaming)."""
+def consultar_deepseek(pregunta, api_key, contexto):
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     data = {
         "model": "deepseek-chat",
-        "stream": True,  # 🚀 Habilita streaming
         "messages": [
             {
                 "role": "system",
                 "content": (
                     "Sos MercedarIA, el asistente educativo del Colegio Mercedaria. "
                     "Usá la base de conocimiento local para responder preguntas sobre el colegio. "
-                    "Si la pregunta no está en la base, respondé con tu conocimiento general."
+                    "Si la pregunta no está en la base, respondé con tu conocimiento general pero mantené un tono educativo."
                 )
             },
             {"role": "user", "content": f"{contexto}\n\nPregunta: {pregunta}"}
@@ -79,27 +74,12 @@ def consultar_deepseek_stream(pregunta, api_key, contexto):
     }
 
     try:
-        with requests.post(url, headers=headers, json=data, stream=True, timeout=60) as resp:
-            resp.raise_for_status()
-            respuesta = ""
-            message_placeholder = st.empty()
-            for line in resp.iter_lines():
-                if line and line.startswith(b"data: "):
-                    contenido = line.decode("utf-8")[6:]
-                    if contenido.strip() == "[DONE]":
-                        break
-                    try:
-                        fragmento = json.loads(contenido)
-                        texto = fragmento.get("choices", [{}])[0].get("delta", {}).get("content", "")
-                        if texto:
-                            respuesta += texto
-                            message_placeholder.markdown(f"🧠 <span style='color:#00FFAA'><b>MercedarIA:</b></span> {respuesta}", unsafe_allow_html=True)
-                    except json.JSONDecodeError:
-                        continue
-            return respuesta.strip() if respuesta else "⚠️ No se recibió respuesta del modelo."
+        resp = requests.post(url, headers=headers, json=data, timeout=60)
+        resp.raise_for_status()
+        data = resp.json()
+        return data["choices"][0]["message"]["content"].strip()
     except Exception as e:
         return f"❌ Error al conectar con DeepSeek: {e}"
-
 
 # ==============================
 # INTERFAZ STREAMLIT
@@ -107,9 +87,8 @@ def consultar_deepseek_stream(pregunta, api_key, contexto):
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="centered")
 
 st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
-st.caption("Conocimiento local + DeepSeek AI (con streaming y seguridad)")
+st.caption("Conocimiento local + DeepSeek AI (sin streaming)")
 
-# Cargar base persistente
 if "base_datos" not in st.session_state:
     st.session_state.base_datos = cargar_base()
 if "historial" not in st.session_state:
@@ -120,7 +99,7 @@ if "acceso_edicion" not in st.session_state:
 contexto = obtener_contexto(st.session_state.base_datos)
 
 # ==============================
-# SECCIÓN DE CHAT
+# CHAT
 # ==============================
 st.subheader("💬 Chat con MercedarIA")
 pregunta = st.text_input("Escribí tu pregunta:")
@@ -129,15 +108,16 @@ if st.button("Enviar"):
     if pregunta.strip():
         st.session_state.historial.append(("👨‍🎓 Vos", pregunta))
         pregunta_normalizada = pregunta.lower().strip()
-        respuesta = None
 
+        # Buscar coincidencia local
+        respuesta = None
         for p, r in st.session_state.base_datos:
             if p.lower() in pregunta_normalizada:
                 respuesta = r
                 break
 
         if not respuesta:
-            respuesta = consultar_deepseek_stream(pregunta, DEEPSEEK_API_KEY, contexto)
+            respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, contexto)
 
         st.session_state.historial.append(("🤖 MercedarIA", respuesta))
 
@@ -150,7 +130,7 @@ for rol, msg in st.session_state.historial:
 st.divider()
 
 # ==============================
-# ACCESO A EDICIÓN (CON CONTRASEÑA)
+# EDICIÓN CON CONTRASEÑA
 # ==============================
 st.subheader("🧩 Editar base de conocimiento")
 
@@ -200,5 +180,4 @@ if st.button("🧹 Limpiar chat"):
     st.session_state.historial = []
     st.rerun()
 
-st.caption("💾 Todos los cambios se guardan automáticamente en base_datos.json")
-
+st.caption("💾 Los cambios se guardan automáticamente en base_datos.json")
