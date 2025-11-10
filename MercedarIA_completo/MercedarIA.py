@@ -101,7 +101,7 @@ contexto = obtener_contexto(st.session_state.base_datos)
 # ==============================
 # CHAT
 # ==============================
-st.subheader("💬 Chat con tu mama")
+st.subheader("💬 Chat con mercedarIA")
 pregunta = st.text_input("Escribí tu pregunta:")
 
 if st.button("Enviar"):
@@ -181,4 +181,5 @@ if st.button("🧹 Limpiar chat"):
     st.rerun()
 
 st.caption("💾 Los cambios se guardan automáticamente en base_datos.json")
+
 
