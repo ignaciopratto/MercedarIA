@@ -6,7 +6,7 @@ import os
 # ==============================
 # CONFIGURACIÓN
 # ==============================
-DEEPSEEK_API_KEY = "TU_API_KEY_AQUI"  # ⚠ Reemplazá con tu API key real
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # ⚠ Reemplazá con tu API key real
 ARCHIVO_BD = "base_datos.json"
 CONTRASEÑA_EDICION = "mercedaria2025"  # 🔐 cambiá esta contraseña
 
@@ -201,3 +201,4 @@ if st.button("🧹 Limpiar chat"):
     st.rerun()
 
 st.caption("💾 Todos los cambios se guardan automáticamente en base_datos.json")
+
