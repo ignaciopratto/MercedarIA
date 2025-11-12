@@ -1,59 +1,58 @@
 import streamlit as st
 import requests
+import threading
+import time
 from datetime import datetime
 
 # ==============================
 # CONFIGURACIÓN
 # ==============================
-DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # ⚠️ Reemplazá con tu API key real
-ADMIN_PASSWORD = "mercedaria2025"
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"   # ⚠️ reemplazá con tu API key real
+ADMIN_PASSWORD = "mercedaria2025"      # 🔒 contraseña para editar la base
 
 # ==============================
-# BASE GENERAL
+# BASE DE CONOCIMIENTO POR CURSO
 # ==============================
 BASE_GENERAL = [
     ("hola", "Hola, ¿cómo estás?"),
-    ("quién eres", "Soy MercedarIA, el asistente virtual del Colegio Mercedaria."),
-    ("cómo te llamas", "Me llamo MercedarIA, tu asistente virtual."),
-    ("como estás", "Estoy funcionando perfectamente, gracias por preguntar."),
-    ("adiós", "¡Hasta luego! Que tengas un buen día."),
-    ("cuándo empiezan las clases", "Las clases comienzan el primer día hábil de marzo."),
-    ("cuándo terminan las clases", "Las clases terminan a mediados de diciembre."),
-    ("quién es la directora", "La directora es Marisa Brizzio."),
-    ("dónde queda la escuela", "En Arroyito, Córdoba, calle 9 de Julio 456."),
-    ("qué pasa si llego tarde", "Debés avisar en preceptoría y se registra como tardanza."),
+    ("quien eres", "Soy MercedarIA, tu asistente del colegio."),
+    ("como te llamas", "Me llamo MercedarIA, tu asistente virtual."),
+    ("como estas", "Estoy funcionando perfectamente, gracias por preguntar."),
+    ("adios", "¡Hasta luego! Que tengas un buen día."),
+    ("quien es la directora", "La directora es Marisa Brizzio."),
+    ("cuando son los recreos", "Turno mañana: 8:35, 10:00, 11:35. Turno tarde: 14:40, 16:05, 17:50."),
+    ("donde queda la escuela", "En Arroyito, Córdoba, calle 9 de Julio 456."),
+    ("cuando empieza el ciclo lectivo", "El ciclo lectivo comienza el primer día hábil de marzo."),
+    ("cuando terminan las clases", "Generalmente a mediados de diciembre."),
 ]
 
-# ==============================
-# BASES ESPECÍFICAS POR CURSO
-# ==============================
 BASES_ESPECIFICAS = {
-    "1° A": [
-        ("qué materias tengo", "Biología, Educación en Artes Visuales, Lengua y Literatura, Física, Geografía, Educación Tecnológica, Matemática, Educación Religiosa Escolar, Ciudadanía y Participación, Inglés y Educación Física."),
-        ("cuáles son mis contraturnos", "Educación Física y Educación Tecnológica."),
-        ("a qué hora son los recreos", "Los recreos son a las 14:40, 16:05 y 17:40 hs.")
-    ],
-    "1° B": [
-        ("qué materias tengo", "Física, Matemática, Educación en Artes Visuales, Inglés, Educación Religiosa Escolar, Lengua y Literatura, Geografía, Ciudadanía y Participación, Educación Tecnológica, Biología y Educación Física."),
-        ("cuáles son mis contraturnos", "Educación Tecnológica y Educación Física."),
-        ("a qué hora son los recreos", "Los recreos son a las 14:40, 16:05 y 17:40 hs.")
-    ],
-    # ... (agregá las demás divisiones aquí igual que antes)
+    "1° A": [("que materias tengo", "Lengua, Matemática, Inglés, Historia, Formación Ética y Ciudadana.")],
+    "1° B": [("que materias tengo", "Lengua, Matemática, Inglés, Biología, Educación Artística.")],
+    "2° A": [("que materias tengo", "Lengua, Matemática, Inglés, Historia, Geografía, Tecnología.")],
+    "2° B": [("que materias tengo", "Lengua, Matemática, Inglés, Biología, Física, Plástica.")],
+    "3° A": [("que materias tengo", "Programación I, Bases de Datos I, Inglés, Matemática, Sistemas Digitales.")],
+    "3° B": [("que materias tengo", "Historia Argentina, Literatura, Inglés, Matemática, Filosofía.")],
+    "4° A": [("que materias tengo", "Programación II, Redes, Inglés, Sistemas Operativos, Matemática Aplicada.")],
+    "4° B": [("que materias tengo", "Historia Mundial, Sociología, Inglés, Psicología, Lengua y Literatura.")],
+    "5° A": [("que materias tengo", "Programación III, Seguridad Informática, Inglés, Electrónica, Gestión de Proyectos.")],
+    "5° B": [("que materias tengo", "Geografía Económica, Ética, Inglés, Política y Ciudadanía, Literatura Avanzada.")],
+    "6° A": [("que materias tengo", "Prácticas Profesionalizantes, Programación Avanzada II, Inglés, Proyectos Institucionales.")],
+    "6° B": [("que materias tengo", "Ciencias Sociales Aplicadas, Inglés, Historia Contemporánea, Proyecto Final.")],
 }
 
 # ==============================
 # FUNCIONES
 # ==============================
-def obtener_contexto(base_general, base_curso):
-    """Crea un contexto unificado con la base general + la del curso"""
+def obtener_contexto(lista):
     contexto = "BASE DE CONOCIMIENTO DEL COLEGIO:\n\n"
-    for i, (p, r) in enumerate(base_general + base_curso, 1):
+    for i, (p, r) in enumerate(lista, 1):
         contexto += f"Pregunta {i}: {p}\nRespuesta {i}: {r}\n\n"
     return contexto
 
 
 def consultar_deepseek(pregunta, api_key, contexto):
-    """Consulta a DeepSeek usando la base local como contexto"""
+    """Consulta a DeepSeek con la base de conocimiento como contexto"""
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
@@ -62,9 +61,10 @@ def consultar_deepseek(pregunta, api_key, contexto):
         "messages": [
             {"role": "system",
              "content": (
-                 "Sos MercedarIA, el asistente educativo del Colegio Mercedaria. "
-                 "Usá la base de conocimiento local y la información del curso correspondiente para responder preguntas. "
-                 "Si la información no está disponible, respondé de manera educativa y adecuada, sin decir que no la sabés."
+                 """Sos MercedarIA, el asistente educativo del Colegio Mercedaria.
+                 Usá la base de conocimiento local para responder preguntas del colegio.
+                 Si la información no está disponible, respondé de manera educativa y correcta.
+                 Podés responder preguntas generales, pero mantené un tono adecuado para estudiantes."""
              )},
             {"role": "user", "content": f"{contexto}\n\nPregunta: {pregunta}"}
         ],
@@ -81,75 +81,79 @@ def consultar_deepseek(pregunta, api_key, contexto):
         return f"❌ Error al conectar con DeepSeek: {e}"
 
 # ==============================
-# STREAMLIT APP
+# CONFIG STREAMLIT
 # ==============================
-st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
+
 st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
 st.caption("Basado en conocimiento local + IA DeepSeek")
-
-# Sesión
-if "historial" not in st.session_state:
-    st.session_state.historial = []
-if "curso" not in st.session_state:
-    st.session_state.curso = "General"
-if "base_datos" not in st.session_state:
-    st.session_state.base_datos = BASE_GENERAL.copy()
 
 # ==============================
 # SELECCIÓN DE CURSO
 # ==============================
-st.subheader("🏫 Seleccioná tu curso")
-cursos_disponibles = ["General"] + list(BASES_ESPECIFICAS.keys())
-curso = st.selectbox("Curso:", cursos_disponibles, index=cursos_disponibles.index(st.session_state.curso))
+CURSOS = ["General"] + list(BASES_ESPECIFICAS.keys())
 
-if curso != st.session_state.curso:
-    st.session_state.curso = curso
-    st.session_state.historial = []  # resetea chat al cambiar curso
+curso_seleccionado = st.sidebar.selectbox(
+    "📘 Seleccioná el curso",
+    CURSOS,
+    index=0
+)
 
-base_curso = BASES_ESPECIFICAS.get(curso, [])
-contexto = obtener_contexto(BASE_GENERAL, base_curso)
+# Inicializar bases en sesión
+if "bases" not in st.session_state:
+    st.session_state.bases = {
+        "General": BASE_GENERAL.copy(),
+        **{curso: BASES_ESPECIFICAS.get(curso, []).copy() for curso in BASES_ESPECIFICAS}
+    }
+if "historial" not in st.session_state:
+    st.session_state.historial = []
+if "edicion_activa" not in st.session_state:
+    st.session_state.edicion_activa = False
+
+# Combinar base general + específica
+base_completa = BASE_GENERAL + st.session_state.bases.get(curso_seleccionado, [])
+contexto = obtener_contexto(base_completa)
 
 # ==============================
 # CHAT
 # ==============================
-st.subheader(f"💬 Chat con MercedarIA ({curso})")
+st.subheader(f"💬 Chat con MercedarIA ({curso_seleccionado})")
 pregunta = st.text_input("Escribí tu pregunta:")
 
-if st.button("Enviar"):
+if st.button("Enviar", key="enviar"):
     if pregunta.strip():
         st.session_state.historial.append(("👨‍🎓 Vos", pregunta))
         pregunta_normalizada = pregunta.lower().strip()
         respuesta = None
 
-        # Buscar coincidencia en bases (curso y general)
-        for p, r in base_curso + BASE_GENERAL:
+        # Buscar coincidencia local (base general + curso)
+        for p, r in base_completa:
             if p.lower() in pregunta_normalizada:
                 respuesta = r
                 break
 
+        # Si no hay coincidencia → consulta a DeepSeek
         if not respuesta:
             respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, contexto)
 
         st.session_state.historial.append(("🤖 MercedarIA", respuesta))
 
 # Mostrar historial
-for rol, msg in st.session_state.historial:
+for rol, msg in st.session_state.historial[-20:]:
     if rol == "👨‍🎓 Vos":
         st.markdown(f"🧍 *{rol}:* {msg}")
     else:
         st.markdown(f"🧠 <span style='color:#00FFAA'><b>{rol}:</b></span> {msg}", unsafe_allow_html=True)
 
-# ==============================
-# ADMIN (EDICIÓN)
-# ==============================
 st.divider()
-st.subheader("🧩 Panel de edición (solo personal autorizado)")
 
-if "edicion_activa" not in st.session_state:
-    st.session_state.edicion_activa = False
+# ==============================
+# EDICIÓN PROTEGIDA
+# ==============================
+st.subheader("🧩 Panel de Edición (solo personal autorizado)")
 
 if not st.session_state.edicion_activa:
-    password = st.text_input("🔒 Ingresá la contraseña", type="password")
+    password = st.text_input("🔒 Ingresá la contraseña para editar", type="password")
     if st.button("Acceder"):
         if password == ADMIN_PASSWORD:
             st.session_state.edicion_activa = True
@@ -157,41 +161,62 @@ if not st.session_state.edicion_activa:
         else:
             st.error("❌ Contraseña incorrecta.")
 else:
-    st.success("Modo edición activado")
-    st.markdown(f"Editando la base de datos de: **{curso}**")
+    st.success(f"Modo edición activado para: {curso_seleccionado}")
 
-    base_actual = base_curso if curso != "General" else BASE_GENERAL
+    # Editar base específica (no la general)
+    st.markdown(f"### ✏️ Editar base de {curso_seleccionado}")
+    if curso_seleccionado == "General":
+        base_editable = BASE_GENERAL
+    else:
+        base_editable = st.session_state.bases[curso_seleccionado]
 
-    for i, (p, r) in enumerate(base_actual):
+    for i, (p, r) in enumerate(base_editable):
         col1, col2, col3 = st.columns([4, 5, 1])
         with col1:
-            nueva_p = st.text_input(f"Pregunta {i+1}", p, key=f"p_{curso}_{i}")
+            nueva_p = st.text_input(f"Pregunta {i+1}", p, key=f"p_{curso_seleccionado}_{i}")
         with col2:
-            nueva_r = st.text_area(f"Respuesta {i+1}", r, key=f"r_{curso}_{i}")
+            nueva_r = st.text_area(f"Respuesta {i+1}", r, key=f"r_{curso_seleccionado}_{i}")
         with col3:
-            if st.button("🗑", key=f"del_{curso}_{i}"):
-                base_actual.pop(i)
+            if st.button("🗑", key=f"del_{curso_seleccionado}_{i}"):
+                base_editable.pop(i)
                 st.rerun()
-        base_actual[i] = (nueva_p, nueva_r)
+        base_editable[i] = (nueva_p, nueva_r)
 
     st.markdown("---")
-    nueva_pregunta = st.text_input("➕ Nueva pregunta", key=f"nueva_p_{curso}")
-    nueva_respuesta = st.text_area("Respuesta", key=f"nueva_r_{curso}")
-    if st.button("Agregar", key=f"add_{curso}"):
+    nueva_pregunta = st.text_input("➕ Nueva pregunta", key=f"nueva_p_{curso_seleccionado}")
+    nueva_respuesta = st.text_area("Respuesta", key=f"nueva_r_{curso_seleccionado}")
+    if st.button("Agregar a la base", key=f"add_{curso_seleccionado}"):
         if nueva_pregunta and nueva_respuesta:
-            base_actual.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
-            st.success("✅ Pregunta agregada.")
+            base_editable.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
+            st.success("✅ Pregunta agregada correctamente.")
         else:
-            st.warning("⚠ Escribí ambos campos antes de agregar.")
+            st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
 
-    if st.button("🚪 Salir del modo edición"):
+    if st.button("🚪 Salir del modo edición", key=f"exit_{curso_seleccionado}"):
         st.session_state.edicion_activa = False
         st.info("🔒 Modo edición cerrado.")
 
-# ==============================
-# BOTÓN EXTRA
-# ==============================
 st.divider()
+
+# ==============================
+# FUNCIONES EXTRA
+# ==============================
 if st.button("🧹 Limpiar chat"):
     st.session_state.historial = []
     st.info("💬 Chat limpiado correctamente.")
+
+st.caption("💡 Los cambios se mantienen mientras la app esté activa. Si se reinicia, se vuelve a la base original.")
+
+# ==============================
+# MANTENER SESIÓN VIVA
+# ==============================
+def mantener_sesion_viva():
+    """Mantiene la sesión activa sin recargar la app."""
+    while True:
+        time.sleep(300)
+        st.session_state["keepalive"] = time.time()
+
+if "keepalive_thread" not in st.session_state:
+    hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
+    hilo.start()
+    st.session_state["keepalive_thread"] = True
