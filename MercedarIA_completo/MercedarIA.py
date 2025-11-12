@@ -27,7 +27,7 @@ BASE_GENERAL = [
 ]
 
 BASES_ESPECIFICAS = {
-    "1° A": [("que materias tengo", "Lengua, Matemática, Inglés, Historia, Formación Ética y Ciudadana.")
+    "1° A": [("que materias tengo", "Lengua, Matemática, Inglés, Historia, Formación Ética y Ciudadana."),
              ("A que hora son los recreos", "Los recreos son a las 14:40, 16,05 y 17:40")],
     "1° B": [("que materias tengo", "Lengua, Matemática, Inglés, Biología, Educación Artística.")],
     "2° A": [("que materias tengo", "Lengua, Matemática, Inglés, Historia, Geografía, Tecnología.")],
@@ -221,5 +221,6 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state["keepalive_thread"] = True
+
 
 
