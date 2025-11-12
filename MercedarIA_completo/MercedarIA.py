@@ -115,7 +115,7 @@ curso_sel = st.selectbox("Seleccioná tu curso:", cursos, index=cursos.index(st.
 if curso_sel != st.session_state.curso:
     st.session_state.curso = curso_sel
     st.session_state.historial = []
-    st.experimental_rerun()  # 🔁 Actualiza al instante
+    st.rerun()  # 🔁 Actualiza al instante
 
 # Armar contexto
 base_curso = BASES_ESPECIFICAS.get(st.session_state.curso, [])
@@ -144,7 +144,7 @@ if st.button("Enviar"):
             respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, contexto)
 
         st.session_state.historial.append(("🤖 MercedarIA", respuesta))
-        st.experimental_rerun()  # 🔁 Actualiza chat inmediatamente
+        st.rerun()  # 🔁 Actualiza chat inmediatamente
 
 # Mostrar historial
 for rol, msg in st.session_state.historial:
@@ -166,7 +166,7 @@ if not st.session_state.edicion_activa:
         if password == ADMIN_PASSWORD:
             st.session_state.edicion_activa = True
             st.success("✅ Acceso concedido.")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("❌ Contraseña incorrecta.")
 else:
@@ -184,7 +184,7 @@ else:
         with col3:
             if st.button("🗑", key=f"del_{i}"):
                 base_objetivo.pop(i)
-                st.experimental_rerun()
+                st.rerun()
         base_objetivo[i] = (nueva_p, nueva_r)
 
     # Agregar nueva pregunta
@@ -195,14 +195,14 @@ else:
         if nueva_pregunta and nueva_respuesta:
             base_objetivo.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
             st.success("✅ Pregunta agregada correctamente.")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
 
     if st.button("🚪 Salir del modo edición"):
         st.session_state.edicion_activa = False
         st.info("🔒 Modo edición cerrado.")
-        st.experimental_rerun()
+        st.rerun()
 
 st.divider()
 
@@ -211,6 +211,7 @@ st.divider()
 # ==============================
 if st.button("🧹 Limpiar chat"):
     st.session_state.historial = []
-    st.experimental_rerun()
+    st.rerun()
 
 st.caption("💡 Todos los cambios se mantienen temporalmente mientras la app esté activa. Si se reinicia, vuelve la base original.")
+
