@@ -87,7 +87,7 @@ def consultar_deepseek(pregunta, api_key, contexto):
              "content": (
                  """Sos MercedarIA, el asistente educativo del Colegio Mercedaria.
                  Usá la base de conocimiento local para responder preguntas del colegio.
-                 si se pregunta algo relacionado al colegio que no se encuentra en tu base de datos, recomienda consulten al chat del curso en especifico del cual tiene la duda
+                 si se pregunta algo relacionado al colegio que no se encuentra en tu base de datos, recomienda que consulten al chat del curso en especifico del cual tiene la duda
                  Si la información no está disponible, respondé de manera educativa y correcta.
                  Podés responder preguntas generales, pero mantené un tono adecuado para estudiantes."""
              )},
@@ -245,6 +245,7 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state["keepalive_thread"] = True
+
 
 
 
