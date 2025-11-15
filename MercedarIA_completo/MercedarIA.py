@@ -10,6 +10,16 @@ from datetime import datetime
 DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"   # ⚠️ reemplazá con tu API key real
 ADMIN_PASSWORD = "mercedaria2025"      # 🔒 contraseña para editar la base
 
+# URLs externas del servidor
+API_BASE = "https://mi-insm.onrender.com"
+API_ENDPOINTS = {
+    "Usuarios": f"{API_BASE}/users",
+    "Cursos": f"{API_BASE}/courses",
+    "Tareas": f"{API_BASE}/tasks",
+    "Archivos": f"{API_BASE}/files",
+    "Egresados": f"{API_BASE}/egresados",
+}
+
 # ==============================
 # BASE DE CONOCIMIENTO GENERAL
 # ==============================
@@ -130,128 +140,172 @@ def consultar_deepseek(pregunta, api_key, contexto):
     except Exception as e:
         return f"❌ Error al conectar con DeepSeek: {e}"
 
+
+def consultar_api(url):
+    """Consulta a cualquiera de las APIs externas"""
+    try:
+        resp = requests.get(url, timeout=20)
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        return {"error": str(e)}
+
+
 # ==============================
 # CONFIG STREAMLIT
 # ==============================
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
 
 st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
-st.caption("Basado en conocimiento local + IA DeepSeek")
+st.caption("Basado en conocimiento local + IA DeepSeek + Servidor externo")
 
 # ==============================
-# SELECCIÓN DE CURSO
+# MENÚ LATERAL
 # ==============================
-CURSOS = ["General"] + list(BASES_ESPECIFICAS.keys())
-
-curso_seleccionado = st.sidebar.selectbox("📘 Seleccioná el curso", CURSOS, index=0)
-
-# Inicializar sesión
-if "bases" not in st.session_state:
-    st.session_state.bases = {
-        "General": BASE_GENERAL.copy(),
-        **{curso: BASES_ESPECIFICAS.get(curso, []).copy() for curso in BASES_ESPECIFICAS}
-    }
-if "historial" not in st.session_state:
-    st.session_state.historial = []
-if "edicion_activa" not in st.session_state:
-    st.session_state.edicion_activa = False
-
-# Seguridad por si el curso no existe
-if curso_seleccionado not in st.session_state.bases:
-    st.session_state.bases[curso_seleccionado] = []
-
-# Base completa
-base_completa = BASE_GENERAL + st.session_state.bases[curso_seleccionado]
-contexto = obtener_contexto(base_completa)
+menu = st.sidebar.radio(
+    "📌 Seleccioná una función",
+    ["Chat", "📦 Datos del Servidor"]
+)
 
 # ==============================
-# CHAT
+# SELECCIÓN DE CURSO (solo para Chat)
 # ==============================
-st.subheader(f"💬 Chat con MercedarIA ({curso_seleccionado})")
-pregunta = st.text_input("Escribí tu pregunta:")
+if menu == "Chat":
 
-enviar = st.button("Enviar", key=f"enviar_{curso_seleccionado}")
-if enviar:
-    if pregunta.strip():
-        st.session_state.historial.append(("👨‍🎓 Vos", pregunta))
-        pregunta_normalizada = pregunta.lower().strip()
-        respuesta = None
+    CURSOS = ["General"] + list(BASES_ESPECIFICAS.keys())
+    curso_seleccionado = st.sidebar.selectbox("📘 Seleccioná el curso", CURSOS, index=0)
 
-        # Buscar en la base local
-        for p, r in base_completa:
-            if p.lower() in pregunta_normalizada:
-                respuesta = r
-                break
-
-        # Si no hay coincidencia, usar IA
-        if not respuesta:
-            respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, contexto)
-
-        st.session_state.historial.append(("🤖 MercedarIA", respuesta))
-
-# Mostrar historial
-for rol, msg in st.session_state.historial[-20:]:
-    if rol == "👨‍🎓 Vos":
-        st.markdown(f"🧍 *{rol}:* {msg}")
-    else:
-        st.markdown(f"🧠 <span style='color:#00FFAA'><b>{rol}:</b></span> {msg}", unsafe_allow_html=True)
-
-st.divider()
-
-# ==============================
-# PANEL DE EDICIÓN PROTEGIDO
-# ==============================
-st.subheader("🧩 Panel de Edición (solo personal autorizado)")
-
-if not st.session_state.edicion_activa:
-    password = st.text_input("🔒 Ingresá la contraseña para editar", type="password", key="pass")
-    if st.button("Acceder", key="login"):
-        if password == ADMIN_PASSWORD:
-            st.session_state.edicion_activa = True
-            st.success("✅ Acceso concedido.")
-        else:
-            st.error("❌ Contraseña incorrecta.")
-else:
-    st.success(f"Modo edición activado para: {curso_seleccionado}")
-
-    base_editable = st.session_state.bases[curso_seleccionado]
-
-    for i, (p, r) in enumerate(base_editable):
-        col1, col2, col3 = st.columns([4, 5, 1])
-        with col1:
-            nueva_p = st.text_input(f"Pregunta {i+1}", p, key=f"p_{curso_seleccionado}_{i}")
-        with col2:
-            nueva_r = st.text_area(f"Respuesta {i+1}", r, key=f"r_{curso_seleccionado}_{i}")
-        with col3:
-            if st.button("🗑", key=f"del_{curso_seleccionado}_{i}"):
-                base_editable.pop(i)
-                st.experimental_rerun()
-        base_editable[i] = (nueva_p, nueva_r)
-
-    st.markdown("---")
-    nueva_pregunta = st.text_input("➕ Nueva pregunta", key=f"nueva_p_{curso_seleccionado}")
-    nueva_respuesta = st.text_area("Respuesta", key=f"nueva_r_{curso_seleccionado}")
-    if st.button("Agregar a la base", key=f"add_{curso_seleccionado}"):
-        if nueva_pregunta and nueva_respuesta:
-            base_editable.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
-            st.success("✅ Pregunta agregada correctamente.")
-        else:
-            st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
-
-    if st.button("🚪 Salir del modo edición", key=f"exit_{curso_seleccionado}"):
+    # Inicializar sesión
+    if "bases" not in st.session_state:
+        st.session_state.bases = {
+            "General": BASE_GENERAL.copy(),
+            **{curso: BASES_ESPECIFICAS.get(curso, []).copy() for curso in BASES_ESPECIFICAS}
+        }
+    if "historial" not in st.session_state:
+        st.session_state.historial = []
+    if "edicion_activa" not in st.session_state:
         st.session_state.edicion_activa = False
-        st.info("🔒 Modo edición cerrado.")
 
-st.divider()
+    # Seguridad por si el curso no existe
+    if curso_seleccionado not in st.session_state.bases:
+        st.session_state.bases[curso_seleccionado] = []
+
+    # Base completa
+    base_completa = BASE_GENERAL + st.session_state.bases[curso_seleccionado]
+    contexto = obtener_contexto(base_completa)
+
+    # ==============================
+    # CHAT
+    # ==============================
+    st.subheader(f"💬 Chat con MercedarIA ({curso_seleccionado})")
+    pregunta = st.text_input("Escribí tu pregunta:")
+
+    enviar = st.button("Enviar", key=f"enviar_{curso_seleccionado}")
+    if enviar:
+        if pregunta.strip():
+            st.session_state.historial.append(("👨‍🎓 Vos", pregunta))
+            pregunta_normalizada = pregunta.lower().strip()
+            respuesta = None
+
+            # Buscar en la base local
+            for p, r in base_completa:
+                if p.lower() in pregunta_normalizada:
+                    respuesta = r
+                    break
+
+            # Si no hay coincidencia, usar IA
+            if not respuesta:
+                respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, contexto)
+
+            st.session_state.historial.append(("🤖 MercedarIA", respuesta))
+
+    # Mostrar historial
+    for rol, msg in st.session_state.historial[-20:]:
+        if rol == "👨‍🎓 Vos":
+            st.markdown(f"🧍 *{rol}:* {msg}")
+        else:
+            st.markdown(f"🧠 <span style='color:#00FFAA'><b>{rol}:</b></span> {msg}", unsafe_allow_html=True)
+
+    st.divider()
+
+    # ==============================
+    # PANEL DE EDICIÓN PROTEGIDO
+    # ==============================
+    st.subheader("🧩 Panel de Edición (solo personal autorizado)")
+
+    if not st.session_state.edicion_activa:
+        password = st.text_input("🔒 Ingresá la contraseña para editar", type="password", key="pass")
+        if st.button("Acceder", key="login"):
+            if password == ADMIN_PASSWORD:
+                st.session_state.edicion_activa = True
+                st.success("✅ Acceso concedido.")
+            else:
+                st.error("❌ Contraseña incorrecta.")
+    else:
+        st.success(f"Modo edición activado para: {curso_seleccionado}")
+
+        base_editable = st.session_state.bases[curso_seleccionado]
+
+        for i, (p, r) in enumerate(base_editable):
+            col1, col2, col3 = st.columns([4, 5, 1])
+            with col1:
+                nueva_p = st.text_input(f"Pregunta {i+1}", p, key=f"p_{curso_seleccionado}_{i}")
+            with col2:
+                nueva_r = st.text_area(f"Respuesta {i+1}", r, key=f"r_{curso_seleccionado}_{i}")
+            with col3:
+                if st.button("🗑", key=f"del_{curso_seleccionado}_{i}"):
+                    base_editable.pop(i)
+                    st.experimental_rerun()
+            base_editable[i] = (nueva_p, nueva_r)
+
+        st.markdown("---")
+        nueva_pregunta = st.text_input("➕ Nueva pregunta", key=f"nueva_p_{curso_seleccionado}")
+        nueva_respuesta = st.text_area("Respuesta", key=f"nueva_r_{curso_seleccionado}")
+        if st.button("Agregar a la base", key=f"add_{curso_seleccionado}"):
+            if nueva_pregunta and nueva_respuesta:
+                base_editable.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
+                st.success("✅ Pregunta agregada correctamente.")
+            else:
+                st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
+
+        if st.button("🚪 Salir del modo edición", key=f"exit_{curso_seleccionado}"):
+            st.session_state.edicion_activa = False
+            st.info("🔒 Modo edición cerrado.")
+
+    st.divider()
+
+    # ==============================
+    # FUNCIONES EXTRA
+    # ==============================
+    if st.button("🧹 Limpiar chat", key="clear"):
+        st.session_state.historial = []
+        st.info("💬 Chat limpiado correctamente.")
+
+    st.caption("💡 Los cambios se mantienen mientras la app esté activa. Si se reinicia, se vuelve a la base original.")
+
 
 # ==============================
-# FUNCIONES EXTRA
+# MENÚ "📦 Datos del Servidor"
 # ==============================
-if st.button("🧹 Limpiar chat", key="clear"):
-    st.session_state.historial = []
-    st.info("💬 Chat limpiado correctamente.")
+elif menu == "📦 Datos del Servidor":
+    st.header("📦 Datos obtenidos desde el servidor externo")
 
-st.caption("💡 Los cambios se mantienen mientras la app esté activa. Si se reinicia, se vuelve a la base original.")
+    opcion = st.sidebar.selectbox(
+        "Elegí qué datos querés ver:",
+        list(API_ENDPOINTS.keys())
+    )
+
+    url = API_ENDPOINTS[opcion]
+
+    st.subheader(f"📄 {opcion}")
+    st.caption(f"Fuente: {url}")
+
+    datos = consultar_api(url)
+
+    if isinstance(datos, dict) and "error" in datos:
+        st.error(f"❌ Error al consultar la API: {datos['error']}")
+    else:
+        st.dataframe(datos)
 
 # ==============================
 # MANTENER SESIÓN VIVA
@@ -266,3 +320,4 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state["keepalive_thread"] = True
+
