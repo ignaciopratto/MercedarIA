@@ -199,7 +199,7 @@ if st.session_state.usuario is None:
                 "profesor_de": usuario_encontrado.get("profesor_de", "")
             }
             st.success(f"Bienvenido/a {st.session_state.usuario['nombre']} {st.session_state.usuario['apellido']} - Curso: {st.session_state.usuario['curso'].upper() if st.session_state.usuario['curso'] else 'sin curso asignado'}")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Documento Nacional de Identidad (DNI) no encontrado en el sistema. Verificá y volvé a intentarlo.")
 
@@ -298,7 +298,7 @@ if st.sidebar.button("Cerrar sesión"):
     # Limpiamos la sesión y recargamos
     for k in list(st.session_state.keys()):
         st.session_state.pop(k, None)
-    st.experimental_rerun()
+    st.rerun()
 
 # ==============================
 # INICIALIZACIÓN DE ESTADO DE APLICACIÓN
@@ -490,7 +490,7 @@ if not st.session_state.edicion_activa:
         if password_input == ADMIN_PASSWORD:
             st.session_state.edicion_activa = True
             st.success("✅ Acceso concedido al modo edición.")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("❌ Contraseña incorrecta. No se ha activado el modo edición.")
 else:
@@ -511,7 +511,7 @@ else:
                     base_editable.pop(indice)
                 except Exception:
                     pass
-                st.experimental_rerun()
+                st.rerun()
         # Actualizamos la entrada
         base_editable[indice] = (nueva_pregunta_texto, nueva_respuesta_texto)
 
@@ -528,7 +528,7 @@ else:
     if st.button("🚪 Salir del modo edición", key=f"exit_{curso_seleccionado_por_el_usuario}"):
         st.session_state.edicion_activa = False
         st.info("🔒 Modo edición cerrado.")
-        st.experimental_rerun()
+        st.rerun()
 
 st.divider()
 
@@ -556,3 +556,4 @@ if "keepalive_thread" not in st.session_state:
     hilo_mantener = threading.Thread(target=mantener_sesion_activa_en_segundo_plano, daemon=True)
     hilo_mantener.start()
     st.session_state["keepalive_thread"] = True
+
