@@ -72,7 +72,7 @@ if "tarea" in preg or "tareas" in preg:
         respuesta += "No tenés tareas personales.\n"
 
     st.session_state.historial.append(("🤖 MercedarIA", respuesta))
-    continue
+continue
 
 # ===========================
 # RESPUESTAS SOBRE PROFESORES
@@ -87,3 +87,4 @@ if "profe" in preg or "profesor" in preg or "profesora" in preg or "mail" in pre
 
     st.session_state.historial.append(("🤖 MercedarIA", respuesta))
     continue
+
