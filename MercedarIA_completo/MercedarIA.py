@@ -10,18 +10,14 @@ from datetime import datetime
 DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"   # ⚠️ reemplazá con tu API key real
 ADMIN_PASSWORD = "mercedaria2025"      # 🔒 contraseña para editar la base
 
-# URLs externas del servidor
-API_BASE = "https://mi-insm.onrender.com"
-API_ENDPOINTS = {
-    "Usuarios": f"{API_BASE}/users",
-    "Cursos": f"{API_BASE}/courses",
-    "Tareas": f"{API_BASE}/tasks",
-    "Archivos": f"{API_BASE}/files",
-    "Egresados": f"{API_BASE}/egresados",
-}
+# APIs externas
+API_USERS = "https://mi-insm.onrender.com/users"
+API_TASKS = "https://mi-insm.onrender.com/tasks"
+API_COURSES = "https://mi-insm.onrender.com/courses"
+
 
 # ==============================
-# BASE DE CONOCIMIENTO GENERAL
+# BASE LOCAL GENERAL
 # ==============================
 BASE_GENERAL = [
     ("hola", "Hola, ¿cómo estás?"),
@@ -36,8 +32,9 @@ BASE_GENERAL = [
     ("cuándo terminan las clases", "Generalmente a mediados de diciembre."),
 ]
 
+
 # ==============================
-# BASE DE CONOCIMIENTO POR CURSO
+# BASE LOCAL POR CURSO
 # ==============================
 BASES_ESPECIFICAS = {
     "1° A": [
@@ -102,9 +99,13 @@ BASES_ESPECIFICAS = {
     ]
 }
 
+
+# -------------------------------------------------------------------
 # ==============================
-# FUNCIONES
+# FUNCIONES AUXILIARES
 # ==============================
+# -------------------------------------------------------------------
+
 def obtener_contexto(lista):
     contexto = "BASE DE CONOCIMIENTO DEL COLEGIO:\n\n"
     for i, (p, r) in enumerate(lista, 1):
@@ -113,7 +114,6 @@ def obtener_contexto(lista):
 
 
 def consultar_deepseek(pregunta, api_key, contexto):
-    """Consulta a DeepSeek con la base de conocimiento como contexto"""
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
@@ -141,177 +141,256 @@ def consultar_deepseek(pregunta, api_key, contexto):
         return f"❌ Error al conectar con DeepSeek: {e}"
 
 
-def consultar_api(url):
-    """Consulta a cualquiera de las APIs externas"""
-    try:
-        resp = requests.get(url, timeout=20)
-        resp.raise_for_status()
-        return resp.json()
-    except Exception as e:
-        return {"error": str(e)}
-
-
+# -------------------------------------------------------------------
 # ==============================
 # CONFIG STREAMLIT
 # ==============================
+# -------------------------------------------------------------------
+
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
 
+
+# -------------------------------------------------------------------
+# ==============================
+# LOGIN POR DNI
+# ==============================
+# -------------------------------------------------------------------
+
+if "user" not in st.session_state:
+    st.session_state.user = None
+    st.session_state.tasks = []
+    st.session_state.courses = []
+
+
+st.title("🔐 Inicio de sesión")
+
+if st.session_state.user is None:
+    dni = st.text_input("Ingresá tu DNI para continuar:")
+
+    if st.button("Ingresar"):
+        try:
+            users = requests.get(API_USERS).json()
+            usuario = next((u for u in users if str(u["dni"]) == dni), None)
+
+            if usuario:
+                st.session_state.user = usuario
+                st.success(f"Bienvenido {usuario['name']} ({usuario['course']})")
+
+                # Cargar tareas y cursos
+                st.session_state.tasks = requests.get(API_TASKS).json()
+                st.session_state.courses = requests.get(API_COURSES).json()
+
+                st.experimental_rerun()
+
+            else:
+                st.error("DNI no encontrado en la base de datos.")
+        except Exception as e:
+            st.error(f"❌ Error al conectar con la API: {e}")
+
+    st.stop()  # Impide que avance si no inicia sesión
+
+
+# -------------------------------------------------------------------
+# ==============================
+# DESPUÉS DEL LOGIN → CHAT COMPLETO
+# ==============================
+# -------------------------------------------------------------------
+
 st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
-st.caption("Basado en conocimiento local + IA DeepSeek + Servidor externo")
+st.caption(f"Alumno: **{st.session_state.user['name']}** — Curso: **{st.session_state.user['course']}**")
+
 
 # ==============================
-# MENÚ LATERAL
+# SESIONES INTERNAS
 # ==============================
-menu = st.sidebar.radio(
-    "📌 Seleccioná una función",
-    ["Chat", "📦 Datos del Servidor"]
-)
+
+if "bases" not in st.session_state:
+    st.session_state.bases = {
+        "General": BASE_GENERAL.copy(),
+        **{curso: BASES_ESPECIFICAS.get(curso, []).copy() for curso in BASES_ESPECIFICAS}
+    }
+
+if "historial" not in st.session_state:
+    st.session_state.historial = []
+
+if "edicion_activa" not in st.session_state:
+    st.session_state.edicion_activa = False
+
 
 # ==============================
-# SELECCIÓN DE CURSO (solo para Chat)
+# SELECCIÓN DE CURSO
 # ==============================
-if menu == "Chat":
+CURSOS = ["General"] + list(BASES_ESPECIFICAS.keys())
 
-    CURSOS = ["General"] + list(BASES_ESPECIFICAS.keys())
-    curso_seleccionado = st.sidebar.selectbox("📘 Seleccioná el curso", CURSOS, index=0)
+curso_seleccionado = st.sidebar.selectbox("📘 Seleccioná el curso", CURSOS, index=0)
 
-    # Inicializar sesión
-    if "bases" not in st.session_state:
-        st.session_state.bases = {
-            "General": BASE_GENERAL.copy(),
-            **{curso: BASES_ESPECIFICAS.get(curso, []).copy() for curso in BASES_ESPECIFICAS}
-        }
-    if "historial" not in st.session_state:
-        st.session_state.historial = []
-    if "edicion_activa" not in st.session_state:
-        st.session_state.edicion_activa = False
+if curso_seleccionado not in st.session_state.bases:
+    st.session_state.bases[curso_seleccionado] = []
 
-    # Seguridad por si el curso no existe
-    if curso_seleccionado not in st.session_state.bases:
-        st.session_state.bases[curso_seleccionado] = []
+base_completa = BASE_GENERAL + st.session_state.bases[curso_seleccionado]
+contexto = obtener_contexto(base_completa)
 
-    # Base completa
-    base_completa = BASE_GENERAL + st.session_state.bases[curso_seleccionado]
-    contexto = obtener_contexto(base_completa)
 
-    # ==============================
-    # CHAT
-    # ==============================
-    st.subheader(f"💬 Chat con MercedarIA ({curso_seleccionado})")
-    pregunta = st.text_input("Escribí tu pregunta:")
+# -------------------------------------------------------------------
+# ==============================
+# CHAT
+# ==============================
+# -------------------------------------------------------------------
+st.subheader(f"💬 Chat con MercedarIA ({curso_seleccionado})")
 
-    enviar = st.button("Enviar", key=f"enviar_{curso_seleccionado}")
-    if enviar:
-        if pregunta.strip():
-            st.session_state.historial.append(("👨‍🎓 Vos", pregunta))
-            pregunta_normalizada = pregunta.lower().strip()
-            respuesta = None
+pregunta = st.text_input("Escribí tu pregunta:")
+enviar = st.button("Enviar", key=f"enviar_{curso_seleccionado}")
 
-            # Buscar en la base local
+if enviar:
+    if pregunta.strip():
+        st.session_state.historial.append(("👨‍🎓 Vos", pregunta))
+        pregunta_normalizada = pregunta.lower().strip()
+        respuesta = None
+
+        # ----------------------------------------------
+        # 1) CONSULTA DE TAREAS (del curso + personales)
+        # ----------------------------------------------
+        if "tarea" in pregunta_normalizada or "tareas" in pregunta_normalizada:
+            curso_usuario = st.session_state.user["course"]
+            id_usuario = st.session_state.user["id"]
+
+            tareas_curso = [t for t in st.session_state.tasks if t["course"] == curso_usuario]
+            tareas_personales = [t for t in st.session_state.tasks if t.get("user_id") == id_usuario]
+
+            texto = "📘 **Tareas del curso:**\n"
+            if tareas_curso:
+                for t in tareas_curso:
+                    texto += f"- {t['title']}\n"
+            else:
+                texto += "- No hay tareas cargadas.\n"
+
+            texto += "\n👤 **Tus tareas personales:**\n"
+            if tareas_personales:
+                for t in tareas_personales:
+                    texto += f"- {t['title']}\n"
+            else:
+                texto += "- No tenés tareas personales.\n"
+
+            respuesta = texto
+
+        # ----------------------------------------------
+        # 2) CONSULTA DE PROFESORES
+        # ----------------------------------------------
+        elif "profesor" in pregunta_normalizada or "docente" in pregunta_normalizada:
+            curso_usuario = st.session_state.user["course"]
+            registros = [c for c in st.session_state.courses if c["course"] == curso_usuario]
+
+            if "de" in pregunta_normalizada:
+                materia = pregunta_normalizada.split("de", 1)[1].strip()
+                encontrado = next((c for c in registros if materia in c["subject"].lower()), None)
+
+                if encontrado:
+                    respuesta = (
+                        f"👨‍🏫 El profesor de **{encontrado['subject']}** es:\n"
+                        f"📧 **{encontrado['teacher']}**"
+                    )
+                else:
+                    respuesta = "No encontré profesor para esa materia."
+            else:
+                respuesta = "👨‍🏫 **Profesores de tu curso:**\n\n"
+                for c in registros:
+                    respuesta += f"- **{c['subject']}** → {c['teacher']}\n"
+
+        # ------------------------------------------------
+        # 3) CONSULTA CON BASE LOCAL (PREGUNTAS PREDEFINIDAS)
+        # ------------------------------------------------
+        if not respuesta:
             for p, r in base_completa:
                 if p.lower() in pregunta_normalizada:
                     respuesta = r
                     break
 
-            # Si no hay coincidencia, usar IA
-            if not respuesta:
-                respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, contexto)
+        # ----------------------------------------------
+        # 4) CONSULTA A DEEPSEEK (IA)
+        # ----------------------------------------------
+        if not respuesta:
+            respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, contexto)
 
-            st.session_state.historial.append(("🤖 MercedarIA", respuesta))
+        st.session_state.historial.append(("🤖 MercedarIA", respuesta))
 
-    # Mostrar historial
-    for rol, msg in st.session_state.historial[-20:]:
-        if rol == "👨‍🎓 Vos":
-            st.markdown(f"🧍 *{rol}:* {msg}")
+
+# Mostrar historial
+for rol, msg in st.session_state.historial[-20:]:
+    if rol == "👨‍🎓 Vos":
+        st.markdown(f"🧍 *{rol}:* {msg}")
+    else:
+        st.markdown(f"🧠 <span style='color:#00FFAA'><b>{rol}:</b></span> {msg}", unsafe_allow_html=True)
+
+st.divider()
+
+
+# -------------------------------------------------------------------
+# ==============================
+# PANEL DE EDICIÓN PROTEGIDO
+# ==============================
+# -------------------------------------------------------------------
+
+st.subheader("🧩 Panel de Edición (solo personal autorizado)")
+
+if not st.session_state.edicion_activa:
+    password = st.text_input("🔒 Ingresá la contraseña para editar", type="password", key="pass")
+    if st.button("Acceder", key="login"):
+        if password == ADMIN_PASSWORD:
+            st.session_state.edicion_activa = True
+            st.success("✅ Acceso concedido.")
         else:
-            st.markdown(f"🧠 <span style='color:#00FFAA'><b>{rol}:</b></span> {msg}", unsafe_allow_html=True)
+            st.error("❌ Contraseña incorrecta.")
+else:
+    st.success(f"Modo edición activado para: {curso_seleccionado}")
 
-    st.divider()
+    base_editable = st.session_state.bases[curso_seleccionado]
 
-    # ==============================
-    # PANEL DE EDICIÓN PROTEGIDO
-    # ==============================
-    st.subheader("🧩 Panel de Edición (solo personal autorizado)")
+    for i, (p, r) in enumerate(base_editable):
+        col1, col2, col3 = st.columns([4, 5, 1])
+        with col1:
+            nueva_p = st.text_input(f"Pregunta {i+1}", p, key=f"p_{curso_seleccionado}_{i}")
+        with col2:
+            nueva_r = st.text_area(f"Respuesta {i+1}", r, key=f"r_{curso_seleccionado}_{i}")
+        with col3:
+            if st.button("🗑", key=f"del_{curso_seleccionado}_{i}"):
+                base_editable.pop(i)
+                st.experimental_rerun()
+        base_editable[i] = (nueva_p, nueva_r)
 
-    if not st.session_state.edicion_activa:
-        password = st.text_input("🔒 Ingresá la contraseña para editar", type="password", key="pass")
-        if st.button("Acceder", key="login"):
-            if password == ADMIN_PASSWORD:
-                st.session_state.edicion_activa = True
-                st.success("✅ Acceso concedido.")
-            else:
-                st.error("❌ Contraseña incorrecta.")
-    else:
-        st.success(f"Modo edición activado para: {curso_seleccionado}")
+    st.markdown("---")
+    nueva_pregunta = st.text_input("➕ Nueva pregunta", key=f"nueva_p_{curso_seleccionado}")
+    nueva_respuesta = st.text_area("Respuesta", key=f"nueva_r_{curso_seleccionado}")
+    if st.button("Agregar a la base", key=f"add_{curso_seleccionado}"):
+        if nueva_pregunta and nueva_respuesta:
+            base_editable.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
+            st.success("✅ Pregunta agregada correctamente.")
+        else:
+            st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
 
-        base_editable = st.session_state.bases[curso_seleccionado]
+    if st.button("🚪 Salir del modo edición", key=f"exit_{curso_seleccionado}"):
+        st.session_state.edicion_activa = False
+        st.info("🔒 Modo edición cerrado.")
 
-        for i, (p, r) in enumerate(base_editable):
-            col1, col2, col3 = st.columns([4, 5, 1])
-            with col1:
-                nueva_p = st.text_input(f"Pregunta {i+1}", p, key=f"p_{curso_seleccionado}_{i}")
-            with col2:
-                nueva_r = st.text_area(f"Respuesta {i+1}", r, key=f"r_{curso_seleccionado}_{i}")
-            with col3:
-                if st.button("🗑", key=f"del_{curso_seleccionado}_{i}"):
-                    base_editable.pop(i)
-                    st.experimental_rerun()
-            base_editable[i] = (nueva_p, nueva_r)
-
-        st.markdown("---")
-        nueva_pregunta = st.text_input("➕ Nueva pregunta", key=f"nueva_p_{curso_seleccionado}")
-        nueva_respuesta = st.text_area("Respuesta", key=f"nueva_r_{curso_seleccionado}")
-        if st.button("Agregar a la base", key=f"add_{curso_seleccionado}"):
-            if nueva_pregunta and nueva_respuesta:
-                base_editable.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
-                st.success("✅ Pregunta agregada correctamente.")
-            else:
-                st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
-
-        if st.button("🚪 Salir del modo edición", key=f"exit_{curso_seleccionado}"):
-            st.session_state.edicion_activa = False
-            st.info("🔒 Modo edición cerrado.")
-
-    st.divider()
-
-    # ==============================
-    # FUNCIONES EXTRA
-    # ==============================
-    if st.button("🧹 Limpiar chat", key="clear"):
-        st.session_state.historial = []
-        st.info("💬 Chat limpiado correctamente.")
-
-    st.caption("💡 Los cambios se mantienen mientras la app esté activa. Si se reinicia, se vuelve a la base original.")
+st.divider()
 
 
 # ==============================
-# MENÚ "📦 Datos del Servidor"
+# LIMPIAR CHAT
 # ==============================
-elif menu == "📦 Datos del Servidor":
-    st.header("📦 Datos obtenidos desde el servidor externo")
+if st.button("🧹 Limpiar chat", key="clear"):
+    st.session_state.historial = []
+    st.info("💬 Chat limpiado correctamente.")
 
-    opcion = st.sidebar.selectbox(
-        "Elegí qué datos querés ver:",
-        list(API_ENDPOINTS.keys())
-    )
+st.caption("💡 Los cambios se mantienen mientras la app esté activa. Si se reinicia, se vuelve a la base original.")
 
-    url = API_ENDPOINTS[opcion]
 
-    st.subheader(f"📄 {opcion}")
-    st.caption(f"Fuente: {url}")
-
-    datos = consultar_api(url)
-
-    if isinstance(datos, dict) and "error" in datos:
-        st.error(f"❌ Error al consultar la API: {datos['error']}")
-    else:
-        st.dataframe(datos)
-
+# -------------------------------------------------------------------
 # ==============================
 # MANTENER SESIÓN VIVA
 # ==============================
+# -------------------------------------------------------------------
+
 def mantener_sesion_viva():
-    """Evita que la sesión se cierre automáticamente."""
     while True:
         time.sleep(300)
         st.session_state["keepalive"] = time.time()
