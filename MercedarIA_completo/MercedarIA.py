@@ -16,10 +16,53 @@ API_COURSES = "https://mi-insm.onrender.com/courses"
 API_FILES = "https://mi-insm.onrender.com/files"
 API_EGRESADOS = "https://mi-insm.onrender.com/egresados"
 
-import streamlit as st
-import requests
-import json
-from datetime import datetime
+# -------------------------------
+# FUNCIÓN PARA USAR DEEPSEEK
+# -------------------------------
+def consultar_deepseek(pregunta, api_key, contexto=""):
+    """
+    Envía la pregunta a la API de DeepSeek para obtener una respuesta generada.
+    Requiere API key válida. Si hay error, devuelve mensaje de error legible.
+    """
+    if not api_key or not str(api_key).strip():
+        return "No tengo una respuesta en la base local y no está configurada la API externa."
+
+    url = "https://api.deepseek.com/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": contexto},
+            {"role": "user", "content": pregunta}
+        ],
+        "max_tokens": 512,
+    }
+
+    try:
+        r = requests.post(url, json=payload, headers=headers, timeout=20)
+        r.raise_for_status()
+        data = r.json()
+        # Manejar estructura robusta
+        if isinstance(data, dict):
+            # intentar caminos comunes
+            if "choices" in data and isinstance(data["choices"], list) and data["choices"]:
+                choice = data["choices"][0]
+                # algunos APIs devuelven texto directo en "text" o en "message"->"content"
+                if isinstance(choice, dict):
+                    if "message" in choice and isinstance(choice["message"], dict) and "content" in choice["message"]:
+                        return choice["message"]["content"]
+                    if "text" in choice:
+                        return choice["text"]
+            # fallback si estructura distinta
+            if "answer" in data:
+                return data["answer"]
+        return "La API externa respondió, pero no pude interpretar la respuesta."
+    except Exception as e:
+        return f"Hubo un error consultando DeepSeek: {str(e)}"
 
 # ==============================
 # BASE LOCAL GENERAL
@@ -39,6 +82,7 @@ BASE_GENERAL = [
 
 # ==============================
 # BASE POR CURSO
+# (idéntica a la que venías usando)
 # ==============================
 BASES_ESPECIFICAS = {
     "1° A": [
@@ -157,17 +201,29 @@ def tarea_pertenece_al_usuario(tarea, email_usuario):
     """
     Una tarea personal pertenece solo a su creador.
     personal=True NO implica que sea visible para todos.
+    Lógica:
+      - Obtener creador (campo 'creador' o 'creator')
+      - Si no existe creador -> no asignar (evita mostrar tareas 'huérfanas' como personales)
+      - Si creador no tiene @ completar con dominio institucional @insm.edu
+      - Comparar case-insensitive con email_usuario
     """
-    creador_raw = (tarea.get("creador") or tarea.get("creator") or "").strip().lower()
-    email_user = (email_usuario or "").strip().lower()
+    if not tarea or not isinstance(tarea, dict):
+        return False
 
-    # Si el creador no tiene dominio (ej: "juani.lopez"), lo completamos con el dominio del colegio
+    email_user = (email_usuario or "").strip().lower()
+    if not email_user:
+        return False
+
+    creador_raw = (tarea.get("creador") or tarea.get("creator") or "").strip().lower()
+    if not creador_raw:
+        # no hay creador definido: no tratamos la tarea como personal de nadie
+        return False
+
+    # Si el creador viene sin dominio, asumimos dominio institucional
     if "@" not in creador_raw:
         creador_raw = creador_raw + "@insm.edu"
 
-    # Comparación final
     return creador_raw == email_user
-
 
 def formatear_detalle_tarea(t):
     """
@@ -177,7 +233,6 @@ def formatear_detalle_tarea(t):
     descripcion = t.get("descripcion") or t.get("description") or ""
     fecha_limite = t.get("fecha_limite") or t.get("due_date") or ""
     creador = t.get("creador") or t.get("creator") or ""
-    es_personal = t.get("personal") is True
     archivo = t.get("archivo") or t.get("file") or ""
 
     partes = [f"• {titulo}"]
@@ -226,21 +281,6 @@ def obtener_profesores_por_curso():
         prof_email = e.get("profesor_email") or e.get("profesor") or e.get("profesor_mail") or "Email no disponible"
         texto += f"• {materia} — {prof_email}\n"
     return texto
-
-# ==============================
-# FUNCION: CONSULTAR DEEPSEEK (FALLBACK)
-# ==============================
-def consultar_deepseek(prompt, api_key, contexto=""):
-    """
-    Placeholder para DeepSeek / motor externo.
-    Si tenés una API real reemplazá esta función por la llamada correspondiente.
-    Por ahora devuelve una respuesta cortita indicando que no hay respuesta local.
-    """
-    # Si no hay api_key, devolvemos un fallback amistoso
-    if not api_key or not str(api_key).strip():
-        return "No tengo una respuesta en la base local y no está configurada la API externa."
-    # Si hay api_key, podríamos intentar una llamada aquí (no incluida).
-    return "No encontré una respuesta local precisa; se intentó usar el servicio externo (API key presente), pero en esta instancia no se realiza la llamada."
 
 # ==============================
 # INICIALIZACIÓN STREAMLIT
@@ -352,7 +392,7 @@ for t in st.session_state.lista_tareas or []:
     except Exception:
         pass
 
-    # Tareas personales (creador == email_usuario OR personal == True)
+    # Tareas personales (solo si el creador coincide con el email del usuario)
     try:
         if tarea_pertenece_al_usuario(t, email_usuario):
             st.session_state.tareas_personales.append(t)
@@ -475,6 +515,3 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
-
-
-
