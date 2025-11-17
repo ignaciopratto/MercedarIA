@@ -7,7 +7,7 @@ from datetime import datetime
 # ==============================
 # CONFIGURACIÓN
 # ==============================
-DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # API KEY opcional
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # API KEY opcional (si no la tenés, queda solo el fallback)
 ADMIN_PASSWORD = "mercedaria2025"
 
 API_USERS = "https://mi-insm.onrender.com/users"
@@ -106,6 +106,7 @@ def obtener_contexto(lista):
     for i, (p, r) in enumerate(lista, 1):
         contexto += f"Pregunta {i}: {p}\nRespuesta {i}: {r}\n\n"
     return contexto
+
 # ==============================
 # UTILIDADES Y FUNCIONES AUXILIARES
 # ==============================
@@ -124,26 +125,17 @@ def api_get(url):
     except Exception:
         return []
 
-def normalizar_dni_para_comparacion(dni_raw):
-    """
-    Devuelve sólo los dígitos del DNI para comparaciones robustas.
-    """
-    try:
-        s = str(dni_raw)
-    except Exception:
-        s = ""
-    return "".join(ch for ch in s if ch.isdigit())
-
 def normalizar_curso(curso_raw):
     """
     Normaliza formatos como "1b", "1 b", "1°b", "1° B" -> "1° B"
+    Si no se puede normalizar devuelve cadena vacía.
     """
     try:
         s = str(curso_raw).strip().lower()
     except Exception:
-        return None
+        return ""
     if len(s) < 2:
-        return None
+        return ""
     numero = s[0]
     division = s[-1].upper()
     return f"{numero}° {division}"
@@ -156,174 +148,29 @@ def limpiar_estado_antes_login():
         if clave in st.session_state:
             st.session_state.pop(clave, None)
 
-def tarea_pertenece_al_usuario(tarea, dni_usuario, email_usuario):
+def tarea_pertenece_al_usuario(tarea, email_usuario):
     """
-    Determina si la tarea es personal para el usuario.
-    Reglas:
-     - Si campo 'personal' == True => True
-     - Si campo 'creador' == email_usuario (coincidencia exacta, case-insensitive) => True
-     - Si el DNI aparece en campos comunes (fallback)
+    Tarea personal = creador == email_usuario (coincidencia case-insensitive)
+    o la tarea está marcada como personal == True.
     """
+    if not tarea or not isinstance(tarea, dict):
+        return False
+
     try:
-        # 1) marcado como personal
         if tarea.get("personal") is True:
             return True
     except Exception:
         pass
 
     try:
-        creador = tarea.get("creador") or ""
-        if isinstance(creador, str) and creador.strip().lower() == str(email_usuario).strip().lower():
-            return True
-    except Exception:
-        pass
-
-    # fallback por DNI dentro de la tarea
-    try:
-        dni_norm = normalizar_dni_para_comparacion(dni_usuario)
-        if dni_norm:
-            claves = ["dni", "assigned_to", "student_dni", "owner", "responsable", "usuario_dni", "user_dni"]
-            for clave in claves:
-                if clave in tarea:
-                    if normalizar_dni_para_comparacion(tarea.get(clave)) == dni_norm:
-                        return True
-    except Exception:
-        pass
-
-    # buscar dni dentro de la representación completa por si acaso
-    try:
-        if dni_norm and dni_norm in normalizar_dni_para_comparacion(str(tarea)):
+        creador = (tarea.get("creador") or tarea.get("creator") or "").strip().lower()
+        if creador and creador == (email_usuario or "").strip().lower():
             return True
     except Exception:
         pass
 
     return False
 
-# ==============================
-# INICIALIZACIÓN STREAMLIT
-# ==============================
-st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
-st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
-st.caption("Inicio de sesión por DNI y acceso a tareas y profesores desde las APIs del colegio.")
-# ==============================
-# PANTALLA DE LOGIN (LIMPIA ESTADO ANTERIOR)
-# ==============================
-if "usuario" not in st.session_state or st.session_state.get("usuario") is None:
-    st.session_state.usuario = None
-
-if st.session_state.usuario is None:
-    st.subheader("🔐 Ingresá para continuar")
-    dni_input = st.text_input("Documento Nacional de Identidad (DNI):", key="dni_login")
-    if st.button("Ingresar"):
-        # limpiar estado de sesión previo para evitar herencias
-        limpiar_estado_antes_login()
-        usuarios = api_get(API_USERS)
-        encontrado = None
-        for u in usuarios or []:
-            if normalizar_dni_para_comparacion(u.get("dni", "")) == normalizar_dni_para_comparacion(dni_input):
-                encontrado = u
-                break
-        if encontrado:
-            # Guardar solo campos relevantes
-            st.session_state.usuario = {
-                "email": encontrado.get("email", ""),
-                "nombre": encontrado.get("nombre", ""),
-                "apellido": encontrado.get("apellido", ""),
-                "dni": encontrado.get("dni", ""),
-                "rol": (encontrado.get("rol") or "").strip().lower(),
-                "curso": encontrado.get("curso", "")
-            }
-            # inicializar estructuras vacías dependientes del usuario
-            st.session_state.lista_tareas = []
-            st.session_state.lista_cursos_api = []
-            st.session_state.tareas_curso = []
-            st.session_state.tareas_personales = []
-            st.session_state.historial = []
-            st.success(f"Bienvenido/a {st.session_state.usuario['nombre']} {st.session_state.usuario['apellido']}.")
-            st.rerun()
-        else:
-            st.error("DNI no encontrado. Revisá y volvé a intentarlo.")
-    st.stop()
-
-# ==============================
-# USUARIO LOGUEADO (YA INICIALIZADO)
-# ==============================
-usuario = st.session_state.usuario
-email_usuario = usuario.get("email", "")
-dni_usuario = usuario.get("dni", "")
-rol_usuario = (usuario.get("rol") or "").strip().lower()
-curso_usuario = normalizar_curso(usuario.get("curso", ""))
-
-# ==============================
-# RECONSTRUIR BASES LOCALES SEGÚN EL CURSO DEL USUARIO
-# ==============================
-
-# Asegurar que exista st.session_state.bases
-if "bases" not in st.session_state:
-    st.session_state.bases = {
-        "General": BASE_GENERAL.copy(),
-        **{curso: BASES_ESPECIFICAS.get(curso, []).copy() for curso in BASES_ESPECIFICAS}
-    }
-
-# Asegurar que exista la clave del curso del usuario (si su curso no está, crear una vacía)
-if curso_usuario not in st.session_state.bases:
-    st.session_state.bases[curso_usuario] = []
-
-# BASE COMPLETA = BASE GENERAL + BASE ESPECÍFICA DEL CURSO DEL USUARIO
-base_completa = BASE_GENERAL + st.session_state.bases[curso_usuario]
-
-
-if not curso_usuario:
-    st.error("No se pudo interpretar el curso del usuario. Contactá al administrador.")
-    st.stop()
-
-st.info(f"Estás conectado como: {usuario.get('nombre','')} {usuario.get('apellido','')} — Curso: {curso_usuario} — Rol: {rol_usuario}")
-
-# ==============================
-# CARGAR DATOS REMOTOS (TAREAS Y CURSOS)
-# ==============================
-# Guardamos en session para evitar múltiples requests durante la sesión
-if not st.session_state.get("lista_tareas"):
-    st.session_state.lista_tareas = api_get(API_TASKS) or []
-
-if not st.session_state.get("lista_cursos_api"):
-    st.session_state.lista_cursos_api = api_get(API_COURSES) or []
-
-# construimos listas específicas para el usuario actual
-st.session_state.tareas_curso = []
-st.session_state.tareas_personales = []
-
-for t in st.session_state.lista_tareas or []:
-    try:
-        curso_t = (t.get("curso") or "").strip().lower()
-    except Exception:
-        curso_t = ""
-    try:
-        tarea_id = t.get("id")
-    except Exception:
-        tarea_id = None
-
-    # Tareas del curso
-    try:
-        if curso_t and curso_t == (usuario.get("curso") or "").strip().lower():
-            st.session_state.tareas_curso.append(t)
-    except Exception:
-        pass
-
-    # Tareas personales (creador == email_usuario OR personal == True)
-    try:
-        if tarea_pertenece_al_usuario(t, dni_usuario, email_usuario):
-            st.session_state.tareas_personales.append(t)
-    except Exception:
-        pass
-
-# Evitar duplicados: si una tarea aparece en personales y en curso la dejamos sólo en personales
-ids_personales = {t.get("id") for t in st.session_state.tareas_personales if t.get("id") is not None}
-st.session_state.tareas_curso = [t for t in st.session_state.tareas_curso if t.get("id") not in ids_personales]
-
-# ==============================
-# FUNCIONES DE FORMATEO
-# ==============================
 def formatear_detalle_tarea(t):
     """
     Devuelve un bloque de texto con todos los datos relevantes de la tarea.
@@ -331,7 +178,7 @@ def formatear_detalle_tarea(t):
     titulo = t.get("titulo") or t.get("title") or "Sin título"
     descripcion = t.get("descripcion") or t.get("description") or ""
     fecha_limite = t.get("fecha_limite") or t.get("due_date") or ""
-    creador = t.get("creador") or ""
+    creador = t.get("creador") or t.get("creator") or ""
     es_personal = t.get("personal") is True
     archivo = t.get("archivo") or t.get("file") or ""
 
@@ -340,6 +187,10 @@ def formatear_detalle_tarea(t):
         partes.append(f"  Descripción: {descripcion}")
     if fecha_limite:
         partes.append(f"  Fecha límite: {fecha_limite}")
+    if creador:
+        partes.append(f"  Creador: {creador}")
+    if archivo:
+        partes.append(f"  Archivo: {archivo}")
     return "\n".join(partes)
 
 def obtener_texto_tareas():
@@ -377,6 +228,143 @@ def obtener_profesores_por_curso():
         prof_email = e.get("profesor_email") or e.get("profesor") or e.get("profesor_mail") or "Email no disponible"
         texto += f"• {materia} — {prof_email}\n"
     return texto
+
+# ==============================
+# FUNCION: CONSULTAR DEEPSEEK (FALLBACK)
+# ==============================
+def consultar_deepseek(prompt, api_key, contexto=""):
+    """
+    Placeholder para DeepSeek / motor externo.
+    Si tenés una API real reemplazá esta función por la llamada correspondiente.
+    Por ahora devuelve una respuesta cortita indicando que no hay respuesta local.
+    """
+    # Si no hay api_key, devolvemos un fallback amistoso
+    if not api_key or not str(api_key).strip():
+        return "No tengo una respuesta en la base local y no está configurada la API externa."
+    # Si hay api_key, podríamos intentar una llamada aquí (no incluida).
+    return "No encontré una respuesta local precisa; se intentó usar el servicio externo (API key presente), pero en esta instancia no se realiza la llamada."
+
+# ==============================
+# INICIALIZACIÓN STREAMLIT
+# ==============================
+st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
+st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
+st.caption("Inicio de sesión por correo (Gmail) y acceso a tareas y profesores desde las APIs del colegio.")
+
+# ==============================
+# PANTALLA DE LOGIN (LIMPIA ESTADO ANTERIOR)
+# ==============================
+if "usuario" not in st.session_state or st.session_state.get("usuario") is None:
+    st.session_state.usuario = None
+
+if st.session_state.usuario is None:
+    st.subheader("🔐 Ingresá para continuar")
+    email_input = st.text_input("Correo electrónico (Gmail):", key="email_login")
+
+    if st.button("Ingresar"):
+        limpiar_estado_antes_login()
+        usuarios = api_get(API_USERS)
+        encontrado = None
+        for u in usuarios or []:
+            if (u.get("email", "").strip().lower() == (email_input or "").strip().lower()):
+                encontrado = u
+                break
+
+        if encontrado:
+            # Guardar solo campos relevantes (sin DNI como llave primaria para login)
+            st.session_state.usuario = {
+                "email": encontrado.get("email", ""),
+                "nombre": encontrado.get("nombre", ""),
+                "apellido": encontrado.get("apellido", ""),
+                "rol": (encontrado.get("rol") or "").strip().lower(),
+                "curso": encontrado.get("curso", "")
+            }
+            # inicializar estructuras vacías dependientes del usuario
+            st.session_state.lista_tareas = []
+            st.session_state.lista_cursos_api = []
+            st.session_state.tareas_curso = []
+            st.session_state.tareas_personales = []
+            st.session_state.historial = []
+            st.success(f"Bienvenido/a {st.session_state.usuario['nombre']} {st.session_state.usuario['apellido']}.")
+            st.rerun()
+        else:
+            st.error("Correo no encontrado. Revisá y volvé a intentarlo.")
+    st.stop()
+
+# ==============================
+# USUARIO LOGUEADO (YA INICIALIZADO)
+# ==============================
+usuario = st.session_state.usuario
+email_usuario = usuario.get("email", "")
+rol_usuario = (usuario.get("rol") or "").strip().lower()
+curso_usuario = normalizar_curso(usuario.get("curso", ""))
+
+# ==============================
+# RECONSTRUIR BASES LOCALES SEGÚN EL CURSO DEL USUARIO
+# ==============================
+
+# Asegurar que exista st.session_state.bases
+if "bases" not in st.session_state:
+    st.session_state.bases = {
+        "General": BASE_GENERAL.copy(),
+        **{curso: BASES_ESPECIFICAS.get(curso, []).copy() for curso in BASES_ESPECIFICAS}
+    }
+
+# Asegurar que exista la clave del curso del usuario (si su curso no está, crear una vacía)
+if curso_usuario not in st.session_state.bases:
+    st.session_state.bases[curso_usuario] = []
+
+# BASE COMPLETA = BASE GENERAL + BASE ESPECÍFICA DEL CURSO DEL USUARIO
+base_completa = BASE_GENERAL + st.session_state.bases[curso_usuario]
+
+if not curso_usuario:
+    st.error("No se pudo interpretar el curso del usuario. Contactá al administrador.")
+    st.stop()
+
+st.info(f"Estás conectado como: {usuario.get('nombre','')} {usuario.get('apellido','')} — Curso: {curso_usuario} — Rol: {rol_usuario}")
+
+# ==============================
+# CARGAR DATOS REMOTOS (TAREAS Y CURSOS)
+# ==============================
+# Guardamos en session para evitar múltiples requests durante la sesión
+if not st.session_state.get("lista_tareas"):
+    st.session_state.lista_tareas = api_get(API_TASKS) or []
+
+if not st.session_state.get("lista_cursos_api"):
+    st.session_state.lista_cursos_api = api_get(API_COURSES) or []
+
+# construimos listas específicas para el usuario actual
+st.session_state.tareas_curso = []
+st.session_state.tareas_personales = []
+
+for t in st.session_state.lista_tareas or []:
+    try:
+        curso_t = (t.get("curso") or "").strip().lower()
+    except Exception:
+        curso_t = ""
+    try:
+        tarea_id = t.get("id")
+    except Exception:
+        tarea_id = None
+
+    # Tareas del curso (comparación simple por cadena)
+    try:
+        if curso_t and curso_t == (usuario.get("curso") or "").strip().lower():
+            st.session_state.tareas_curso.append(t)
+    except Exception:
+        pass
+
+    # Tareas personales (creador == email_usuario OR personal == True)
+    try:
+        if tarea_pertenece_al_usuario(t, email_usuario):
+            st.session_state.tareas_personales.append(t)
+    except Exception:
+        pass
+
+# Evitar duplicados: si una tarea aparece en personales y en curso la dejamos sólo en personales
+ids_personales = {t.get("id") for t in st.session_state.tareas_personales if t.get("id") is not None}
+st.session_state.tareas_curso = [t for t in st.session_state.tareas_curso if t.get("id") not in ids_personales]
+
 # ==============================
 # INTERFAZ DE CHAT PRINCIPAL
 # ==============================
@@ -437,6 +425,7 @@ else:
 
     base_editable = st.session_state.bases.get(curso_a_editar, [])
 
+    # Mostrar y editar entradas
     for i, (p, r) in enumerate(base_editable.copy()):
         col1, col2, col3 = st.columns([4, 5, 1])
         with col1:
