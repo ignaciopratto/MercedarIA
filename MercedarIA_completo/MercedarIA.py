@@ -21,33 +21,6 @@ import requests
 import json
 from datetime import datetime
 
-# -------------------------------
-# FUNCIÓN PARA USAR DEEPSEEK
-# -------------------------------
-def consultar_deepseek(pregunta, api_key, contexto):
-    url = "https://api.deepseek.com/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "system", "content": contexto},
-            {"role": "user", "content": pregunta}
-        ]
-    }
-
-    try:
-        r = requests.post(url, json=payload, headers=headers, timeout=20)
-        r.raise_for_status()
-        data = r.json()
-        return data["choices"][0]["message"]["content"]
-
-    except Exception as e:
-        return "Hubo un error consultando DeepSeek."
-
 # ==============================
 # BASE LOCAL GENERAL
 # ==============================
@@ -502,5 +475,6 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
 
 
