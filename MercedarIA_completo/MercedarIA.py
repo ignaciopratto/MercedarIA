@@ -310,4 +310,13 @@ def main():
         pantalla_login()
         return
 
-    usuario = st.session_state["usuario]()_
+    usuario = st.session_state["usuario"]
+
+    if usuario["rol"] == "admin":
+        pantalla_admin()
+    else:
+        pantalla_chat(usuario)
+
+
+if __name__ == "__main__":
+    main()
