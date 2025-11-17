@@ -286,8 +286,7 @@ def obtener_profesores_por_curso():
 # INICIALIZACIÓN STREAMLIT
 # ==============================
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
-st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
-st.caption("Inicio de sesión por correo (Gmail) y acceso a tareas y profesores desde las APIs del colegio.")
+st.title("🎓 MercedarIA - Asistente del Colegio INSM")
 
 # ==============================
 # PANTALLA DE LOGIN (LIMPIA ESTADO ANTERIOR)
@@ -501,8 +500,6 @@ if st.button("🧹 Limpiar chat"):
     st.session_state.historial = []
     st.info("Historial limpiado correctamente.")
 
-st.caption("Los cambios se mantienen mientras la aplicación esté activa. Si la aplicación se reinicia, se restaurará la base definida en el código.")
-
 # ==============================
 # KEEP-ALIVE
 # ==============================
@@ -515,3 +512,4 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
