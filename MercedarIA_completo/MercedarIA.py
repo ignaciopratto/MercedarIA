@@ -240,10 +240,6 @@ def formatear_detalle_tarea(t):
         partes.append(f"  Descripción: {descripcion}")
     if fecha_limite:
         partes.append(f"  Fecha límite: {fecha_limite}")
-    if creador:
-        partes.append(f"  Creador: {creador}")
-    if archivo:
-        partes.append(f"  Archivo: {archivo}")
     return "\n".join(partes)
 
 def obtener_texto_tareas():
@@ -512,4 +508,5 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
 
