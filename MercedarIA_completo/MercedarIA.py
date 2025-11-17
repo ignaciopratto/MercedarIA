@@ -461,7 +461,7 @@ st.session_state.tareas_curso = [t for t in st.session_state.tareas_curso if t.g
 # ==============================
 st.subheader(f"💬 Chat con MercedarIA — Curso: {curso_usuario} (bloqueado)")
 
-pregunta = st.text_input("Escribí tu pregunta:", key="pregunta_principal")
+pregunta = st.text_area("Escribí tu pregunta:", key="pregunta_principal")
 if st.button("Enviar"):
     if pregunta and pregunta.strip():
         st.session_state.historial.append(("👨‍🎓 Vos", pregunta.strip()))
@@ -582,6 +582,7 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
 
 
 
