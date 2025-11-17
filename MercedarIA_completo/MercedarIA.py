@@ -292,7 +292,13 @@ if "usuario" not in st.session_state or st.session_state.get("usuario") is None:
 
 if st.session_state.usuario is None:
     st.subheader("🔐 Ingresá para continuar")
-    email_input = st.text_input("Correo electrónico (Gmail):", key="email_login")
+    email_input = st.text_input("Ingrese su correo electrónico vinculado a miINSM:", key="email_login")
+
+    st.markdown(
+        '<a href="https://miinsm.netlify.app/" target="_blank" style="color:#00AEEF; font-weight:bold; text-decoration:none;">🔗 Abrir miINSM</a>',
+        unsafe_allow_html=True
+    )
+
 
     if st.button("Ingresar"):
         limpiar_estado_antes_login()
@@ -524,6 +530,7 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
 
 
 
