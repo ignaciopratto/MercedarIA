@@ -254,6 +254,25 @@ dni_usuario = usuario.get("dni", "")
 rol_usuario = (usuario.get("rol") or "").strip().lower()
 curso_usuario = normalizar_curso(usuario.get("curso", ""))
 
+# ==============================
+# RECONSTRUIR BASES LOCALES SEGÚN EL CURSO DEL USUARIO
+# ==============================
+
+# Asegurar que exista st.session_state.bases
+if "bases" not in st.session_state:
+    st.session_state.bases = {
+        "General": BASE_GENERAL.copy(),
+        **{curso: BASES_ESPECIFICAS.get(curso, []).copy() for curso in BASES_ESPECIFICAS}
+    }
+
+# Asegurar que exista la clave del curso del usuario (si su curso no está, crear una vacía)
+if curso_usuario not in st.session_state.bases:
+    st.session_state.bases[curso_usuario] = []
+
+# BASE COMPLETA = BASE GENERAL + BASE ESPECÍFICA DEL CURSO DEL USUARIO
+base_completa = BASE_GENERAL + st.session_state.bases[curso_usuario]
+
+
 if not curso_usuario:
     st.error("No se pudo interpretar el curso del usuario. Contactá al administrador.")
     st.stop()
@@ -475,3 +494,4 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
