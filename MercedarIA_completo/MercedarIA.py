@@ -300,14 +300,62 @@ if st.session_state.usuario is None:
     )
 
 
-    if st.button("Ingresar"):
-        limpiar_estado_antes_login()
-        usuarios = api_get(API_USERS)
-        encontrado = None
-        for u in usuarios or []:
-            if (u.get("email", "").strip().lower() == (email_input or "").strip().lower()):
-                encontrado = u
-                break
+if st.button("Ingresar"):
+    limpiar_estado_antes_login()
+
+    # ===========================
+    # MODO ANÓNIMO
+    # ===========================
+    if not email_input.strip():
+        st.session_state.usuario = {
+            "email": "anonimo",
+            "nombre": "Usuario",
+            "apellido": "Anónimo",
+            "rol": "anon",
+            "curso": "General"
+        }
+
+        # Inicializar estructuras mínimas
+        st.session_state.lista_tareas = []
+        st.session_state.lista_cursos_api = []
+        st.session_state.tareas_curso = []
+        st.session_state.tareas_personales = []
+        st.session_state.historial = []
+
+        st.success("Ingresaste en modo anónimo. Solo se usarán respuestas generales.")
+        st.rerun()
+
+    # ===========================
+    # LOGIN NORMAL (EMAIL)
+    # ===========================
+    usuarios = api_get(API_USERS)
+    encontrado = None
+
+    for u in usuarios or []:
+        if (u.get("email", "").strip().lower() == email_input.strip().lower()):
+            encontrado = u
+            break
+
+    if encontrado:
+        st.session_state.usuario = {
+            "email": encontrado.get("email", ""),
+            "nombre": encontrado.get("nombre", ""),
+            "apellido": encontrado.get("apellido", ""),
+            "rol": (encontrado.get("rol") or "").strip().lower(),
+            "curso": encontrado.get("curso", "")
+        }
+
+        st.session_state.lista_tareas = []
+        st.session_state.lista_cursos_api = []
+        st.session_state.tareas_curso = []
+        st.session_state.tareas_personales = []
+        st.session_state.historial = []
+
+        st.success(f"Bienvenido/a {st.session_state.usuario['nombre']} {st.session_state.usuario['apellido']}.")
+        st.rerun()
+    else:
+        st.error("Correo no encontrado. Revisá y volvé a intentarlo.")
+
 
         if encontrado:
             # Guardar solo campos relevantes (sin DNI como llave primaria para login)
@@ -530,6 +578,7 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
 
 
 
