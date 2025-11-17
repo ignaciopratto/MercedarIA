@@ -150,26 +150,19 @@ def limpiar_estado_antes_login():
 
 def tarea_pertenece_al_usuario(tarea, email_usuario):
     """
-    Tarea personal = creador == email_usuario (coincidencia case-insensitive)
-    o la tarea está marcada como personal == True.
+    Una tarea personal pertenece solo a su creador.
+    personal=True NO implica que sea visible para todos.
     """
-    if not tarea or not isinstance(tarea, dict):
-        return False
+    creador_raw = (tarea.get("creador") or tarea.get("creator") or "").strip().lower()
+    email_user = (email_usuario or "").strip().lower()
 
-    try:
-        if tarea.get("personal") is True:
-            return True
-    except Exception:
-        pass
+    # Si el creador no tiene dominio (ej: "juani.lopez"), lo completamos con el dominio del colegio
+    if "@" not in creador_raw:
+        creador_raw = creador_raw + "@insm.edu"
 
-    try:
-        creador = (tarea.get("creador") or tarea.get("creator") or "").strip().lower()
-        if creador and creador == (email_usuario or "").strip().lower():
-            return True
-    except Exception:
-        pass
+    # Comparación final
+    return creador_raw == email_user
 
-    return False
 
 def formatear_detalle_tarea(t):
     """
@@ -477,3 +470,4 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
