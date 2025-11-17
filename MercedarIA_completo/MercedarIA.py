@@ -7,20 +7,22 @@ from datetime import datetime
 # ==============================
 # CONFIGURACIÓN
 # ==============================
-DEEPSEEK_API_KEY = ""  # Colocar tu API key real
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # Colocá tu API key si querés usar DeepSeek
 ADMIN_PASSWORD = "mercedaria2025"
 
-# URLs de API externas
+# Endpoints remotos
 API_USERS = "https://mi-insm.onrender.com/users"
 API_TASKS = "https://mi-insm.onrender.com/tasks"
 API_COURSES = "https://mi-insm.onrender.com/courses"
+API_FILES = "https://mi-insm.onrender.com/files"
+API_EGRESADOS = "https://mi-insm.onrender.com/egresados"
 
 # ==============================
-# BASE LOCAL GENERAL (SE MANTIENE)
+# BASE DE CONOCIMIENTO LOCAL (ORIGINAL)
 # ==============================
 BASE_GENERAL = [
     ("hola", "Hola, ¿cómo estás?"),
-    ("quién eres", "Soy MercedarIA, tu asistente del Colegio Mercedaria."),
+    ("quién eres", "Soy MercedarIA, tu asistente del colegio."),
     ("cómo te llamas", "Me llamo MercedarIA, tu asistente virtual."),
     ("cómo estás", "Estoy funcionando perfectamente, gracias por preguntar."),
     ("adiós", "¡Hasta luego! Que tengas un buen día."),
@@ -31,9 +33,6 @@ BASE_GENERAL = [
     ("cuándo terminan las clases", "Generalmente a mediados de diciembre."),
 ]
 
-# ==============================
-# BASES POR CURSO (SE MANTIENEN)
-# ==============================
 BASES_ESPECIFICAS = {
     "1° A": [
         ("¿Qué materias tengo?", "Biología, Educación en Artes Visuales, Lengua y Literatura, Física, Geografía, Educación Tecnológica, Matemática, Educación Religiosa Escolar, Ciudadanía y Participación, Inglés y Educación Física."),
@@ -82,7 +81,7 @@ BASES_ESPECIFICAS = {
     ],
     "5° B": [
         ("¿Qué materias tengo?", "Robótica, Música, Física, Matemática, Historia, Lengua y Literatura, Formación para la Vida y el Trabajo, Sistemas Digitales de Información, Geografía, Psicología, Educación Física, Desarrollo de Soluciones Informáticas e Inglés."),
-        ("¿Cuáles son mis contraturnos?", "Educación Física, Sistemas Digitales de Información, Desarrollo de Soluciones Informáticas e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física, Sistemas Digitales de Información, Desarrollo de Soluciones Informáticos e Inglés."),
         ("¿A qué hora son los recreos?", "Los recreos son a las 8:35, 10:00 y 11:35 hs.")
     ],
     "6° A": [
@@ -97,141 +96,161 @@ BASES_ESPECIFICAS = {
     ]
 }
 
-# =====================================
-# FUNCIÓN PARA ARMAR CONTEXTO A IA
-# =====================================
-def obtener_contexto(lista):
-    contexto = "BASE DE CONOCIMIENTO DEL COLEGIO:\n\n"
-    for i, (p, r) in enumerate(lista, 1):
-        contexto += f"Pregunta {i}: {p}\nRespuesta {i}: {r}\n\n"
-    return contexto
-# =====================================
-# CONSULTA A LA IA DEEPSEEK
-# =====================================
-def consultar_deepseek(pregunta, api_key, contexto):
-    url = "https://api.deepseek.com/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-
-    data = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "system",
-             "content": (
-                 "Sos MercedarIA, el asistente educativo del Colegio Mercedaria. "
-                 "Usá exclusivamente la base de conocimiento local y los datos "
-                 "de la API del colegio. Si la información no está disponible, "
-                 "respondé de manera educativa, respetuosa y clara."
-             )},
-            {"role": "user", "content": f"{contexto}\n\nPregunta: {pregunta}"}
-        ],
-        "max_tokens": 500,
-        "temperature": 0.7
-    }
-
+# ==============================
+# FUNCIONES AUXILIARES
+# ==============================
+def api_get(url):
     try:
-        resp = requests.post(url, headers=headers, json=data, timeout=60)
+        resp = requests.get(url, timeout=12)
         resp.raise_for_status()
         data = resp.json()
-        return data["choices"][0]["message"]["content"].strip()
-
-    except Exception as e:
-        return f"❌ Error al conectar con DeepSeek: {e}"
-
-
-# =====================================
-# FUNCIONES DE API EXTERNA
-# =====================================
-def cargar_users():
-    try:
-        return requests.get(API_USERS, timeout=15).json()
-    except:
+        if isinstance(data, dict) and "data" in data and isinstance(data["data"], list):
+            return data["data"]
+        return data
+    except Exception:
         return []
 
-
-def cargar_tasks():
+def normalizar_dni_para_comparacion(dni_raw):
     try:
-        return requests.get(API_TASKS, timeout=15).json()
-    except:
-        return []
+        s = str(dni_raw)
+    except Exception:
+        s = ""
+    return "".join(ch for ch in s if ch.isdigit())
 
-
-def cargar_courses():
-    try:
-        return requests.get(API_COURSES, timeout=15).json()
-    except:
-        return []
-
-
-# =====================================
-# FUNCIÓN PARA NORMALIZAR CURSO
-# Entrada:  "1b", "1B", " 1 b "
-# Salida:   "1° B"
-# =====================================
 def normalizar_curso(curso_raw):
     if not curso_raw:
         return None
+    s = str(curso_raw).strip().lower()
+    # ejemplo "1b", "1 b", "1°b"
+    if len(s) >= 2:
+        numero = s[0]
+        division = s[-1].upper()
+        return f"{numero}° {division}"
+    return None
 
-    curso_raw = curso_raw.strip().lower()
+def tarea_pertenece_a_dni(tarea, dni_usuario, email_usuario):
+    """
+    Devuelve True si la tarea pertenece al usuario:
+    - si la tarea está marcada como 'personal' == True
+    - o si el campo 'creador' coincide con el email del usuario
+    - o si el dni aparece en alguna clave del registro
+    """
+    if not tarea:
+        return False
 
-    if len(curso_raw) < 2:
-        return None
+    # 1) Por campo 'personal'
+    try:
+        if tarea.get("personal") is True:
+            return True
+    except Exception:
+        pass
 
-    numero = curso_raw[0]
-    division = curso_raw[-1].upper()
+    # 2) Por creador == email
+    try:
+        creador = tarea.get("creador") or tarea.get("creador_email") or tarea.get("creator") or ""
+        if creador and isinstance(creador, str):
+            if creador.strip().lower() == str(email_usuario).strip().lower():
+                return True
+    except Exception:
+        pass
 
-    return f"{numero}° {division}"
+    # 3) Por dni dentro del registro (ej: assigned_to, dni, usuario_dni)
+    dni_norm = normalizar_dni_para_comparacion(dni_usuario)
+    if dni_norm:
+        # claves comunes
+        claves = ["dni", "assigned_to", "student_dni", "owner", "responsable", "usuario_dni", "user_dni"]
+        try:
+            for clave in claves:
+                if clave in tarea:
+                    if normalizar_dni_para_comparacion(tarea.get(clave)) == dni_norm:
+                        return True
+        except Exception:
+            pass
 
+    # 4) Buscar dni dentro de la representación completa
+    try:
+        if dni_norm and dni_norm in normalizar_dni_para_comparacion(str(tarea)):
+            return True
+    except Exception:
+        pass
 
-# =====================================
+    return False
+# ==============================
+# CONSULTA A DEEPSEEK (OPCIONAL)
+# ==============================
+def consultar_deepseek(pregunta, api_key, contexto):
+    if not api_key:
+        return "No tengo configurada la clave de DeepSeek. Respondo con la base local y los datos del colegio."
+    url = "https://api.deepseek.com/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    data = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": ("Sos MercedarIA, el asistente educativo del Colegio Mercedaria. "
+                                           "Usá la base local y la información de las APIs del colegio.")},
+            {"role": "user", "content": f"{contexto}\n\nPregunta: {pregunta}"}
+        ],
+        "max_tokens": 500,
+        "temperature": 0.6
+    }
+    try:
+        r = requests.post(url, headers=headers, json=data, timeout=60)
+        r.raise_for_status()
+        j = r.json()
+        return j["choices"][0]["message"]["content"].strip()
+    except Exception as e:
+        return f"❌ Error al conectar con DeepSeek: {e}"
+
+# ==============================
 # INICIALIZACIÓN STREAMLIT
-# =====================================
+# ==============================
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
-
 st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
-st.caption("Basado en conocimiento local + API del colegio + IA DeepSeek")
+st.caption("Responde con información local y con consultas a las APIs del colegio cuando corresponde.")
 
-# =====================================
+# ==============================
 # LOGIN POR DNI
-# =====================================
+# ==============================
 if "usuario" not in st.session_state:
     st.session_state.usuario = None
 
 if st.session_state.usuario is None:
     st.subheader("🔐 Inicio de sesión")
-
-    dni_ingresado = st.text_input("Ingresá tu DNI para continuar:")
-
+    dni_ingresado = st.text_input("Ingresá tu Documento Nacional de Identidad (DNI):", key="dni_input")
     if st.button("Ingresar"):
-        usuarios = cargar_users()
-
-        usuario = next((u for u in usuarios if u["dni"] == dni_ingresado), None)
-
-        if usuario:
-            st.session_state.usuario = usuario
-            st.success(f"Bienvenido/a {usuario['nombre']} {usuario['apellido']}.")
+        usuarios = api_get(API_USERS)
+        encontrado = None
+        for u in usuarios:
+            if normalizar_dni_para_comparacion(u.get("dni", "")) == normalizar_dni_para_comparacion(dni_ingresado):
+                encontrado = u
+                break
+        if encontrado:
+            st.session_state.usuario = encontrado
+            st.success(f"Bienvenido/a {encontrado.get('nombre','')} {encontrado.get('apellido','')}. Curso: {str(encontrado.get('curso','')).upper()}")
+            st.experimental_rerun()
         else:
-            st.error("❌ DNI no encontrado en la base de datos.")
-
+            st.error("DNI no encontrado. Verificá e intentá nuevamente.")
     st.stop()
 
-
-# =====================================
-# DATOS DEL USUARIO YA LOGUEADO
-# =====================================
+# ==============================
+# SESIÓN ACTIVA: DATOS DEL USUARIO
+# ==============================
 usuario = st.session_state.usuario
-email_usuario = usuario["email"]
-curso_usuario_raw = usuario["curso"]
+email_usuario = usuario.get("email", "")
+dni_usuario = usuario.get("dni", "")
+rol_usuario = (usuario.get("rol") or "").strip().lower()
+curso_usuario_raw = usuario.get("curso", "")
 curso_usuario = normalizar_curso(curso_usuario_raw)
 
 if not curso_usuario:
-    st.error("❌ Error: No se pudo interpretar el curso del usuario.")
+    st.error("No se pudo interpretar el curso del usuario. Revisá los datos en la API de usuarios.")
     st.stop()
 
-st.info(f"📘 Estás en el curso: **{curso_usuario}**")
-# =====================================
-# INICIALIZAR BASES LOCALES
-# (Se mantiene el sistema que ya tenías)
-# =====================================
+st.info(f"📘 Estás en el curso: {curso_usuario} (bloqueado)")
+
+# ==============================
+# INICIALIZACIÓN DE ESTADO
+# ==============================
 if "bases" not in st.session_state:
     st.session_state.bases = {
         "General": BASE_GENERAL.copy(),
@@ -244,213 +263,214 @@ if "historial" not in st.session_state:
 if "edicion_activa" not in st.session_state:
     st.session_state.edicion_activa = False
 
-
-# =====================================
-# FORZAR QUE EL CHAT USE SIEMPRE EL CURSO DEL USUARIO (OPCIÓN A)
-# =====================================
-curso_seleccionado = curso_usuario  # 🔒 El alumno NO puede cambiar de curso.
-
-
-# =====================================
-# ARMAR CONTEXTO PARA LA IA
-# =====================================
+# Construimos la base local que corresponde al curso del usuario (bloqueado)
+curso_seleccionado = curso_usuario
 base_completa = BASE_GENERAL + st.session_state.bases.get(curso_seleccionado, [])
 contexto = obtener_contexto(base_completa)
 
+# ==============================
+# CARGAR DATOS REMOTOS: TASKS Y COURSES
+# ==============================
+lista_tareas = api_get(API_TASKS)
+lista_cursos_api = api_get(API_COURSES)
 
-# =====================================
-# CARGAR TAREAS Y CURSOS DESDE LA API
-# =====================================
-lista_tareas = cargar_tasks()
-lista_cursos_api = cargar_courses()
+# Normalizamos y filtramos tareas del curso del usuario
+tareas_curso = []
+tareas_personales = []
+for t in lista_tareas or []:
+    try:
+        curso_t = str(t.get("curso", "")).strip().lower()
+    except Exception:
+        curso_t = ""
+    # Si la tarea es del curso
+    try:
+        if curso_t and curso_t == (usuario.get("curso") or "").strip().lower():
+            tareas_curso.append(t)
+    except Exception:
+        pass
+    # Si la tarea es personal o creada por el usuario
+    try:
+        if tarea_pertenece_a_dni(t, dni_usuario, email_usuario):
+            tareas_personales.append(t)
+    except Exception:
+        pass
 
-# Filtrar tareas del curso
-tareas_curso = [
-    t for t in lista_tareas
-    if t.get("curso", "").lower() == usuario["curso"].lower()
-]
+# Eliminar duplicados (misma tarea en ambas listas)
+ids_personales = {t.get("id") for t in tareas_personales if t.get("id") is not None}
+tareas_curso = [t for t in tareas_curso if t.get("id") not in ids_personales]
+# ==============================
+# FUNCIONES PARA FORMATEAR SALIDAS
+# ==============================
+def formatear_detalle_tarea(t):
+    titulo = t.get("titulo") or t.get("title") or "Sin título"
+    descripcion = t.get("descripcion") or t.get("description") or ""
+    fecha_limite = t.get("fecha_limite") or t.get("due_date") or ""
+    creador = t.get("creador") or t.get("creator") or ""
+    personal = t.get("personal") is True
+    archivo = t.get("archivo") or t.get("file") or ""
+    partes = [f"• {titulo}"]
+    if descripcion:
+        partes.append(f"  Descripción: {descripcion}")
+    if fecha_limite:
+        partes.append(f"  Fecha límite: {fecha_limite}")
+    if creador:
+        partes.append(f"  Creador: {creador}")
+    if personal:
+        partes.append("  (Tarea marcada como personal)")
+    if archivo:
+        partes.append(f"  Archivo: {archivo}")
+    return "\n".join(partes)
 
-# Filtrar tareas personales (dos formas posibles)
-tareas_personales = [
-    t for t in lista_tareas
-    if t.get("personal") is True or t.get("creador") == email_usuario
-]
-
-# Evitar duplicados si una tarea cumple ambas condiciones
-ids_personales = {t["id"] for t in tareas_personales}
-tareas_curso = [t for t in tareas_curso if t["id"] not in ids_personales]
-
-
-# =====================================
-# FUNCIÓN PARA MOSTRAR TAREAS EN EL CHAT
-# =====================================
 def obtener_texto_tareas():
     texto = ""
-
-    # TAREAS DEL CURSO
-    texto += "📚 **Tareas del curso:**\n"
+    texto += "📚 Tareas del curso:\n\n"
     if tareas_curso:
         for t in tareas_curso:
-            titulo = t.get("titulo", "Sin título")
-            fecha = t.get("fecha_limite", "")
-            texto += f"- {titulo} — *{fecha}*\n"
+            texto += formatear_detalle_tarea(t) + "\n\n"
     else:
-        texto += "*(No hay tareas cargadas para tu curso)*\n"
+        texto += "(No hay tareas cargadas para tu curso)\n\n"
 
-    texto += "\n"
-
-    # TAREAS PERSONALES
-    texto += "🧍‍♂️ **Tus tareas personales:**\n"
+    texto += "🧍‍♂️ Tus tareas personales:\n\n"
     if tareas_personales:
         for t in tareas_personales:
-            titulo = t.get("titulo", "Sin título")
-            fecha = t.get("fecha_limite", "")
-            texto += f"- {titulo} — *{fecha}*\n"
+            texto += formatear_detalle_tarea(t) + "\n\n"
     else:
-        texto += "*(No tenés tareas personales cargadas)*\n"
+        texto += "(No tenés tareas personales cargadas)\n\n"
 
     return texto
 
-
-# =====================================
-# FUNCIÓN PARA RESPONDER SOBRE PROFESORES
-# =====================================
+# ==============================
+# FUNCION PARA OBTENER PROFESORES POR CURSO
+# ==============================
 def obtener_profesores():
-    curso_raw = usuario["curso"]  # ejemplo: "1b"
+    """
+    La API de cursos devuelve registros con:
+    - curso_id (ej. "1a")
+    - materia (ej. "Biología")
+    - profesor_email (ej. "cecilia.viotti@institutolamerced.edu.ar")
+    """
+    if not lista_cursos_api:
+        return "❌ No se pudo cargar la información de profesores desde la API."
 
-    materias = [
-        c for c in lista_cursos_api
-        if c.get("curso", "").lower() == curso_raw.lower()
-    ]
+    curso_id_normalizado = (usuario.get("curso") or "").strip().lower()
+
+    materias = [c for c in lista_cursos_api if str(c.get("curso_id", "")).strip().lower() == curso_id_normalizado]
 
     if not materias:
-        return "❌ No se encontró información de profesores para tu curso."
+        return "❌ No encontré asignaciones de profesores para tu curso."
 
-    texto = "📘 **Profesores de tu curso:**\n\n"
+    texto = "📘 Profesores asignados a tu curso:\n\n"
     for m in materias:
-        materia = m.get("materia", "Materia desconocida")
-        profe = m.get("mail_profesor", "Sin profesor")
-        texto += f"- **{materia}** — {profe}\n"
+        materia = m.get("materia") or "Materia desconocida"
+        profesor_email = m.get("profesor_email") or m.get("profesor") or m.get("profesor_mail") or "Email no disponible"
+        texto += f"• {materia} — {profesor_email}\n"
 
     return texto
 
-
-# =====================================
-# INTERFAZ DE CHAT
-# =====================================
-st.subheader(f"💬 Chat con MercedarIA ({curso_seleccionado})")
+# ==============================
+# INTERFAZ PRINCIPAL DEL CHAT
+# ==============================
+st.subheader(f"💬 Chat con MercedarIA — Curso: {curso_seleccionado}")
 
 pregunta = st.text_input("Escribí tu pregunta:")
-
 if st.button("Enviar"):
-    if pregunta.strip():
+    if pregunta and pregunta.strip():
         st.session_state.historial.append(("👨‍🎓 Vos", pregunta))
-        pregunta_norm = pregunta.lower().strip()
-
+        q = pregunta.strip().lower()
         respuesta = None
 
-        # Buscar en base local
+        # Respuesta por coincidencia en base local
         for p, r in base_completa:
-            if p.lower() in pregunta_norm:
-                respuesta = r
-                break
+            try:
+                if p.lower() in q:
+                    respuesta = r
+                    break
+            except Exception:
+                continue
 
-        # Preguntar por tareas
-        if not respuesta and ("tarea" in pregunta_norm or "tareas" in pregunta_norm):
+        # Consultas sobre tareas
+        if not respuesta and ("tarea" in q or "tareas" in q):
             respuesta = obtener_texto_tareas()
 
-        # Preguntar por profesores
-        if not respuesta and ("profe" in pregunta_norm or "profesor" in pregunta_norm or "profesores" in pregunta_norm):
+        # Consultas sobre profesores
+        if not respuesta and ("profe" in q or "profesor" in q or "profesores" in q or "mail" in q or "correo" in q):
             respuesta = obtener_profesores()
 
-        # Si falla, usar DeepSeek
+        # Si no hay respuesta local, consultar IA externa
         if not respuesta:
             respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, contexto)
 
         st.session_state.historial.append(("🤖 MercedarIA", respuesta))
-# =====================================
-# MOSTRAR HISTORIAL
-# =====================================
-for rol, msg in st.session_state.historial[-20:]:
+
+# Mostrar historial
+st.markdown("### Historial de conversación")
+for rol, mensaje in st.session_state.historial[-40:]:
     if rol == "👨‍🎓 Vos":
-        st.markdown(f"🧍 *{rol}:* {msg}")
+        st.markdown(f"🧍 *{rol}:* {mensaje}")
     else:
-        st.markdown(
-            f"🧠 <span style='color:#00FFAA'><b>{rol}:</b></span> {msg}",
-            unsafe_allow_html=True
-        )
+        st.markdown(f"🧠 <span style='color:#00FFAA'><b>{rol}:</b></span> {mensaje}", unsafe_allow_html=True)
 
 st.divider()
 
-
-# =====================================
-# PANEL DE EDICIÓN (PROFESORES Y ADMIN)
-# =====================================
+# ==============================
+# PANEL DE EDICIÓN RESTRINGIDO
+# ==============================
 st.subheader("🧩 Panel de Edición (solo personal autorizado)")
 
-if not st.session_state.edicion_activa:
-    password = st.text_input("🔒 Ingresá la contraseña para editar", type="password")
-
-    if st.button("Acceder"):
-        if password == ADMIN_PASSWORD:
-            st.session_state.edicion_activa = True
-            st.success("✅ Acceso concedido.")
-        else:
-            st.error("❌ Contraseña incorrecta.")
-
+# Mostrar panel solo para roles 'profe' y 'admin'
+if rol_usuario not in ("profe", "admin"):
+    st.info("No tenés permisos para editar la base de conocimiento. Si sos docente o administrador, iniciá sesión con una cuenta con rol 'profe' o 'admin'.")
 else:
-    st.success(f"Modo edición activado para el curso: {curso_seleccionado}")
+    st.success(f"Usuario con permisos: rol = {rol_usuario}")
 
-    base_editable = st.session_state.bases[curso_seleccionado]
+    # Selección del curso a editar (General + claves locales)
+    opciones_cursos_para_editar = ["General"] + list(BASES_ESPECIFICAS.keys())
+    curso_a_editar = st.selectbox("Seleccioná el curso que querés modificar", opciones_cursos_para_editar, index=0)
 
-    for i, (p, r) in enumerate(base_editable):
+    base_editable = st.session_state.bases.get(curso_a_editar, [])
+
+    for i, (p, r) in enumerate(base_editable.copy()):
         col1, col2, col3 = st.columns([4, 5, 1])
-
         with col1:
-            nueva_p = st.text_input(f"Pregunta {i+1}", p, key=f"p_{curso_seleccionado}_{i}")
-
+            nueva_p = st.text_input(f"Pregunta {i+1}", p, key=f"p_edit_{curso_a_editar}_{i}")
         with col2:
-            nueva_r = st.text_area(f"Respuesta {i+1}", r, key=f"r_{curso_seleccionado}_{i}")
-
+            nueva_r = st.text_area(f"Respuesta {i+1}", r, key=f"r_edit_{curso_a_editar}_{i}")
         with col3:
-            if st.button("🗑", key=f"del_{curso_seleccionado}_{i}"):
-                base_editable.pop(i)
+            if st.button("🗑", key=f"del_edit_{curso_a_editar}_{i}"):
+                try:
+                    base_editable.pop(i)
+                except Exception:
+                    pass
                 st.experimental_rerun()
-
         base_editable[i] = (nueva_p, nueva_r)
 
     st.markdown("---")
-
-    nueva_pregunta = st.text_input("➕ Nueva pregunta")
-    nueva_respuesta = st.text_area("Respuesta")
-
+    nueva_preg = st.text_input("➕ Nueva pregunta", key="nueva_p_edit")
+    nueva_resp = st.text_area("Respuesta", key="nueva_r_edit")
     if st.button("Agregar a la base"):
-        if nueva_pregunta and nueva_respuesta:
-            base_editable.append((nueva_pregunta.strip(), nueva_respuesta.strip()))
+        if nueva_preg and nueva_resp:
+            base_editable.append((nueva_preg.strip(), nueva_resp.strip()))
             st.success("✅ Pregunta agregada correctamente.")
         else:
-            st.warning("⚠ Escribí una pregunta y su respuesta antes de agregar.")
+            st.warning("⚠ Completá pregunta y respuesta antes de agregar.")
 
-    if st.button("🚪 Salir del modo edición"):
-        st.session_state.edicion_activa = False
-        st.info("🔒 Modo edición cerrado.")
+    if st.button("Salir del modo edición"):
+        st.experimental_rerun()
 
 st.divider()
 
-
-# =====================================
-# BOTÓN PARA LIMPIAR CHAT
-# =====================================
+# ==============================
+# LIMPIAR CHAT Y MISC
+# ==============================
 if st.button("🧹 Limpiar chat"):
     st.session_state.historial = []
-    st.info("💬 Chat limpiado correctamente.")
+    st.info("Historial limpiado correctamente.")
 
-st.caption("💡 Los cambios se mantienen mientras la app esté activa. Si se reinicia, se restaura la base original.")
+st.caption("Los cambios en la base local se mantienen mientras la aplicación esté activa. Al reiniciar la app, se volverá a la base original del código.")
 
-
-# =====================================
-# MANTENER SESIÓN VIVA
-# =====================================
+# ==============================
+# KEEP ALIVE THREAD
+# ==============================
 def mantener_sesion_viva():
     while True:
         time.sleep(300)
