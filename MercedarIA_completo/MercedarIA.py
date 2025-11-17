@@ -262,21 +262,37 @@ def obtener_texto_tareas():
 
 def obtener_profesores_por_curso():
     """
-    Usa la lista de cursos de la API (st.session_state.lista_cursos_api)
-    y busca entradas cuya clave 'curso_id' coincida con el curso del usuario.
-    Cada registro esperado tiene: curso_id, materia, profesor_email
+    Obtiene los profesores del curso del usuario desde la API /users.
+    Solo muestra profesores cuyo campo 'curso' coincide exactamente con el del usuario.
+    Cada profesor debe tener: nombre, apellido, email, materia.
     """
-    lista = st.session_state.lista_cursos_api or []
-    curso_id_norm = (usuario.get("curso") or "").strip().lower()
-    entradas = [c for c in lista if str(c.get("curso_id", "")).strip().lower() == curso_id_norm]
-    if not entradas:
-        return "No se encontró información de profesores para tu curso."
+    usuarios = api_get(API_USERS)
+    curso_user = (usuario.get("curso") or "").strip().lower()
+
+    # Filtrar profesores asignados a este curso
+    profesores = []
+    for u in usuarios:
+        try:
+            if (u.get("rol", "").strip().lower() == "profe" and
+                (u.get("curso", "").strip().lower() == curso_user)):
+                profesores.append(u)
+        except:
+            continue
+
+    if not profesores:
+        return "No se encontraron profesores asignados a tu curso."
+
     texto = "📘 Profesores asignados a tu curso:\n\n"
-    for e in entradas:
-        materia = e.get("materia") or "Materia desconocida"
-        prof_email = e.get("profesor_email") or e.get("profesor") or e.get("profesor_mail") or "Email no disponible"
-        texto += f"• {materia} — {prof_email}\n"
+    for prof in profesores:
+        nombre = prof.get("nombre", "Nombre desconocido")
+        apellido = prof.get("apellido", "Apellido desconocido")
+        materia = prof.get("materia", "Materia no especificada")
+        email = prof.get("email", "Email no disponible")
+
+        texto += f"• {materia} — {nombre} {apellido} — {email}\n"
+
     return texto
+
 
 # ==============================
 # INICIALIZACIÓN STREAMLIT
@@ -582,6 +598,7 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
 
 
 
