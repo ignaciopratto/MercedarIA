@@ -7,10 +7,9 @@ from datetime import datetime
 # ==============================
 # CONFIGURACIÓN
 # ==============================
-DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # Colocá tu API key si querés usar DeepSeek
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # API KEY opcional
 ADMIN_PASSWORD = "mercedaria2025"
 
-# Endpoints remotos
 API_USERS = "https://mi-insm.onrender.com/users"
 API_TASKS = "https://mi-insm.onrender.com/tasks"
 API_COURSES = "https://mi-insm.onrender.com/courses"
@@ -18,11 +17,11 @@ API_FILES = "https://mi-insm.onrender.com/files"
 API_EGRESADOS = "https://mi-insm.onrender.com/egresados"
 
 # ==============================
-# BASE DE CONOCIMIENTO LOCAL (ORIGINAL)
+# BASE LOCAL GENERAL
 # ==============================
 BASE_GENERAL = [
     ("hola", "Hola, ¿cómo estás?"),
-    ("quién eres", "Soy MercedarIA, tu asistente del colegio."),
+    ("quién eres", "Soy MercedarIA, tu asistente del Colegio Mercedaria."),
     ("cómo te llamas", "Me llamo MercedarIA, tu asistente virtual."),
     ("cómo estás", "Estoy funcionando perfectamente, gracias por preguntar."),
     ("adiós", "¡Hasta luego! Que tengas un buen día."),
@@ -30,92 +29,95 @@ BASE_GENERAL = [
     ("cuándo son los recreos", "Turno mañana: 8:35, 10:00, 11:35. Turno tarde: 14:40, 16:05, 17:50."),
     ("dónde queda la escuela", "En Arroyito, Córdoba, calle 9 de Julio 456."),
     ("cuándo empieza el ciclo lectivo", "El ciclo lectivo comienza el primer día hábil de marzo."),
-    ("cuándo terminan las clases", "Generalmente a mediados de diciembre."),
+    ("cuándo terminan las clases", "Generalmente a mediados de diciembre.")
 ]
 
+# ==============================
+# BASE POR CURSO
+# ==============================
 BASES_ESPECIFICAS = {
     "1° A": [
         ("¿Qué materias tengo?", "Biología, Educación en Artes Visuales, Lengua y Literatura, Física, Geografía, Educación Tecnológica, Matemática, Educación Religiosa Escolar, Ciudadanía y Participación, Inglés y Educación Física."),
         ("¿Cuáles son mis contraturnos?", "Educación Física y Educación Tecnológica."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 14:40, 16:05 y 17:40 hs.")
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
     ],
     "1° B": [
         ("¿Qué materias tengo?", "Física, Matemática, Educación en Artes Visuales, Inglés, Educación Religiosa Escolar, Lengua y Literatura, Geografía, Ciudadanía y Participación, Educación Tecnológica, Biología y Educación Física."),
         ("¿Cuáles son mis contraturnos?", "Educación Tecnológica y Educación Física."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 14:40, 16:05 y 17:40 hs.")
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
     ],
     "2° A": [
         ("¿Qué materias tengo?", "Matemática, Lengua y Literatura, Educación Religiosa Escolar, Música, Historia, Educación Tecnológica, Química, Computación, Ciudadanía y Participación, Biología, Inglés y Educación Física."),
         ("¿Cuáles son mis contraturnos?", "Educación Física."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 14:40, 16:05 y 17:40 hs.")
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
     ],
     "2° B": [
         ("¿Qué materias tengo?", "Música, Historia, Educación Religiosa Escolar, Ciudadanía y Participación, Inglés, Matemática, Lengua y Literatura, Educación Tecnológica, Química, Biología y Educación Física."),
         ("¿Cuáles son mis contraturnos?", "Educación Física."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 14:40, 16:05 y 17:40 hs.")
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
     ],
     "3° A": [
         ("¿Qué materias tengo?", "Lengua y Literatura, Inglés, Historia, Geografía, Química, Educación Tecnológica, Física, Educación Religiosa Escolar, Formación para la Vida y el Trabajo, Matemática, Educación Artística Visual, Música, Computación y Educación Física."),
         ("¿Cuáles son mis contraturnos?", "Educación Física y Formación para la Vida y el Trabajo."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 14:40, 16:05 y 17:40 hs.")
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
     ],
     "3° B": [
         ("¿Qué materias tengo?", "Lengua y Literatura, Formación para la Vida y el Trabajo, Física, Historia, Geografía, Educación Artística Visual, Música, Matemática, Educación Tecnológica, Química, Computación, Educación Religiosa Escolar, Educación Física e Inglés."),
         ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 14:40, 16:05 y 17:40 hs.")
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
     ],
     "4° A": [
-        ("¿Qué materias tengo?", "Historia, Lengua y Literatura, Biología, Educación Religiosa Escolar, Matemática, Geografía, Educación Artística, Formación para la Vida y el Trabajo, Tecnologías de la Información y la Comunicación (TIC), Sociedad, Cultura y Comunicación, Antropología, Educación Física e Inglés."),
+        ("¿Qué materias tengo?", "Historia, Lengua y Literatura, Biología, ERE, Matemática, Geografía, Educ. Artística, FVT, TIC, Sociedad y Comunicación, Antropología, Educación Física e Inglés."),
         ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 8:35, 10:00 y 11:35 hs.")
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
     ],
     "4° B": [
-        ("¿Qué materias tengo?", "Lengua y Literatura, Biología, Educación Religiosa Escolar, Historia, Tecnología y Lenguajes de Programación, Geografía, Matemática, Sistemas Digitales de Información, Formación para la Vida y el Trabajo, Educación Artística, Educación Física e Inglés."),
+        ("¿Qué materias tengo?", "Lengua y Literatura, Biología, ERE, Historia, Programación, Geografía, Matemática, Sistemas Digitales, FVT, Educación Artística, Educación Física e Inglés."),
         ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 8:35, 10:00 y 11:35 hs.")
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
     ],
     "5° A": [
-        ("¿Qué materias tengo?", "Metodología, Historia, Física, Geografía, Arte Cultural y Social, Educación Religiosa Escolar, Lengua y Literatura, Formación para la Vida y el Trabajo, Matemática, Educación Física, Psicología, Sociología e Inglés."),
-        ("¿Cuáles son mis contraturnos?", "Educación Física, Psicología, Sociología e Inglés."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 8:35, 10:00 y 11:35 hs.")
+        ("¿Qué materias tengo?", "Metodología, Historia, Física, Geografía, Arte Cultural y Social, ERE, Lengua y Literatura, FVT, Matemática, EF, Psicología, Sociología e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Psicología, Sociología e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
     ],
     "5° B": [
-        ("¿Qué materias tengo?", "Robótica, Música, Física, Matemática, Historia, Lengua y Literatura, Formación para la Vida y el Trabajo, Sistemas Digitales de Información, Geografía, Psicología, Educación Física, Desarrollo de Soluciones Informáticas e Inglés."),
-        ("¿Cuáles son mis contraturnos?", "Educación Física, Sistemas Digitales de Información, Desarrollo de Soluciones Informáticos e Inglés."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 8:35, 10:00 y 11:35 hs.")
+        ("¿Qué materias tengo?", "Robótica, Música, Física, Matemática, Historia, Lengua y Literatura, FVT, Sistemas Digitales, Geografía, Psicología, EF, Desarrollo Informático e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Sistemas Digitales, Desarrollo Informático e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
     ],
     "6° A": [
-        ("¿Qué materias tengo?", "Ciudadanía y Política, Economía Política, Matemática, Geografía, Filosofía, Química, Lengua y Literatura, Historia, Educación Religiosa Escolar, Sociedad, Cultura y Comunicación, Teatro, Formación para la Vida y el Trabajo, Educación Física e Inglés."),
-        ("¿Cuáles son mis contraturnos?", "Educación Física, Sociedad, Cultura y Comunicación e Inglés."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 8:35, 10:00 y 11:35 hs.")
+        ("¿Qué materias tengo?", "Ciudadanía y Política, Economía Política, Matemática, Geografía, Filosofía, Química, Lengua y Literatura, Historia, ERE, Sociedad y Comunicación, Teatro, FVT, EF e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Sociedad y Comunicación e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
     ],
     "6° B": [
-        ("¿Qué materias tengo?", "Lengua y Literatura, Comunicación Audiovisual, Desarrollo de Soluciones Informáticas, Informática Aplicada, Filosofía, Formación para la Vida y el Trabajo, Química, Matemática, Ciudadanía y Política, Educación Religiosa Escolar, Teatro, Educación Física, Aplicaciones Informáticas e Inglés."),
-        ("¿Cuáles son mis contraturnos?", "Educación Física, Aplicaciones Informáticas e Inglés."),
-        ("¿A qué hora son los recreos?", "Los recreos son a las 8:35, 10:00 y 11:35 hs.")
+        ("¿Qué materias tengo?", "Lengua y Literatura, Comunicación Audiovisual, Desarrollo de Soluciones Informáticas, Informática Aplicada, Filosofía, Formación para la Vida y el Trabajo, Química, Matemática, ERE, Ciudadanía y Política, Teatro, EF, Aplicaciones Informáticas e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Aplicaciones Informáticas e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
     ]
 }
 
 # =====================================
-# FUNCIÓN PARA ARMAR CONTEXTO PARA LA IA
+# FUNCIÓN: CONVERTIR BASE A CONTEXTO
 # =====================================
 def obtener_contexto(lista):
-    """
-    Convierte la base de conocimiento en un texto largo para usar como contexto en DeepSeek.
-    """
     contexto = "BASE DE CONOCIMIENTO DEL COLEGIO:\n\n"
     for i, (p, r) in enumerate(lista, 1):
         contexto += f"Pregunta {i}: {p}\nRespuesta {i}: {r}\n\n"
     return contexto
-
 # ==============================
-# FUNCIONES AUXILIARES
+# UTILIDADES Y FUNCIONES AUXILIARES
 # ==============================
 def api_get(url):
+    """
+    Obtiene datos de la API remota. Devuelve lista o [] si hay error.
+    """
     try:
-        resp = requests.get(url, timeout=12)
-        resp.raise_for_status()
-        data = resp.json()
+        r = requests.get(url, timeout=12)
+        r.raise_for_status()
+        data = r.json()
+        # soportar estructuras tipo {"data": [...]}
         if isinstance(data, dict) and "data" in data and isinstance(data["data"], list):
             return data["data"]
         return data
@@ -123,6 +125,9 @@ def api_get(url):
         return []
 
 def normalizar_dni_para_comparacion(dni_raw):
+    """
+    Devuelve sólo los dígitos del DNI para comparaciones robustas.
+    """
     try:
         s = str(dni_raw)
     except Exception:
@@ -130,56 +135,62 @@ def normalizar_dni_para_comparacion(dni_raw):
     return "".join(ch for ch in s if ch.isdigit())
 
 def normalizar_curso(curso_raw):
-    if not curso_raw:
-        return None
-    s = str(curso_raw).strip().lower()
-    # ejemplo "1b", "1 b", "1°b"
-    if len(s) >= 2:
-        numero = s[0]
-        division = s[-1].upper()
-        return f"{numero}° {division}"
-    return None
-
-def tarea_pertenece_a_dni(tarea, dni_usuario, email_usuario):
     """
-    Devuelve True si la tarea pertenece al usuario:
-    - si la tarea está marcada como 'personal' == True
-    - o si el campo 'creador' coincide con el email del usuario
-    - o si el dni aparece en alguna clave del registro
+    Normaliza formatos como "1b", "1 b", "1°b", "1° B" -> "1° B"
     """
-    if not tarea:
-        return False
-
-    # 1) Por campo 'personal'
     try:
+        s = str(curso_raw).strip().lower()
+    except Exception:
+        return None
+    if len(s) < 2:
+        return None
+    numero = s[0]
+    division = s[-1].upper()
+    return f"{numero}° {division}"
+
+def limpiar_estado_antes_login():
+    """
+    Limpia del session_state los datos que dependen del usuario anterior.
+    """
+    for clave in ["usuario", "tareas_curso", "tareas_personales", "lista_tareas", "lista_cursos_api", "historial"]:
+        if clave in st.session_state:
+            st.session_state.pop(clave, None)
+
+def tarea_pertenece_al_usuario(tarea, dni_usuario, email_usuario):
+    """
+    Determina si la tarea es personal para el usuario.
+    Reglas:
+     - Si campo 'personal' == True => True
+     - Si campo 'creador' == email_usuario (coincidencia exacta, case-insensitive) => True
+     - Si el DNI aparece en campos comunes (fallback)
+    """
+    try:
+        # 1) marcado como personal
         if tarea.get("personal") is True:
             return True
     except Exception:
         pass
 
-    # 2) Por creador == email
     try:
-        creador = tarea.get("creador") or tarea.get("creador_email") or tarea.get("creator") or ""
-        if creador and isinstance(creador, str):
-            if creador.strip().lower() == str(email_usuario).strip().lower():
-                return True
+        creador = tarea.get("creador") or ""
+        if isinstance(creador, str) and creador.strip().lower() == str(email_usuario).strip().lower():
+            return True
     except Exception:
         pass
 
-    # 3) Por dni dentro del registro (ej: assigned_to, dni, usuario_dni)
-    dni_norm = normalizar_dni_para_comparacion(dni_usuario)
-    if dni_norm:
-        # claves comunes
-        claves = ["dni", "assigned_to", "student_dni", "owner", "responsable", "usuario_dni", "user_dni"]
-        try:
+    # fallback por DNI dentro de la tarea
+    try:
+        dni_norm = normalizar_dni_para_comparacion(dni_usuario)
+        if dni_norm:
+            claves = ["dni", "assigned_to", "student_dni", "owner", "responsable", "usuario_dni", "user_dni"]
             for clave in claves:
                 if clave in tarea:
                     if normalizar_dni_para_comparacion(tarea.get(clave)) == dni_norm:
                         return True
-        except Exception:
-            pass
+    except Exception:
+        pass
 
-    # 4) Buscar dni dentro de la representación completa
+    # buscar dni dentro de la representación completa por si acaso
     try:
         if dni_norm and dni_norm in normalizar_dni_para_comparacion(str(tarea)):
             return True
@@ -187,139 +198,124 @@ def tarea_pertenece_a_dni(tarea, dni_usuario, email_usuario):
         pass
 
     return False
-# ==============================
-# CONSULTA A DEEPSEEK (OPCIONAL)
-# ==============================
-def consultar_deepseek(pregunta, api_key, contexto):
-    if not api_key:
-        return "No tengo configurada la clave de DeepSeek. Respondo con la base local y los datos del colegio."
-    url = "https://api.deepseek.com/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    data = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "system", "content": ("Sos MercedarIA, el asistente educativo del Colegio Mercedaria. "
-                                           "Usá la base local y la información de las APIs del colegio.")},
-            {"role": "user", "content": f"{contexto}\n\nPregunta: {pregunta}"}
-        ],
-        "max_tokens": 500,
-        "temperature": 0.6
-    }
-    try:
-        r = requests.post(url, headers=headers, json=data, timeout=60)
-        r.raise_for_status()
-        j = r.json()
-        return j["choices"][0]["message"]["content"].strip()
-    except Exception as e:
-        return f"❌ Error al conectar con DeepSeek: {e}"
 
 # ==============================
 # INICIALIZACIÓN STREAMLIT
 # ==============================
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
 st.title("🎓 MercedarIA - Asistente del Colegio Mercedaria")
-st.caption("Responde con información local y con consultas a las APIs del colegio cuando corresponde.")
-
+st.caption("Inicio de sesión por DNI y acceso a tareas y profesores desde las APIs del colegio.")
 # ==============================
-# LOGIN POR DNI
+# PANTALLA DE LOGIN (LIMPIA ESTADO ANTERIOR)
 # ==============================
-if "usuario" not in st.session_state:
+if "usuario" not in st.session_state or st.session_state.get("usuario") is None:
     st.session_state.usuario = None
 
 if st.session_state.usuario is None:
-    st.subheader("🔐 Inicio de sesión")
-    dni_ingresado = st.text_input("Ingresá tu Documento Nacional de Identidad (DNI):", key="dni_input")
+    st.subheader("🔐 Ingresá para continuar")
+    dni_input = st.text_input("Documento Nacional de Identidad (DNI):", key="dni_login")
     if st.button("Ingresar"):
+        # limpiar estado de sesión previo para evitar herencias
+        limpiar_estado_antes_login()
         usuarios = api_get(API_USERS)
         encontrado = None
-        for u in usuarios:
-            if normalizar_dni_para_comparacion(u.get("dni", "")) == normalizar_dni_para_comparacion(dni_ingresado):
+        for u in usuarios or []:
+            if normalizar_dni_para_comparacion(u.get("dni", "")) == normalizar_dni_para_comparacion(dni_input):
                 encontrado = u
                 break
         if encontrado:
-            st.session_state.usuario = encontrado
-            st.success(f"Bienvenido/a {encontrado.get('nombre','')} {encontrado.get('apellido','')}. Curso: {str(encontrado.get('curso','')).upper()}")
+            # Guardar solo campos relevantes
+            st.session_state.usuario = {
+                "email": encontrado.get("email", ""),
+                "nombre": encontrado.get("nombre", ""),
+                "apellido": encontrado.get("apellido", ""),
+                "dni": encontrado.get("dni", ""),
+                "rol": (encontrado.get("rol") or "").strip().lower(),
+                "curso": encontrado.get("curso", "")
+            }
+            # inicializar estructuras vacías dependientes del usuario
+            st.session_state.lista_tareas = []
+            st.session_state.lista_cursos_api = []
+            st.session_state.tareas_curso = []
+            st.session_state.tareas_personales = []
+            st.session_state.historial = []
+            st.success(f"Bienvenido/a {st.session_state.usuario['nombre']} {st.session_state.usuario['apellido']}.")
             st.rerun()
         else:
-            st.error("DNI no encontrado. Verificá e intentá nuevamente.")
+            st.error("DNI no encontrado. Revisá y volvé a intentarlo.")
     st.stop()
 
 # ==============================
-# SESIÓN ACTIVA: DATOS DEL USUARIO
+# USUARIO LOGUEADO (YA INICIALIZADO)
 # ==============================
 usuario = st.session_state.usuario
 email_usuario = usuario.get("email", "")
 dni_usuario = usuario.get("dni", "")
 rol_usuario = (usuario.get("rol") or "").strip().lower()
-curso_usuario_raw = usuario.get("curso", "")
-curso_usuario = normalizar_curso(curso_usuario_raw)
+curso_usuario = normalizar_curso(usuario.get("curso", ""))
 
 if not curso_usuario:
-    st.error("No se pudo interpretar el curso del usuario. Revisá los datos en la API de usuarios.")
+    st.error("No se pudo interpretar el curso del usuario. Contactá al administrador.")
     st.stop()
 
-st.info(f"📘 Estás en el curso: {curso_usuario} (bloqueado)")
+st.info(f"Estás conectado como: {usuario.get('nombre','')} {usuario.get('apellido','')} — Curso: {curso_usuario} — Rol: {rol_usuario}")
 
 # ==============================
-# INICIALIZACIÓN DE ESTADO
+# CARGAR DATOS REMOTOS (TAREAS Y CURSOS)
 # ==============================
-if "bases" not in st.session_state:
-    st.session_state.bases = {
-        "General": BASE_GENERAL.copy(),
-        **{curso: BASES_ESPECIFICAS.get(curso, []).copy() for curso in BASES_ESPECIFICAS}
-    }
+# Guardamos en session para evitar múltiples requests durante la sesión
+if not st.session_state.get("lista_tareas"):
+    st.session_state.lista_tareas = api_get(API_TASKS) or []
 
-if "historial" not in st.session_state:
-    st.session_state.historial = []
+if not st.session_state.get("lista_cursos_api"):
+    st.session_state.lista_cursos_api = api_get(API_COURSES) or []
 
-if "edicion_activa" not in st.session_state:
-    st.session_state.edicion_activa = False
+# construimos listas específicas para el usuario actual
+st.session_state.tareas_curso = []
+st.session_state.tareas_personales = []
 
-# Construimos la base local que corresponde al curso del usuario (bloqueado)
-curso_seleccionado = curso_usuario
-base_completa = BASE_GENERAL + st.session_state.bases.get(curso_seleccionado, [])
-contexto = obtener_contexto(base_completa)
-
-# ==============================
-# CARGAR DATOS REMOTOS: TASKS Y COURSES
-# ==============================
-lista_tareas = api_get(API_TASKS)
-lista_cursos_api = api_get(API_COURSES)
-
-# Normalizamos y filtramos tareas del curso del usuario
-tareas_curso = []
-tareas_personales = []
-for t in lista_tareas or []:
+for t in st.session_state.lista_tareas or []:
     try:
-        curso_t = str(t.get("curso", "")).strip().lower()
+        curso_t = (t.get("curso") or "").strip().lower()
     except Exception:
         curso_t = ""
-    # Si la tarea es del curso
+    try:
+        tarea_id = t.get("id")
+    except Exception:
+        tarea_id = None
+
+    # Tareas del curso
     try:
         if curso_t and curso_t == (usuario.get("curso") or "").strip().lower():
-            tareas_curso.append(t)
-    except Exception:
-        pass
-    # Si la tarea es personal o creada por el usuario
-    try:
-        if tarea_pertenece_a_dni(t, dni_usuario, email_usuario):
-            tareas_personales.append(t)
+            st.session_state.tareas_curso.append(t)
     except Exception:
         pass
 
-# Eliminar duplicados (misma tarea en ambas listas)
-ids_personales = {t.get("id") for t in tareas_personales if t.get("id") is not None}
-tareas_curso = [t for t in tareas_curso if t.get("id") not in ids_personales]
+    # Tareas personales (creador == email_usuario OR personal == True)
+    try:
+        if tarea_pertenece_al_usuario(t, dni_usuario, email_usuario):
+            st.session_state.tareas_personales.append(t)
+    except Exception:
+        pass
+
+# Evitar duplicados: si una tarea aparece en personales y en curso la dejamos sólo en personales
+ids_personales = {t.get("id") for t in st.session_state.tareas_personales if t.get("id") is not None}
+st.session_state.tareas_curso = [t for t in st.session_state.tareas_curso if t.get("id") not in ids_personales]
+
 # ==============================
-# FUNCIONES PARA FORMATEAR SALIDAS
+# FUNCIONES DE FORMATEO
 # ==============================
 def formatear_detalle_tarea(t):
+    """
+    Devuelve un bloque de texto con todos los datos relevantes de la tarea.
+    """
     titulo = t.get("titulo") or t.get("title") or "Sin título"
     descripcion = t.get("descripcion") or t.get("description") or ""
     fecha_limite = t.get("fecha_limite") or t.get("due_date") or ""
-    creador = t.get("creador") or t.get("creator") or ""
-    personal = t.get("personal") is True
+    creador = t.get("creador") or ""
+    es_personal = t.get("personal") is True
     archivo = t.get("archivo") or t.get("file") or ""
+
     partes = [f"• {titulo}"]
     if descripcion:
         partes.append(f"  Descripción: {descripcion}")
@@ -327,7 +323,7 @@ def formatear_detalle_tarea(t):
         partes.append(f"  Fecha límite: {fecha_limite}")
     if creador:
         partes.append(f"  Creador: {creador}")
-    if personal:
+    if es_personal:
         partes.append("  (Tarea marcada como personal)")
     if archivo:
         partes.append(f"  Archivo: {archivo}")
@@ -336,62 +332,51 @@ def formatear_detalle_tarea(t):
 def obtener_texto_tareas():
     texto = ""
     texto += "📚 Tareas del curso:\n\n"
-    if tareas_curso:
-        for t in tareas_curso:
+    if st.session_state.tareas_curso:
+        for t in st.session_state.tareas_curso:
             texto += formatear_detalle_tarea(t) + "\n\n"
     else:
         texto += "(No hay tareas cargadas para tu curso)\n\n"
 
     texto += "🧍‍♂️ Tus tareas personales:\n\n"
-    if tareas_personales:
-        for t in tareas_personales:
+    if st.session_state.tareas_personales:
+        for t in st.session_state.tareas_personales:
             texto += formatear_detalle_tarea(t) + "\n\n"
     else:
         texto += "(No tenés tareas personales cargadas)\n\n"
 
     return texto
 
-# ==============================
-# FUNCION PARA OBTENER PROFESORES POR CURSO
-# ==============================
-def obtener_profesores():
+def obtener_profesores_por_curso():
     """
-    La API de cursos devuelve registros con:
-    - curso_id (ej. "1a")
-    - materia (ej. "Biología")
-    - profesor_email (ej. "cecilia.viotti@institutolamerced.edu.ar")
+    Usa la lista de cursos de la API (st.session_state.lista_cursos_api)
+    y busca entradas cuya clave 'curso_id' coincida con el curso del usuario.
+    Cada registro esperado tiene: curso_id, materia, profesor_email
     """
-    if not lista_cursos_api:
-        return "❌ No se pudo cargar la información de profesores desde la API."
-
-    curso_id_normalizado = (usuario.get("curso") or "").strip().lower()
-
-    materias = [c for c in lista_cursos_api if str(c.get("curso_id", "")).strip().lower() == curso_id_normalizado]
-
-    if not materias:
-        return "❌ No encontré asignaciones de profesores para tu curso."
-
+    lista = st.session_state.lista_cursos_api or []
+    curso_id_norm = (usuario.get("curso") or "").strip().lower()
+    entradas = [c for c in lista if str(c.get("curso_id", "")).strip().lower() == curso_id_norm]
+    if not entradas:
+        return "No se encontró información de profesores para tu curso."
     texto = "📘 Profesores asignados a tu curso:\n\n"
-    for m in materias:
-        materia = m.get("materia") or "Materia desconocida"
-        profesor_email = m.get("profesor_email") or m.get("profesor") or m.get("profesor_mail") or "Email no disponible"
-        texto += f"• {materia} — {profesor_email}\n"
-
+    for e in entradas:
+        materia = e.get("materia") or "Materia desconocida"
+        prof_email = e.get("profesor_email") or e.get("profesor") or e.get("profesor_mail") or "Email no disponible"
+        texto += f"• {materia} — {prof_email}\n"
     return texto
-
 # ==============================
-# INTERFAZ PRINCIPAL DEL CHAT
+# INTERFAZ DE CHAT PRINCIPAL
 # ==============================
-st.subheader(f"💬 Chat con MercedarIA — Curso: {curso_seleccionado}")
+st.subheader(f"💬 Chat con MercedarIA — Curso: {curso_usuario} (bloqueado)")
 
-pregunta = st.text_input("Escribí tu pregunta:")
+pregunta = st.text_input("Escribí tu pregunta:", key="pregunta_principal")
 if st.button("Enviar"):
     if pregunta and pregunta.strip():
-        st.session_state.historial.append(("👨‍🎓 Vos", pregunta))
+        st.session_state.historial.append(("👨‍🎓 Vos", pregunta.strip()))
         q = pregunta.strip().lower()
         respuesta = None
 
-        # Respuesta por coincidencia en base local
+        # 1) Coincidencia en base local
         for p, r in base_completa:
             try:
                 if p.lower() in q:
@@ -400,53 +385,51 @@ if st.button("Enviar"):
             except Exception:
                 continue
 
-        # Consultas sobre tareas
+        # 2) Consultas de tareas
         if not respuesta and ("tarea" in q or "tareas" in q):
             respuesta = obtener_texto_tareas()
 
-        # Consultas sobre profesores
+        # 3) Consultas de profesores / mails
         if not respuesta and ("profe" in q or "profesor" in q or "profesores" in q or "mail" in q or "correo" in q):
-            respuesta = obtener_profesores()
+            respuesta = obtener_profesores_por_curso()
 
-        # Si no hay respuesta local, consultar IA externa
+        # 4) Si sigue sin respuesta, usar DeepSeek (si existe API key)
         if not respuesta:
-            respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, contexto)
+            respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, obtener_contexto(base_completa))
 
         st.session_state.historial.append(("🤖 MercedarIA", respuesta))
 
-# Mostrar historial
+# Mostrar historial (últimas 50 entradas)
 st.markdown("### Historial de conversación")
-for rol, mensaje in st.session_state.historial[-40:]:
+for rol, msg in st.session_state.historial[-50:]:
     if rol == "👨‍🎓 Vos":
-        st.markdown(f"🧍 *{rol}:* {mensaje}")
+        st.markdown(f"🧍 *{rol}:* {msg}")
     else:
-        st.markdown(f"🧠 <span style='color:#00FFAA'><b>{rol}:</b></span> {mensaje}", unsafe_allow_html=True)
+        st.markdown(f"🧠 <span style='color:#00FFAA'><b>{rol}:</b></span> {msg}", unsafe_allow_html=True)
 
 st.divider()
 
 # ==============================
-# PANEL DE EDICIÓN RESTRINGIDO
+# PANEL DE EDICIÓN RESTRINGIDO (solo 'profe' y 'admin')
 # ==============================
 st.subheader("🧩 Panel de Edición (solo personal autorizado)")
 
-# Mostrar panel solo para roles 'profe' y 'admin'
 if rol_usuario not in ("profe", "admin"):
     st.info("No tenés permisos para editar la base de conocimiento. Si sos docente o administrador, iniciá sesión con una cuenta con rol 'profe' o 'admin'.")
 else:
-    st.success(f"Usuario con permisos: rol = {rol_usuario}")
-
-    # Selección del curso a editar (General + claves locales)
-    opciones_cursos_para_editar = ["General"] + list(BASES_ESPECIFICAS.keys())
-    curso_a_editar = st.selectbox("Seleccioná el curso que querés modificar", opciones_cursos_para_editar, index=0)
+    st.success(f"Usuario con permisos de edición: rol = {rol_usuario}")
+    # Permitimos seleccionar qué curso editar (General + locales)
+    opciones_edicion = ["General"] + list(BASES_ESPECIFICAS.keys())
+    curso_a_editar = st.selectbox("Seleccioná el curso que querés modificar", opciones_edicion, index=0)
 
     base_editable = st.session_state.bases.get(curso_a_editar, [])
 
     for i, (p, r) in enumerate(base_editable.copy()):
         col1, col2, col3 = st.columns([4, 5, 1])
         with col1:
-            nueva_p = st.text_input(f"Pregunta {i+1}", p, key=f"p_edit_{curso_a_editar}_{i}")
+            nuevo_p = st.text_input(f"Pregunta {i+1}", p, key=f"p_edit_{curso_a_editar}_{i}")
         with col2:
-            nueva_r = st.text_area(f"Respuesta {i+1}", r, key=f"r_edit_{curso_a_editar}_{i}")
+            nuevo_r = st.text_area(f"Respuesta {i+1}", r, key=f"r_edit_{curso_a_editar}_{i}")
         with col3:
             if st.button("🗑", key=f"del_edit_{curso_a_editar}_{i}"):
                 try:
@@ -454,17 +437,17 @@ else:
                 except Exception:
                     pass
                 st.rerun()
-        base_editable[i] = (nueva_p, nueva_r)
+        base_editable[i] = (nuevo_p, nuevo_r)
 
     st.markdown("---")
-    nueva_preg = st.text_input("➕ Nueva pregunta", key="nueva_p_edit")
-    nueva_resp = st.text_area("Respuesta", key="nueva_r_edit")
+    nueva_p = st.text_input("➕ Nueva pregunta", key="nueva_p_edit")
+    nueva_r = st.text_area("Respuesta", key="nueva_r_edit")
     if st.button("Agregar a la base"):
-        if nueva_preg and nueva_resp:
-            base_editable.append((nueva_preg.strip(), nueva_resp.strip()))
-            st.success("✅ Pregunta agregada correctamente.")
+        if nueva_p and nueva_r:
+            base_editable.append((nueva_p.strip(), nueva_r.strip()))
+            st.success("Pregunta agregada correctamente.")
         else:
-            st.warning("⚠ Completá pregunta y respuesta antes de agregar.")
+            st.warning("Completá pregunta y respuesta antes de agregar.")
 
     if st.button("Salir del modo edición"):
         st.rerun()
@@ -472,16 +455,16 @@ else:
 st.divider()
 
 # ==============================
-# LIMPIAR CHAT Y MISC
+# ACCIONES UTILES
 # ==============================
 if st.button("🧹 Limpiar chat"):
     st.session_state.historial = []
     st.info("Historial limpiado correctamente.")
 
-st.caption("Los cambios en la base local se mantienen mientras la aplicación esté activa. Al reiniciar la app, se volverá a la base original del código.")
+st.caption("Los cambios se mantienen mientras la aplicación esté activa. Si la aplicación se reinicia, se restaurará la base definida en el código.")
 
 # ==============================
-# KEEP ALIVE THREAD
+# KEEP-ALIVE
 # ==============================
 def mantener_sesion_viva():
     while True:
@@ -492,4 +475,3 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
-
