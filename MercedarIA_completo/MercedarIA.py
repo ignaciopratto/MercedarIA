@@ -497,6 +497,22 @@ if st.button("🧹 Limpiar chat"):
     st.info("Historial limpiado correctamente.")
 
 # ==============================
+# BOTÓN DE CERRAR SESIÓN
+# ==============================
+st.markdown("---")
+if st.button("🚪 Cerrar sesión"):
+    # Limpiar todo lo relacionado al usuario
+    for clave in list(st.session_state.keys()):
+        if clave not in ["keepalive_thread"]:  # mantenemos el hilo de keepalive
+            st.session_state.pop(clave, None)
+
+    # Reiniciar usuario
+    st.session_state.usuario = None
+    st.success("Cerraste sesión correctamente.")
+    st.rerun()
+
+
+# ==============================
 # KEEP-ALIVE
 # ==============================
 def mantener_sesion_viva():
@@ -508,5 +524,6 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
 
 
