@@ -381,6 +381,10 @@ if st.button("Ingresar"):
 # ==============================
 # USUARIO LOGUEADO (YA INICIALIZADO)
 # ==============================
+# Evitar que continue si no hay usuario logueado
+if "usuario" not in st.session_state or st.session_state.usuario is None:
+    st.stop()
+
 usuario = st.session_state.usuario
 email_usuario = usuario.get("email", "")
 rol_usuario = (usuario.get("rol") or "").strip().lower()
@@ -578,6 +582,7 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
 
 
 
