@@ -330,6 +330,34 @@ if st.session_state.usuario is None:
             st.error("Correo no encontrado. Revisá y volvé a intentarlo.")
     st.stop()
 
+# ------------------------------
+# BOTÓN MODO ANÓNIMO
+# ------------------------------
+st.markdown("### o")
+
+if st.button("Usar modo anónimo"):
+    limpiar_estado_antes_login()
+
+    # Crear un usuario genérico sin curso específico
+    st.session_state.usuario = {
+        "email": "anonimo@insm.edu",
+        "nombre": "Usuario",
+        "apellido": "Anónimo",
+        "rol": "invitado",
+        "curso": "General"
+    }
+
+    # Bases, listas y estructuras necesarias
+    st.session_state.lista_tareas = []
+    st.session_state.lista_cursos_api = []
+    st.session_state.tareas_curso = []
+    st.session_state.tareas_personales = []
+    st.session_state.historial = []
+
+    st.success("Ingresaste en modo anónimo. Solo se utilizará la base de datos general.")
+    st.rerun()
+
+
 # ==============================
 # USUARIO LOGUEADO (YA INICIALIZADO)
 # ==============================
@@ -530,6 +558,7 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
 
 
 
