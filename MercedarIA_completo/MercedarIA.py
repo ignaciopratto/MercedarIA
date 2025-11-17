@@ -96,6 +96,18 @@ BASES_ESPECIFICAS = {
     ]
 }
 
+# =====================================
+# FUNCIÓN PARA ARMAR CONTEXTO PARA LA IA
+# =====================================
+def obtener_contexto(lista):
+    """
+    Convierte la base de conocimiento en un texto largo para usar como contexto en DeepSeek.
+    """
+    contexto = "BASE DE CONOCIMIENTO DEL COLEGIO:\n\n"
+    for i, (p, r) in enumerate(lista, 1):
+        contexto += f"Pregunta {i}: {p}\nRespuesta {i}: {r}\n\n"
+    return contexto
+
 # ==============================
 # FUNCIONES AUXILIARES
 # ==============================
@@ -480,3 +492,4 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
