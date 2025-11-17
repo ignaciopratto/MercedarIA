@@ -227,7 +227,7 @@ if st.session_state.usuario is None:
         if encontrado:
             st.session_state.usuario = encontrado
             st.success(f"Bienvenido/a {encontrado.get('nombre','')} {encontrado.get('apellido','')}. Curso: {str(encontrado.get('curso','')).upper()}")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("DNI no encontrado. Verificá e intentá nuevamente.")
     st.stop()
@@ -441,7 +441,7 @@ else:
                     base_editable.pop(i)
                 except Exception:
                     pass
-                st.experimental_rerun()
+                st.rerun()
         base_editable[i] = (nueva_p, nueva_r)
 
     st.markdown("---")
@@ -455,7 +455,7 @@ else:
             st.warning("⚠ Completá pregunta y respuesta antes de agregar.")
 
     if st.button("Salir del modo edición"):
-        st.experimental_rerun()
+        st.rerun()
 
 st.divider()
 
@@ -480,3 +480,4 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
