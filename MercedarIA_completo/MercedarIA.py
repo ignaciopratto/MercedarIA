@@ -167,7 +167,6 @@ def obtener_texto_tareas():
         texto += "(No tenés tareas personales cargadas)\n\n"
 
     return texto
-
 # ==============================
 # FUNCIÓN PARA GENERAR CONTEXTO DE USUARIOS
 # ==============================
