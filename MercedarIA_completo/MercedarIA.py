@@ -89,6 +89,7 @@ base = {
     }
 }
 
+
 # ====================================================================
 #                          PERSISTENCIA REAL
 # ====================================================================
@@ -109,17 +110,17 @@ def guardar_base(nueva_base):
 # ====================================================================
 #                           CHATBOT
 # ====================================================================
-def responder_local(pregunta, curso_activo):
+def responder_local(pregunta, curso_seleccionado):
     p = pregunta.lower()
 
-    # Primero revisar la base general
+    # Respuestas generales
     for q, r in base["general"]:
         if q in p:
             return r
 
-    # Luego revisar la base específica del curso elegido
-    if curso_activo and curso_activo in base["especificas"]:
-        for q, r in base["especificas"][curso_activo]:
+    # Respuestas específicas según el curso
+    if curso_seleccionado in base["especificas"]:
+        for q, r in base["especificas"][curso_seleccionado]:
             if q.lower() in p:
                 return r
 
@@ -146,15 +147,15 @@ def responder_deepseek(pregunta):
 st.title("💬 Chat con MercedarIA")
 st.write("¡Bienvenido! Preguntame lo que necesites sobre el colegio.")
 
-# Curso activo
-st.sidebar.title("Seleccionar curso")
-curso_activo = st.sidebar.selectbox("Elegí tu curso:", ["Ninguno"] + list(base["especificas"].keys()))
-if curso_activo == "Ninguno":
-    curso_activo = None
-
+# Mantener chat
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
+# ==========================================================
+# Selección de curso antes del chat
+# ==========================================================
+st.subheader("📘 Seleccioná tu curso")
+curso_seleccionado = st.selectbox("Elegí tu curso:", ["Ninguno"] + list(base["especificas"].keys()))
 
 # ========================
 # FORMULARIO DEL CHAT
@@ -165,12 +166,11 @@ if st.button("Enviar"):
     if pregunta.strip() != "":
         st.session_state.chat.append(("Tú", pregunta))
 
-        resp = responder_local(pregunta, curso_activo)
-        if not resp:
-            resp = responder_deepseek(pregunta)
+        respuesta = responder_local(pregunta, curso_seleccionado)
+        if not respuesta:
+            respuesta = responder_deepseek(pregunta)
 
-        st.session_state.chat.append(("MercedarIA", resp))
-
+        st.session_state.chat.append(("MercedarIA", respuesta))
 
 # Mostrar chat
 for emisor, texto in st.session_state.chat:
@@ -190,22 +190,23 @@ if password == "mercedaria2025":
 
     st.success("Acceso concedido ✔")
 
-    # ============================
+    # ==========================================================
     # VER Y MODIFICAR BASE GENERAL
-    # ============================
+    # ==========================================================
     st.markdown("## 📁 Base General")
 
     nueva_general = []
     for i, (preg, resp) in enumerate(base["general"]):
         st.markdown(f"### Entrada {i+1}")
-        nueva_p = st.text_input(f"Pregunta {i+1}", preg, key=f"gp_{i}")
-        nueva_r = st.text_area(f"Respuesta {i+1}", resp, key=f"gr_{i}")
+        nueva_p = st.text_input(f"Pregunta {i+1}", preg, key=f"g_p_{i}")
+        nueva_r = st.text_area(f"Respuesta {i+1}", resp, key=f"g_r_{i}")
         nueva_general.append((nueva_p, nueva_r))
 
-    # ============================
-    # VER Y MODIFICAR BASE ESPECÍFICA
-    # ============================
     st.markdown("---")
+
+    # ==========================================================
+    # VER Y MODIFICAR BASES ESPECÍFICAS
+    # ==========================================================
     st.markdown("## 🏫 Base por Curso")
 
     nueva_especifica = {}
@@ -215,25 +216,26 @@ if password == "mercedaria2025":
 
         nueva_especifica[curso] = []
         for i, (preg, resp) in enumerate(pares):
-            nueva_p = st.text_input(f"{curso} - Pregunta {i+1}", preg, key=f"ep_{curso}_{i}")
-            nueva_r = st.text_area(f"{curso} - Respuesta {i+1}", resp, key=f"er_{curso}_{i}")
+            nueva_p = st.text_input(f"{curso} - Pregunta {i+1}", preg, key=f"e_p_{curso}_{i}")
+            nueva_r = st.text_area(f"{curso} - Respuesta {i+1}", resp, key=f"e_r_{curso}_{i}")
             nueva_especifica[curso].append((nueva_p, nueva_r))
 
-    # ============================
-    # BOTÓN PARA GUARDAR TODO
-    # ============================
-    if st.button("💾 Guardar cambios"):
+    # ==========================================================
+    # GUARDAR CAMBIOS
+    # ==========================================================
+    if st.button("💾 Guardar cambios en la base"):
         nueva_base = {
             "general": nueva_general,
             "especificas": nueva_especifica
         }
         guardar_base(nueva_base)
-        st.success("Base actualizada. Recargá la página.")
+        st.success("Base actualizada. Recargá la página para ver los cambios.")
 
-    # ============================
-    # AGREGAR NUEVA ENTRADA
-    # ============================
     st.markdown("---")
+
+    # ==========================================================
+    # AGREGAR NUEVA ENTRADA
+    # ==========================================================
     st.subheader("➕ Agregar nueva entrada")
 
     p_nueva = st.text_input("Nueva pregunta:")
@@ -246,16 +248,16 @@ if password == "mercedaria2025":
     else:
         curso_sel = None
 
-    if st.button("Agregar"):
-        nueva_base = base.copy()
+    if st.button("Agregar nueva entrada"):
+        nueva_base = json.loads(json.dumps(base))  # Copia profunda segura
 
         if tipo == "General":
-            nueva_base["general"] = base["general"] + [(p_nueva, r_nueva)]
+            nueva_base["general"].append((p_nueva, r_nueva))
         else:
-            nueva_base["especificas"][curso_sel] = base["especificas"][curso_sel] + [(p_nueva, r_nueva)]
+            nueva_base["especificas"][curso_sel].append((p_nueva, r_nueva))
 
         guardar_base(nueva_base)
-        st.success("Entrada agregada. Recargá la página.")
+        st.success("Entrada agregada correctamente. Recargá la página para verla.")
 
 else:
     if password != "":
