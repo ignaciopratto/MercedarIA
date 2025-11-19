@@ -89,7 +89,6 @@ base = {
     }
 }
 
-
 # ====================================================================
 #                          PERSISTENCIA REAL
 # ====================================================================
@@ -110,15 +109,17 @@ def guardar_base(nueva_base):
 # ====================================================================
 #                           CHATBOT
 # ====================================================================
-def responder_local(pregunta):
+def responder_local(pregunta, curso_activo):
     p = pregunta.lower()
 
+    # Primero revisar la base general
     for q, r in base["general"]:
         if q in p:
             return r
 
-    for curso, pares in base["especificas"].items():
-        for q, r in pares:
+    # Luego revisar la base específica del curso elegido
+    if curso_activo and curso_activo in base["especificas"]:
+        for q, r in base["especificas"][curso_activo]:
             if q.lower() in p:
                 return r
 
@@ -145,6 +146,12 @@ def responder_deepseek(pregunta):
 st.title("💬 Chat con MercedarIA")
 st.write("¡Bienvenido! Preguntame lo que necesites sobre el colegio.")
 
+# Curso activo
+st.sidebar.title("Seleccionar curso")
+curso_activo = st.sidebar.selectbox("Elegí tu curso:", ["Ninguno"] + list(base["especificas"].keys()))
+if curso_activo == "Ninguno":
+    curso_activo = None
+
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
@@ -158,7 +165,7 @@ if st.button("Enviar"):
     if pregunta.strip() != "":
         st.session_state.chat.append(("Tú", pregunta))
 
-        resp = responder_local(pregunta)
+        resp = responder_local(pregunta, curso_activo)
         if not resp:
             resp = responder_deepseek(pregunta)
 
@@ -183,6 +190,9 @@ if password == "mercedaria2025":
 
     st.success("Acceso concedido ✔")
 
+    # ============================
+    # VER Y MODIFICAR BASE GENERAL
+    # ============================
     st.markdown("## 📁 Base General")
 
     nueva_general = []
@@ -192,6 +202,9 @@ if password == "mercedaria2025":
         nueva_r = st.text_area(f"Respuesta {i+1}", resp, key=f"gr_{i}")
         nueva_general.append((nueva_p, nueva_r))
 
+    # ============================
+    # VER Y MODIFICAR BASE ESPECÍFICA
+    # ============================
     st.markdown("---")
     st.markdown("## 🏫 Base por Curso")
 
@@ -206,6 +219,9 @@ if password == "mercedaria2025":
             nueva_r = st.text_area(f"{curso} - Respuesta {i+1}", resp, key=f"er_{curso}_{i}")
             nueva_especifica[curso].append((nueva_p, nueva_r))
 
+    # ============================
+    # BOTÓN PARA GUARDAR TODO
+    # ============================
     if st.button("💾 Guardar cambios"):
         nueva_base = {
             "general": nueva_general,
@@ -214,8 +230,9 @@ if password == "mercedaria2025":
         guardar_base(nueva_base)
         st.success("Base actualizada. Recargá la página.")
 
-
-    # Agregar una nueva entrada (como antes)
+    # ============================
+    # AGREGAR NUEVA ENTRADA
+    # ============================
     st.markdown("---")
     st.subheader("➕ Agregar nueva entrada")
 
