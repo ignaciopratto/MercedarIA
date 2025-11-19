@@ -7,6 +7,8 @@ import re
 #               ESCRIBE TU API KEY DE DEEPSEEK AQUÍ
 # ==========================================================
 DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"   # <<<<<< PONELA ACÁ
+
+
 # ==========================================================
 #               BASE DE DATOS LOCAL ORIGINAL
 # ==========================================================
@@ -125,7 +127,6 @@ def responder_local(pregunta):
 
 def responder_deepseek(pregunta):
     import requests
-
     url = "https://api.deepseek.com/chat/completions"
 
     headers = {"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
@@ -142,7 +143,6 @@ def responder_deepseek(pregunta):
 #                           INTERFAZ STREAMLIT
 # ====================================================================
 st.title("💬 Chat con MercedarIA")
-
 st.write("¡Bienvenido! Preguntame lo que necesites sobre el colegio.")
 
 if "chat" not in st.session_state:
@@ -169,44 +169,76 @@ if st.button("Enviar"):
 for emisor, texto in st.session_state.chat:
     st.markdown(f"**{emisor}:** {texto}")
 
-
 st.markdown("---")
 
+
 # ====================================================================
-#                     AGREGAR NUEVAS ENTRADAS (CON CONTRASEÑA)
+#       ADMINISTRACIÓN: VER Y MODIFICAR BASES (CON CONTRASEÑA)
 # ====================================================================
-st.subheader("➕ Agregar nueva entrada a las bases")
+st.subheader("🔐 Administración de base de datos")
 
 password = st.text_input("Contraseña:", type="password")
 
 if password == "mercedaria2025":
 
-    nueva_pregunta = st.text_input("Nueva pregunta:")
-    nueva_respuesta = st.text_input("Nueva respuesta:")
+    st.success("Acceso concedido ✔")
 
-    tipo = st.radio(
-        "¿A qué base querés agregar?",
-        ["General", "Específica"]
-    )
+    st.markdown("## 📁 Base General")
+
+    nueva_general = []
+    for i, (preg, resp) in enumerate(base["general"]):
+        st.markdown(f"### Entrada {i+1}")
+        nueva_p = st.text_input(f"Pregunta {i+1}", preg, key=f"gp_{i}")
+        nueva_r = st.text_area(f"Respuesta {i+1}", resp, key=f"gr_{i}")
+        nueva_general.append((nueva_p, nueva_r))
+
+    st.markdown("---")
+    st.markdown("## 🏫 Base por Curso")
+
+    nueva_especifica = {}
+
+    for curso, pares in base["especificas"].items():
+        st.markdown(f"### 📘 {curso}")
+
+        nueva_especifica[curso] = []
+        for i, (preg, resp) in enumerate(pares):
+            nueva_p = st.text_input(f"{curso} - Pregunta {i+1}", preg, key=f"ep_{curso}_{i}")
+            nueva_r = st.text_area(f"{curso} - Respuesta {i+1}", resp, key=f"er_{curso}_{i}")
+            nueva_especifica[curso].append((nueva_p, nueva_r))
+
+    if st.button("💾 Guardar cambios"):
+        nueva_base = {
+            "general": nueva_general,
+            "especificas": nueva_especifica
+        }
+        guardar_base(nueva_base)
+        st.success("Base actualizada. Recargá la página.")
+
+
+    # Agregar una nueva entrada (como antes)
+    st.markdown("---")
+    st.subheader("➕ Agregar nueva entrada")
+
+    p_nueva = st.text_input("Nueva pregunta:")
+    r_nueva = st.text_area("Nueva respuesta:")
+
+    tipo = st.radio("¿A qué base querés agregar?", ["General", "Específica"])
 
     if tipo == "Específica":
-        curso = st.selectbox("Seleccionar curso:", list(base["especificas"].keys()))
+        curso_sel = st.selectbox("Seleccioná curso:", list(base["especificas"].keys()))
     else:
-        curso = None
+        curso_sel = None
 
-    if st.button("Guardar entrada"):
-        if nueva_pregunta and nueva_respuesta:
+    if st.button("Agregar"):
+        nueva_base = base.copy()
 
-            nueva_base = base.copy()
+        if tipo == "General":
+            nueva_base["general"] = base["general"] + [(p_nueva, r_nueva)]
+        else:
+            nueva_base["especificas"][curso_sel] = base["especificas"][curso_sel] + [(p_nueva, r_nueva)]
 
-            if tipo == "General":
-                nueva_base["general"] = base["general"] + [(nueva_pregunta, nueva_respuesta)]
-            else:
-                nueva_base["especificas"][curso] = base["especificas"][curso] + [(nueva_pregunta, nueva_respuesta)]
-
-            guardar_base(nueva_base)
-
-            st.success("Entrada guardada correctamente. ¡Recargá la página!")
+        guardar_base(nueva_base)
+        st.success("Entrada agregada. Recargá la página.")
 
 else:
     if password != "":
