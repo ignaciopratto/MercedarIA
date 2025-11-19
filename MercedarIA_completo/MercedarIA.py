@@ -1,239 +1,213 @@
 import streamlit as st
-import requests
 import json
 import os
+import re
 
-# ===========================================
-# CONFIGURACIÓN INICIAL
-# ===========================================
-
-st.set_page_config(page_title="Chatbot DeepSeek", layout="wide")
-
-API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"  # ← PONÉ TU LLAVE AQUÍ
-DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
-
-# Archivo donde se guardan las preguntas/respuestas
-ARCHIVO_DB = "preguntas_respuestas.txt"
-
-# ===========================================
-# CARGAR Y GUARDAR LA BASE
-# ===========================================
-
-def cargar_base():
-    """Carga la base desde el archivo TXT en formato JSON."""
-    if not os.path.exists(ARCHIVO_DB):
-        with open(ARCHIVO_DB, "w", encoding="utf-8") as f:
-            json.dump({"general": [], "especifica": []}, f, ensure_ascii=False, indent=4)
-
-    try:
-        with open(ARCHIVO_DB, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            if "general" not in data or "especifica" not in data:
-                raise ValueError("El archivo no tiene el formato esperado.")
-            return data
-    except Exception:
-        # Si se rompe el archivo, lo reescribo limpio
-        data = {"general": [], "especifica": []}
-        with open(ARCHIVO_DB, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-        return data
-
-
-def guardar_base(data):
-    """Guarda toda la base sobrescribiendo el archivo."""
-    with open(ARCHIVO_DB, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
-# Cargar memoria al iniciar
-base = cargar_base()
-
-# ===========================================
-# FUNCIÓN PARA CONSULTAR DEEPSEEK
-# ===========================================
-
-def consultar_deepseek(mensaje):
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}"
-    }
-
-    payload = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "system", "content":
-             "Eres un asistente útil. NO filtres preguntas. Responde TODO lo mejor posible."},
-            {"role": "user", "content": mensaje}
+# ==========================================================
+#               ESCRIBE TU API KEY DE DEEPSEEK AQUÍ
+# ==========================================================
+DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"   # <<<<<< PONELA ACÁ
+# ==========================================================
+#               BASE DE DATOS LOCAL ORIGINAL
+# ==========================================================
+base = {
+    "general": [
+        ("hola", "Hola, ¿cómo estás?"),
+        ("quién eres", "Soy MercedarIA, tu asistente del Colegio Mercedaria."),
+        ("cómo te llamas", "Me llamo MercedarIA, tu asistente virtual."),
+        ("cómo estás", "Estoy funcionando perfectamente, gracias por preguntar."),
+        ("adiós", "¡Hasta luego! Que tengas un buen día."),
+        ("quién es la directora", "La directora es Marisa Brizzio."),
+        ("cuándo son los recreos", "Turno mañana: 8:35, 10:00, 11:35. Turno tarde: 14:40, 16:05, 17:50."),
+        ("dónde queda la escuela", "En Arroyito, Córdoba, calle 9 de Julio 456."),
+        ("cuándo empieza el ciclo lectivo", "El ciclo lectivo comienza el primer día hábil de marzo."),
+        ("cuándo terminan las clases", "Generalmente a mediados de diciembre.")
+    ],
+    "especificas": {
+        "1° A": [
+            ("¿Qué materias tengo?", "Biología, Educación en Artes Visuales, Lengua y Literatura, Física, Geografía, Educación Tecnológica, Matemática, Educación Religiosa Escolar, Ciudadanía y Participación, Inglés y Educación Física."),
+            ("¿Cuáles son mis contraturnos?", "Educación Física y Educación Tecnológica."),
+            ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+        ],
+        "1° B": [
+            ("¿Qué materias tengo?", "Física, Matemática, Educación en Artes Visuales, Inglés, Educación Religiosa Escolar, Lengua y Literatura, Geografía, Ciudadanía y Participación, Educación Tecnológica, Biología y Educación Física."),
+            ("¿Cuáles son mis contraturnos?", "Educación Tecnológica y Educación Física."),
+            ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+        ],
+        "2° A": [
+            ("¿Qué materias tengo?", "Matemática, Lengua y Literatura, Educación Religiosa Escolar, Música, Historia, Educación Tecnológica, Química, Computación, Ciudadanía y Participación, Biología, Inglés y Educación Física."),
+            ("¿Cuáles son mis contraturnos?", "Educación Física."),
+            ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+        ],
+        "2° B": [
+            ("¿Qué materias tengo?", "Música, Historia, Educación Religiosa Escolar, Ciudadanía y Participación, Inglés, Matemática, Lengua y Literatura, Educación Tecnológica, Química, Biología y Educación Física."),
+            ("¿Cuáles son mis contraturnos?", "Educación Física."),
+            ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+        ],
+        "3° A": [
+            ("¿Qué materias tengo?", "Lengua y Literatura, Inglés, Historia, Geografía, Química, Educación Tecnológica, Física, Educación Religiosa Escolar, Formación para la Vida y el Trabajo, Matemática, Educación Artística Visual, Música, Computación y Educación Física."),
+            ("¿Cuáles son mis contraturnos?", "Educación Física y Formación para la Vida y el Trabajo."),
+            ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+        ],
+        "3° B": [
+            ("¿Qué materias tengo?", "Lengua y Literatura, Formación para la Vida y el Trabajo, Física, Historia, Geografía, Educación Artística Visual, Música, Matemática, Educación Tecnológica, Química, Computación, Educación Religiosa Escolar, Educación Física e Inglés."),
+            ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
+            ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+        ],
+        "4° A": [
+            ("¿Qué materias tengo?", "Historia, Lengua y Literatura, Biología, ERE, Matemática, Geografía, Educ. Artística, FVT, TIC, Sociedad y Comunicación, Antropología, Educación Física e Inglés."),
+            ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
+            ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+        ],
+        "4° B": [
+            ("¿Qué materias tengo?", "Lengua y Literatura, Biología, ERE, Historia, Programación, Geografía, Matemática, Sistemas Digitales, FVT, Educación Artística, Educación Física e Inglés."),
+            ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
+            ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+        ],
+        "5° A": [
+            ("¿Qué materias tengo?", "Metodología, Historia, Física, Geografía, Arte Cultural y Social, ERE, Lengua y Literatura, FVT, Matemática, EF, Psicología, Sociología e Inglés."),
+            ("¿Cuáles son mis contraturnos?", "EF, Psicología, Sociología e Inglés."),
+            ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+        ],
+        "5° B": [
+            ("¿Qué materias tengo?", "Robótica, Música, Física, Matemática, Historia, Lengua y Literatura, FVT, Sistemas Digitales, Geografía, Psicología, EF, Desarrollo Informático e Inglés."),
+            ("¿Cuáles son mis contraturnos?", "EF, Sistemas Digitales, Desarrollo Informático e Inglés."),
+            ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+        ],
+        "6° A": [
+            ("¿Qué materias tengo?", "Ciudadanía y Política, Economía Política, Matemática, Geografía, Filosofía, Química, Lengua y Literatura, Historia, ERE, Sociedad y Comunicación, Teatro, FVT, EF e Inglés."),
+            ("¿Cuáles son mis contraturnos?", "EF, Sociedad y Comunicación e Inglés."),
+            ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+        ],
+        "6° B": [
+            ("¿Qué materias tengo?", "Lengua y Literatura, Comunicación Audiovisual, Desarrollo de Soluciones Informáticas, Informática Aplicada, Filosofía, Formación para la Vida y el Trabajo, Química, Matemática, ERE, Ciudadanía y Política, Teatro, EF, Aplicaciones Informáticas e Inglés."),
+            ("¿Cuáles son mis contraturnos?", "EF, Aplicaciones Informáticas e Inglés."),
+            ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
         ]
     }
+}
 
-    try:
-        r = requests.post(DEEPSEEK_URL, headers=headers, json=payload)
-        r.raise_for_status()
-        respuesta = r.json()["choices"][0]["message"]["content"]
-        return respuesta
-    except Exception as e:
-        return f"Error al conectar con DeepSeek: {str(e)}"
-# ===========================================
-# FUNCIÓN PARA BUSCAR RESPUESTAS EN LAS BASES
-# ===========================================
 
-def buscar_respuesta_local(pregunta):
-    """
-    Busca coincidencias exactas en la base general o específica.
-    """
-    pregunta_lower = pregunta.strip().lower()
+# ====================================================================
+#                          PERSISTENCIA REAL
+# ====================================================================
+def guardar_base(nueva_base):
+    """Reescribe el archivo app.py reemplazando el diccionario 'base' completo."""
+    with open("app.py", "r", encoding="utf-8") as f:
+        contenido = f.read()
 
-    # Buscar en específica
-    for item in base["especifica"]:
-        if item["pregunta"].lower() == pregunta_lower:
-            return item["respuesta"]
+    patron = r"base\s*=\s*\{[\s\S]*?\}\n"
+    reemplazo = "base = " + json.dumps(nueva_base, indent=4, ensure_ascii=False) + "\n"
 
-    # Buscar en general
-    for item in base["general"]:
-        if item["pregunta"].lower() == pregunta_lower:
-            return item["respuesta"]
+    nuevo_contenido = re.sub(patron, reemplazo, contenido, count=1)
+
+    with open("app.py", "w", encoding="utf-8") as f:
+        f.write(nuevo_contenido)
+
+
+# ====================================================================
+#                           CHATBOT
+# ====================================================================
+def responder_local(pregunta):
+    p = pregunta.lower()
+
+    for q, r in base["general"]:
+        if q in p:
+            return r
+
+    for curso, pares in base["especificas"].items():
+        for q, r in pares:
+            if q.lower() in p:
+                return r
 
     return None
 
 
-# ===========================================
-# INTERFAZ — SIDEBAR
-# ===========================================
+def responder_deepseek(pregunta):
+    import requests
 
-with st.sidebar:
-    st.title("⚙️ Configuración")
+    url = "https://api.deepseek.com/chat/completions"
 
-    st.markdown("### Base general")
-    st.write("Preguntas y respuestas que aplican a todo.")
+    headers = {"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
+    data = {
+        "model": "deepseek-chat",
+        "messages": [{"role": "user", "content": pregunta}]
+    }
 
-    for i, item in enumerate(base["general"]):
-        st.write(f"**{i+1}.** {item['pregunta']}")
-        if st.button(f"❌ Borrar {i+1}", key=f"gen_del_{i}"):
-            base["general"].pop(i)
-            guardar_base(base)
-            st.rerun()
+    r = requests.post(url, json=data, headers=headers)
+    return r.json()["choices"][0]["message"]["content"]
 
-    st.markdown("---")
-    st.markdown("### Base específica")
-    st.write("Información concreta agregada por vos.")
 
-    for i, item in enumerate(base["especifica"]):
-        st.write(f"**{i+1}.** {item['pregunta']}")
-        if st.button(f"❌ Borrar {i+1}", key=f"esp_del_{i}"):
-            base["especifica"].pop(i)
-            guardar_base(base)
-            st.rerun()
+# ====================================================================
+#                           INTERFAZ STREAMLIT
+# ====================================================================
+st.title("💬 Chat con MercedarIA")
 
-    st.markdown("---")
-    st.markdown("### ➕ Agregar nueva entrada")
+st.write("¡Bienvenido! Preguntame lo que necesites sobre el colegio.")
 
-    nueva_preg = st.text_input("Pregunta:")
-    nueva_resp = st.text_area("Respuesta:")
+if "chat" not in st.session_state:
+    st.session_state.chat = []
 
-    tipo = st.radio("Guardar en:", ["General", "Específica"])
+
+# ========================
+# FORMULARIO DEL CHAT
+# ========================
+pregunta = st.text_input("Escribe tu pregunta:")
+
+if st.button("Enviar"):
+    if pregunta.strip() != "":
+        st.session_state.chat.append(("Tú", pregunta))
+
+        resp = responder_local(pregunta)
+        if not resp:
+            resp = responder_deepseek(pregunta)
+
+        st.session_state.chat.append(("MercedarIA", resp))
+
+
+# Mostrar chat
+for emisor, texto in st.session_state.chat:
+    st.markdown(f"**{emisor}:** {texto}")
+
+
+st.markdown("---")
+
+# ====================================================================
+#                     AGREGAR NUEVAS ENTRADAS (CON CONTRASEÑA)
+# ====================================================================
+st.subheader("➕ Agregar nueva entrada a las bases")
+
+password = st.text_input("Contraseña:", type="password")
+
+if password == "mercedaria2025":
+
+    nueva_pregunta = st.text_input("Nueva pregunta:")
+    nueva_respuesta = st.text_input("Nueva respuesta:")
+
+    tipo = st.radio(
+        "¿A qué base querés agregar?",
+        ["General", "Específica"]
+    )
+
+    if tipo == "Específica":
+        curso = st.selectbox("Seleccionar curso:", list(base["especificas"].keys()))
+    else:
+        curso = None
 
     if st.button("Guardar entrada"):
-        if nueva_preg.strip() and nueva_resp.strip():
+        if nueva_pregunta and nueva_respuesta:
+
+            nueva_base = base.copy()
+
             if tipo == "General":
-                base["general"].append({"pregunta": nueva_preg, "respuesta": nueva_resp})
+                nueva_base["general"] = base["general"] + [(nueva_pregunta, nueva_respuesta)]
             else:
-                base["especifica"].append({"pregunta": nueva_preg, "respuesta": nueva_resp})
+                nueva_base["especificas"][curso] = base["especificas"][curso] + [(nueva_pregunta, nueva_respuesta)]
 
-            guardar_base(base)
-            st.success("Guardado correctamente.")
-            st.rerun()
-        else:
-            st.error("Debes completar ambos campos.")
-# ===========================================
-# SECCIÓN DE CHAT
-# ===========================================
+            guardar_base(nueva_base)
 
-st.title("🤖 Asistente con DeepSeek + Base local")
+            st.success("Entrada guardada correctamente. ¡Recargá la página!")
 
-st.write("Escribe tu pregunta y el sistema responderá usando primero la base local y, si no encuentra coincidencias, DeepSeek.")
-
-
-if "mensajes" not in st.session_state:
-    st.session_state["mensajes"] = []
-
-
-# Mostrar historial
-for rol, texto in st.session_state["mensajes"]:
-    if rol == "user":
-        st.chat_message("user").markdown(texto)
-    else:
-        st.chat_message("assistant").markdown(texto)
-
-
-# Input del usuario
-prompt = st.chat_input("Escribe aquí...")
-
-if prompt:
-    st.session_state["mensajes"].append(("user", prompt))
-    st.chat_message("user").markdown(prompt)
-
-    # 1. Buscar en base local
-    respuesta_local = buscar_respuesta_local(prompt)
-
-    if respuesta_local:
-        respuesta = respuesta_local
-
-    else:
-        # 2. Si no está, usar DeepSeek
-        st.toast("Usando DeepSeek...")
-
-        try:
-            DEEPSEEK_API_KEY = "sk-f3e25c8aa4604877bc9238eca28e5e0e"
-
-            headers = {
-                "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-                "Content-Type": "application/json"
-            }
-
-            data = {
-                "model": "deepseek-chat",
-                "messages": [
-                    {"role": "system", "content": "Eres un asistente útil que responde de forma clara y precisa."},
-                    {"role": "user", "content": prompt}
-                ]
-            }
-
-            resp = requests.post(
-                "https://api.deepseek.com/chat/completions",
-                headers=headers,
-                json=data,
-                timeout=20
-            )
-
-            respuesta = resp.json()["choices"][0]["message"]["content"]
-
-        except Exception as e:
-            respuesta = "⚠️ Error al consultar DeepSeek."
-
-    # Mostrar respuesta
-    st.session_state["mensajes"].append(("assistant", respuesta))
-    st.chat_message("assistant").markdown(respuesta)
-# ===========================================
-# PERSISTENCIA — REESCRIBIR EL ARCHIVO app.py
-# ===========================================
-
-def guardar_base(nueva_base):
-    """
-    Reescribe el archivo app.py conservando todo el código
-    pero actualizando las bases GENERAL y ESPECIFICA.
-    """
-    with open("app.py", "r", encoding="utf-8") as f:
-        contenido = f.read()
-
-    # Encontrar las listas originales
-    inicio = contenido.index("base = {")
-    fin = contenido.index("}", inicio) + 1
-
-    # Crear texto reemplazado
-    reemplazo = f'base = {json.dumps(nueva_base, indent=4, ensure_ascii=False)}'
-
-    nuevo_contenido = contenido[:inicio] + reemplazo + contenido[fin:]
-
-    # Reescribir archivo
-    with open("app.py", "w", encoding="utf-8") as f:
-        f.write(nuevo_contenido)
+else:
+    if password != "":
+        st.error("Contraseña incorrecta.")
