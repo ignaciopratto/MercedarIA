@@ -344,11 +344,15 @@ if st.session_state.usuario is None:
             st.error("Correo no encontrado. Revisá y volvé a intentarlo.")
             st.stop()
 
-
 # ==============================
 # USUARIO LOGUEADO
 # ==============================
-usuario = st.session_state.usuario
+usuario = st.session_state.get("usuario")
+
+if not usuario:
+    st.error("⚠️ No hay un usuario logueado. Por favor iniciá sesión nuevamente.")
+    st.stop()
+
 email_usuario = usuario.get("email", "")
 rol_usuario = (usuario.get("rol") or "").strip().lower()
 curso_usuario = normalizar_curso(usuario.get("curso", ""))
@@ -525,3 +529,4 @@ if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
     st.session_state.keepalive_thread = True
+
