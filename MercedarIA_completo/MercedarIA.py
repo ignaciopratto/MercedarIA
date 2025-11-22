@@ -7,10 +7,10 @@ from datetime import datetime
 # ============================================
 # CONFIGURACIÓN DESDE SECRETS
 # ============================================
-DEEPSEEK_API_KEY = st.secrets["sk-f3e25c8aa4604877bc9238eca28e5e0e"]
-GITHUB_TOKEN = st.secrets["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"]
-GITHUB_USER = st.secrets["ignaciopratto"]
-GITHUB_REPO = st.secrets["MercedarIA"]
+DEEPSEEK_API_KEY = st.secrets["DEEPSEEK_API_KEY"]
+GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
+GITHUB_USER = st.secrets["GITHUB_USER"]
+GITHUB_REPO = st.secrets["GITHUB_REPO"]
 GITHUB_BASE_FOLDER = st.secrets.get("GITHUB_BASE_FOLDER", "MercedarIA_completo")
 
 BASES_ROOT = f"{GITHUB_BASE_FOLDER}/bases"
@@ -932,3 +932,4 @@ st.markdown("---")
 if st.button("🚪 Cerrar sesión"):
     st.session_state.clear()
     st.success("Sesión cerrada. Volvé a recargar la página para iniciar de nuevo.")
+
