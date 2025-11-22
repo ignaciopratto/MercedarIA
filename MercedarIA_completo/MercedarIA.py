@@ -46,23 +46,23 @@ def consultar_deepseek(pregunta, api_key, contexto=""):
         r = requests.post(url, json=payload, headers=headers, timeout=20)
         r.raise_for_status()
         data = r.json()
-        # Manejar estructura robusta
+
         if isinstance(data, dict):
-            # intentar caminos comunes
             if "choices" in data and isinstance(data["choices"], list) and data["choices"]:
                 choice = data["choices"][0]
-                # algunos APIs devuelven texto directo en "text" o en "message"->"content"
                 if isinstance(choice, dict):
                     if "message" in choice and isinstance(choice["message"], dict) and "content" in choice["message"]:
                         return choice["message"]["content"]
                     if "text" in choice:
                         return choice["text"]
-            # fallback si estructura distinta
             if "answer" in data:
                 return data["answer"]
+
         return "La API externa respondió, pero no pude interpretar la respuesta."
+
     except Exception as e:
         return f"Hubo un error consultando DeepSeek: {str(e)}"
+
 
 # ==============================
 # BASE LOCAL GENERAL
@@ -82,9 +82,9 @@ BASE_GENERAL = [
 
 # ==============================
 # BASE POR CURSO
-# (idéntica a la que venías usando)
 # ==============================
 BASES_ESPECIFICAS = {
+    # (NO MODIFICO—SE MANTIENE IGUAL)
     "1° A": [
         ("¿Qué materias tengo?", "Biología, Educación en Artes Visuales, Lengua y Literatura, Física, Geografía, Educación Tecnológica, Matemática, Educación Religiosa Escolar, Ciudadanía y Participación, Inglés y Educación Física."),
         ("¿Cuáles son mis contraturnos?", "Educación Física y Educación Tecnológica."),
@@ -147,6 +147,7 @@ BASES_ESPECIFICAS = {
     ]
 }
 
+
 # =====================================
 # FUNCIÓN: CONVERTIR BASE A CONTEXTO
 # =====================================
@@ -156,57 +157,43 @@ def obtener_contexto(lista):
         contexto += f"Pregunta {i}: {p}\nRespuesta {i}: {r}\n\n"
     return contexto
 
+
 # ==============================
-# UTILIDADES Y FUNCIONES AUXILIARES
+# UTILIDADES
 # ==============================
 def api_get(url):
-    """
-    Obtiene datos de la API remota. Devuelve lista o [] si hay error.
-    """
     try:
         r = requests.get(url, timeout=12)
         r.raise_for_status()
         data = r.json()
-        # soportar estructuras tipo {"data": [...]}
         if isinstance(data, dict) and "data" in data and isinstance(data["data"], list):
             return data["data"]
         return data
-    except Exception:
+    except:
         return []
 
+
 def normalizar_curso(curso_raw):
-    """
-    Normaliza formatos como "1b", "1 b", "1°b", "1° B" -> "1° B"
-    Si no se puede normalizar devuelve cadena vacía.
-    """
     try:
         s = str(curso_raw).strip().lower()
-    except Exception:
+    except:
         return ""
+
     if len(s) < 2:
         return ""
+
     numero = s[0]
     division = s[-1].upper()
     return f"{numero}° {division}"
 
+
 def limpiar_estado_antes_login():
-    """
-    Limpia del session_state los datos que dependen del usuario anterior.
-    """
     for clave in ["usuario", "tareas_curso", "tareas_personales", "lista_tareas", "lista_cursos_api", "historial"]:
         if clave in st.session_state:
             st.session_state.pop(clave, None)
 
+
 def tarea_pertenece_al_usuario(tarea, email_usuario):
-    """
-    Una tarea personal pertenece solo a su creador.
-    personal=True NO implica que sea visible para todos.
-    Lógica:
-      - Obtener creador (campo 'creador' o 'creator')
-      - Si no existe creador -> no asignar (evita mostrar tareas 'huérfanas' como personales)
-      - Si creador no tiene @ completar con dominio institucional @insm.edu
-      - Comparar case-insensitive con email_usuario
-    """
     if not tarea or not isinstance(tarea, dict):
         return False
 
@@ -216,19 +203,15 @@ def tarea_pertenece_al_usuario(tarea, email_usuario):
 
     creador_raw = (tarea.get("creador") or tarea.get("creator") or "").strip().lower()
     if not creador_raw:
-        # no hay creador definido: no tratamos la tarea como personal de nadie
         return False
 
-    # Si el creador viene sin dominio, asumimos dominio institucional
     if "@" not in creador_raw:
-        creador_raw = creador_raw + "@insm.edu"
+        creador_raw += "@insm.edu"
 
     return creador_raw == email_user
 
+
 def formatear_detalle_tarea(t):
-    """
-    Devuelve un bloque de texto con todos los datos relevantes de la tarea.
-    """
     titulo = t.get("titulo") or t.get("title") or "Sin título"
     descripcion = t.get("descripcion") or t.get("description") or ""
     fecha_limite = t.get("fecha_limite") or t.get("due_date") or ""
@@ -237,21 +220,24 @@ def formatear_detalle_tarea(t):
 
     partes = [f"• {titulo}"]
     if descripcion:
-        partes.append(f"  Descripción: {descripcion}")
+        partes.append(f" Descripción: {descripcion}")
     if fecha_limite:
-        partes.append(f"  Fecha límite: {fecha_limite}")
+        partes.append(f" Fecha límite: {fecha_limite}")
+
     return "\n".join(partes)
 
+
 def obtener_texto_tareas():
-    texto = ""
-    texto += "📚 Tareas del curso:\n\n"
+    texto = "📚 Tareas del curso:\n\n"
+
     if st.session_state.tareas_curso:
         for t in st.session_state.tareas_curso:
             texto += formatear_detalle_tarea(t) + "\n\n"
     else:
         texto += "(No hay tareas cargadas para tu curso)\n\n"
 
-    texto += "🧍‍♂ Tus tareas personales:\n\n"
+    texto += "🧍‍♂️ Tus tareas personales:\n\n"
+
     if st.session_state.tareas_personales:
         for t in st.session_state.tareas_personales:
             texto += formatear_detalle_tarea(t) + "\n\n"
@@ -260,33 +246,35 @@ def obtener_texto_tareas():
 
     return texto
 
+
 def obtener_profesores_por_curso():
-    """
-    Usa la lista de cursos de la API (st.session_state.lista_cursos_api)
-    y busca entradas cuya clave 'curso_id' coincida con el curso del usuario.
-    Cada registro esperado tiene: curso_id, materia, profesor_email
-    """
     lista = st.session_state.lista_cursos_api or []
     curso_id_norm = (usuario.get("curso") or "").strip().lower()
+
     entradas = [c for c in lista if str(c.get("curso_id", "")).strip().lower() == curso_id_norm]
+
     if not entradas:
         return "No se encontró información de profesores para tu curso."
+
     texto = "📘 Profesores asignados a tu curso:\n\n"
+
     for e in entradas:
         materia = e.get("materia") or "Materia desconocida"
         prof_email = e.get("profesor_email") or e.get("profesor") or e.get("profesor_mail") or "Email no disponible"
         texto += f"• {materia} — {prof_email}\n"
+
     return texto
 
 
 # ==============================
-# INICIALIZACIÓN STREAMLIT
+# INICIO STREAMLIT
 # ==============================
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
 st.title("🎓 MercedarIA - Asistente del Colegio INSM")
 
+
 # ==============================
-# PANTALLA DE LOGIN (LIMPIA ESTADO ANTERIOR)
+# LOGIN
 # ==============================
 if "usuario" not in st.session_state or st.session_state.get("usuario") is None:
     st.session_state.usuario = None
@@ -300,66 +288,42 @@ if st.session_state.usuario is None:
         unsafe_allow_html=True
     )
 
+    if st.button("Ingresar"):
+        limpiar_estado_antes_login()
 
-if st.button("Ingresar"):
-    limpiar_estado_antes_login()
+        # ===========================
+        # MODO ANÓNIMO
+        # ===========================
+        if not email_input.strip():
+            st.session_state.usuario = {
+                "email": "anonimo",
+                "nombre": "Usuario",
+                "apellido": "Anónimo",
+                "rol": "anon",
+                "curso": "General"
+            }
 
-    # ===========================
-    # MODO ANÓNIMO
-    # ===========================
-    if not email_input.strip():
-        st.session_state.usuario = {
-            "email": "anonimo",
-            "nombre": "Usuario",
-            "apellido": "Anónimo",
-            "rol": "anon",
-            "curso": "General"
-        }
+            st.session_state.lista_tareas = []
+            st.session_state.lista_cursos_api = []
+            st.session_state.tareas_curso = []
+            st.session_state.tareas_personales = []
+            st.session_state.historial = []
 
-        # Inicializar estructuras mínimas
-        st.session_state.lista_tareas = []
-        st.session_state.lista_cursos_api = []
-        st.session_state.tareas_curso = []
-        st.session_state.tareas_personales = []
-        st.session_state.historial = []
+            st.success("Ingresaste en modo anónimo. Solo se usarán respuestas generales.")
+            st.rerun()
 
-        st.success("Ingresaste en modo anónimo. Solo se usarán respuestas generales.")
-        st.rerun()
+        # ===========================
+        # LOGIN NORMAL
+        # ===========================
+        usuarios = api_get(API_USERS)
+        encontrado = None
 
-    # ===========================
-    # LOGIN NORMAL (EMAIL)
-    # ===========================
-    usuarios = api_get(API_USERS)
-    encontrado = None
-
-    for u in usuarios or []:
-        if (u.get("email", "").strip().lower() == email_input.strip().lower()):
-            encontrado = u
-            break
-
-    if encontrado:
-        st.session_state.usuario = {
-            "email": encontrado.get("email", ""),
-            "nombre": encontrado.get("nombre", ""),
-            "apellido": encontrado.get("apellido", ""),
-            "rol": (encontrado.get("rol") or "").strip().lower(),
-            "curso": encontrado.get("curso", "")
-        }
-
-        st.session_state.lista_tareas = []
-        st.session_state.lista_cursos_api = []
-        st.session_state.tareas_curso = []
-        st.session_state.tareas_personales = []
-        st.session_state.historial = []
-
-        st.success(f"Bienvenido/a {st.session_state.usuario['nombre']} {st.session_state.usuario['apellido']}.")
-        st.rerun()
-    else:
-        st.error("Correo no encontrado. Revisá y volvé a intentarlo.")
-
+        for u in usuarios or []:
+            if (u.get("email", "").strip().lower() == email_input.strip().lower()):
+                encontrado = u
+                break
 
         if encontrado:
-            # Guardar solo campos relevantes (sin DNI como llave primaria para login)
             st.session_state.usuario = {
                 "email": encontrado.get("email", ""),
                 "nombre": encontrado.get("nombre", ""),
@@ -367,157 +331,132 @@ if st.button("Ingresar"):
                 "rol": (encontrado.get("rol") or "").strip().lower(),
                 "curso": encontrado.get("curso", "")
             }
-            # inicializar estructuras vacías dependientes del usuario
+
             st.session_state.lista_tareas = []
             st.session_state.lista_cursos_api = []
             st.session_state.tareas_curso = []
             st.session_state.tareas_personales = []
             st.session_state.historial = []
+
             st.success(f"Bienvenido/a {st.session_state.usuario['nombre']} {st.session_state.usuario['apellido']}.")
             st.rerun()
         else:
             st.error("Correo no encontrado. Revisá y volvé a intentarlo.")
-    st.stop()
+            st.stop()
+
 
 # ==============================
-# USUARIO LOGUEADO (YA INICIALIZADO)
+# USUARIO LOGUEADO
 # ==============================
-# Evitar que continue si no hay usuario logueado
-if "usuario" not in st.session_state or st.session_state.usuario is None:
-    st.stop()
-
 usuario = st.session_state.usuario
 email_usuario = usuario.get("email", "")
 rol_usuario = (usuario.get("rol") or "").strip().lower()
 curso_usuario = normalizar_curso(usuario.get("curso", ""))
 
-# ==============================
-# RECONSTRUIR BASES LOCALES SEGÚN EL CURSO DEL USUARIO
-# ==============================
 
-# Asegurar que exista st.session_state.bases
+# ==============================
+# BASE LOCAL COMPLETA
+# ==============================
 if "bases" not in st.session_state:
     st.session_state.bases = {
         "General": BASE_GENERAL.copy(),
         **{curso: BASES_ESPECIFICAS.get(curso, []).copy() for curso in BASES_ESPECIFICAS}
     }
 
-# Asegurar que exista la clave del curso del usuario (si su curso no está, crear una vacía)
 if curso_usuario not in st.session_state.bases:
     st.session_state.bases[curso_usuario] = []
 
-# BASE COMPLETA = BASE GENERAL + BASE ESPECÍFICA DEL CURSO DEL USUARIO
 base_completa = BASE_GENERAL + st.session_state.bases[curso_usuario]
-
-if not curso_usuario:
-    st.error("No se pudo interpretar el curso del usuario. Contactá al administrador.")
-    st.stop()
 
 st.info(f"Estás conectado como: {usuario.get('nombre','')} {usuario.get('apellido','')} — Curso: {curso_usuario} — Rol: {rol_usuario}")
 
+
 # ==============================
-# CARGAR DATOS REMOTOS (TAREAS Y CURSOS)
+# CARGA DE TAREAS Y CURSOS (API)
 # ==============================
-# Guardamos en session para evitar múltiples requests durante la sesión
 if not st.session_state.get("lista_tareas"):
     st.session_state.lista_tareas = api_get(API_TASKS) or []
 
 if not st.session_state.get("lista_cursos_api"):
     st.session_state.lista_cursos_api = api_get(API_COURSES) or []
 
-# construimos listas específicas para el usuario actual
 st.session_state.tareas_curso = []
 st.session_state.tareas_personales = []
 
 for t in st.session_state.lista_tareas or []:
     try:
         curso_t = (t.get("curso") or "").strip().lower()
-    except Exception:
+    except:
         curso_t = ""
-    try:
-        tarea_id = t.get("id")
-    except Exception:
-        tarea_id = None
 
-    # Tareas del curso (comparación simple por cadena)
-    try:
-        if curso_t and curso_t == (usuario.get("curso") or "").strip().lower():
-            st.session_state.tareas_curso.append(t)
-    except Exception:
-        pass
+    if curso_t and curso_t == (usuario.get("curso") or "").strip().lower():
+        st.session_state.tareas_curso.append(t)
 
-    # Tareas personales (solo si el creador coincide con el email del usuario)
-    try:
-        if tarea_pertenece_al_usuario(t, email_usuario):
-            st.session_state.tareas_personales.append(t)
-    except Exception:
-        pass
+    if tarea_pertenece_al_usuario(t, email_usuario):
+        st.session_state.tareas_personales.append(t)
 
-# Evitar duplicados: si una tarea aparece en personales y en curso la dejamos sólo en personales
 ids_personales = {t.get("id") for t in st.session_state.tareas_personales if t.get("id") is not None}
 st.session_state.tareas_curso = [t for t in st.session_state.tareas_curso if t.get("id") not in ids_personales]
 
+
 # ==============================
-# INTERFAZ DE CHAT PRINCIPAL
+# CHAT
 # ==============================
 st.subheader(f"💬 Chat con MercedarIA — Curso: {curso_usuario} (bloqueado)")
 
 pregunta = st.text_area("Escribí tu pregunta:", key="pregunta_principal")
+
 if st.button("Enviar"):
     if pregunta and pregunta.strip():
         st.session_state.historial.append(("👨‍🎓 Vos", pregunta.strip()))
         q = pregunta.strip().lower()
         respuesta = None
 
-        # 1) Coincidencia en base local
         for p, r in base_completa:
             try:
                 if p.lower() in q:
                     respuesta = r
                     break
-            except Exception:
+            except:
                 continue
 
-        # 2) Consultas de tareas
         if not respuesta and ("tarea" in q or "tareas" in q):
             respuesta = obtener_texto_tareas()
 
-        # 3) Consultas de profesores / mails
         if not respuesta and ("profe" in q or "profesor" in q or "profesores" in q or "mail" in q or "correo" in q):
             respuesta = obtener_profesores_por_curso()
 
-        # 4) Si sigue sin respuesta, usar DeepSeek (si existe API key)
         if not respuesta:
             respuesta = consultar_deepseek(pregunta, DEEPSEEK_API_KEY, obtener_contexto(base_completa))
 
         st.session_state.historial.append(("🤖 MercedarIA", respuesta))
 
-# Mostrar historial (últimas 50 entradas)
 st.markdown("### Historial de conversación")
+
 for rol, msg in st.session_state.historial[-50:]:
     if rol == "👨‍🎓 Vos":
-        st.markdown(f"🧍 {rol}: {msg}")
+        st.markdown(f"🧍 *{rol}:* {msg}")
     else:
         st.markdown(f"🧠 <span style='color:#00FFAA'><b>{rol}:</b></span> {msg}", unsafe_allow_html=True)
 
 st.divider()
 
+
 # ==============================
-# PANEL DE EDICIÓN RESTRINGIDO (solo 'profe' y 'admin')
+# PANEL DE EDICIÓN
 # ==============================
 st.subheader("🧩 Panel de Edición (solo personal autorizado)")
 
 if rol_usuario not in ("profe", "admin"):
-    st.info("No tenés permisos para editar la base de conocimiento. Si sos docente o administrador, iniciá sesión con una cuenta con rol 'profe' o 'admin'.")
+    st.info("No tenés permisos para editar la base de conocimiento.")
 else:
     st.success(f"Usuario con permisos de edición: rol = {rol_usuario}")
-    # Permitimos seleccionar qué curso editar (General + locales)
+
     opciones_edicion = ["General"] + list(BASES_ESPECIFICAS.keys())
     curso_a_editar = st.selectbox("Seleccioná el curso que querés modificar", opciones_edicion, index=0)
 
     base_editable = st.session_state.bases.get(curso_a_editar, [])
 
-    # Mostrar y editar entradas
     for i, (p, r) in enumerate(base_editable.copy()):
         col1, col2, col3 = st.columns([4, 5, 1])
         with col1:
@@ -528,14 +467,16 @@ else:
             if st.button("🗑", key=f"del_edit_{curso_a_editar}_{i}"):
                 try:
                     base_editable.pop(i)
-                except Exception:
+                except:
                     pass
                 st.rerun()
+
         base_editable[i] = (nuevo_p, nuevo_r)
 
     st.markdown("---")
     nueva_p = st.text_input("➕ Nueva pregunta", key="nueva_p_edit")
     nueva_r = st.text_area("Respuesta", key="nueva_r_edit")
+
     if st.button("Agregar a la base"):
         if nueva_p and nueva_r:
             base_editable.append((nueva_p.strip(), nueva_r.strip()))
@@ -546,26 +487,27 @@ else:
     if st.button("Salir del modo edición"):
         st.rerun()
 
+
 st.divider()
 
 # ==============================
-# ACCIONES UTILES
+# LIMPIAR CHAT
 # ==============================
 if st.button("🧹 Limpiar chat"):
     st.session_state.historial = []
     st.info("Historial limpiado correctamente.")
 
+
 # ==============================
-# BOTÓN DE CERRAR SESIÓN
+# CERRAR SESIÓN
 # ==============================
 st.markdown("---")
+
 if st.button("🚪 Cerrar sesión"):
-    # Limpiar todo lo relacionado al usuario
     for clave in list(st.session_state.keys()):
-        if clave not in ["keepalive_thread"]:  # mantenemos el hilo de keepalive
+        if clave not in ["keepalive_thread"]:
             st.session_state.pop(clave, None)
 
-    # Reiniciar usuario
     st.session_state.usuario = None
     st.success("Cerraste sesión correctamente.")
     st.rerun()
@@ -582,4 +524,4 @@ def mantener_sesion_viva():
 if "keepalive_thread" not in st.session_state:
     hilo = threading.Thread(target=mantener_sesion_viva, daemon=True)
     hilo.start()
-    st.session_state.keepalive_thread = True
+    st.session_state.keepalive_thread = True
