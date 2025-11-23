@@ -358,34 +358,6 @@ st.info(
 )
 
 # ============================================
-# VERIFICACIÓN DE BASES CREADAS
-# ============================================
-
-def verificar_bases_creadas(cursos):
-    st.subheader("🧪 Verificación de creación de bases por materia")
-
-    archivos_creados = []
-
-    for c in cursos:
-        path = archivo_base_curso_materia(c["curso"], c["materia"])
-        contenido = leer_archivo_github(path)
-        if contenido.strip() != "":
-            archivos_creados.append(path)
-
-    st.info(f"Materias detectadas en courses.txt: **{len(cursos)}**")
-    st.info(f"Bases por materia encontradas en GitHub: **{len(archivos_creados)}**")
-
-    if archivos_creados:
-        st.markdown("### Archivos detectados:")
-        for a in archivos_creados:
-            st.markdown(f"- `{a}`")
-    else:
-        st.error("❌ No se detectó ningún archivo de materia creado.")
-
-# Mostrar verificación
-verificar_bases_creadas(cursos)
-
-# ============================================
 # FUNCIÓN DE DEEPSEEK
 # ============================================
 
@@ -606,4 +578,5 @@ if rol == "admin":
 
         st.success("Materia creada y base inicial generada.")
         st.experimental_rerun()
+
 
