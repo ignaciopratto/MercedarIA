@@ -392,7 +392,7 @@ for mensaje in st.session_state.chat:
 <div style="text-align: right; margin: 4px 0;">
     <div style="
         display: inline-block;
-        background-color: #CFE8C0;
+        background-color: #71b548;
         padding: 8px 12px;
         border-radius: 12px;
         max-width: 80%;
@@ -410,7 +410,7 @@ for mensaje in st.session_state.chat:
 <div style="text-align: left; margin: 4px 0;">
     <div style="
         display: inline-block;
-        background-color: #E0E0E0;
+        background-color: #23263d;
         padding: 8px 12px;
         border-radius: 12px;
         max-width: 80%;
@@ -582,4 +582,5 @@ if rol == "admin":
         guardar_cursos(cursos)
         st.success("Materia agregada.")
         st.rerun()
+
 
