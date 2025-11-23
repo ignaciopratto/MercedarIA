@@ -330,7 +330,7 @@ def consultar_deepseek(pregunta, contexto_txt):
     """
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {
-        "Authorization": f"Bearer {DEEPSEEK_API_KEY"],
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY"}",
         "Content-Type": "application/json"
     }
 
@@ -619,3 +619,4 @@ if rol == "admin":
         guardar_cursos(cursos)
         st.success("Materia agregada.")
         st.rerun()
+
