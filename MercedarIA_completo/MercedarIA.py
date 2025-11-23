@@ -264,7 +264,7 @@ cursos = cargar_cursos()
 tareas = cargar_tareas()
 
 # ============================================
-# CONFIG STREAMLIT / LOGIN
+# CONFIG STREAMLIT Y LOGIN
 # ============================================
 
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
@@ -273,9 +273,8 @@ st.title("🎓 MercedarIA - Asistente del Colegio INSM")
 if "usuario" not in st.session_state:
     st.session_state.usuario = None
 
-# Historial de chat en sesión
-if "chat" not in st.session_state:
-    st.session_state.chat = []  # cada item: {"role": "user"/"assistant", "content": "texto"}
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
 if st.session_state.usuario is None:
     st.subheader("🔐 Iniciar sesión")
@@ -311,7 +310,6 @@ rol = usuario["rol"]
 email_usuario = usuario["email"]
 curso_usuario = usuario["curso"]
 
-# Releer siempre para tener lo último desde GitHub
 usuarios = cargar_usuarios()
 cursos = cargar_cursos()
 tareas = cargar_tareas()
@@ -378,78 +376,77 @@ def construir_contexto_completo(curso_usuario):
     return contexto
 
 # ============================================
-# CHAT ESTILO CONVERSACIÓN
+# CHAT CON HISTORIAL ESTILO BURBUJA
 # ============================================
 
-st.header("💬 Chat con MercedarIA")
+st.subheader("💬 Chat con MercedarIA")
 
-# Mostrar historial de mensajes (tipo chat)
-for mensaje in st.session_state.chat:
+col_input, col_btn = st.columns([4, 1])
+with col_input:
+    pregunta = st.text_input("Escribí tu pregunta:", key="campo_pregunta")
+with col_btn:
+    enviar = st.button("Enviar", key="btn_enviar_chat")
+
+if enviar and pregunta.strip():
+    contexto = construir_contexto_completo(curso_usuario)
+    respuesta = consultar_deepseek(pregunta, contexto)
+
+    # Guardar en historial
+    st.session_state.chat_history.append({"role": "user", "content": pregunta.strip()})
+    st.session_state.chat_history.append({"role": "assistant", "content": respuesta})
+
+# Mostrar historial como chat
+st.markdown("### 🗨️ Historial de conversación")
+
+for mensaje in st.session_state.chat_history:
     if mensaje["role"] == "user":
-        # Mensaje del usuario
+        # Burbuja del usuario (verde suave)
         st.markdown(
             f"""
 <div style="text-align: right; margin: 4px 0;">
-    <div style="
-        display: inline-block;
-        background-color: #71b548;
-        padding: 8px 12px;
-        border-radius: 12px;
-        max-width: 80%;
-        ">
-        <b>Vos:</b> {mensaje["content"]}
-    </div>
+  <div style="
+      display: inline-block;
+      background-color: #CFE8C0;
+      color: #111;
+      padding: 8px 12px;
+      border-radius: 12px;
+      max-width: 80%;
+  ">
+    <b>Vos:</b> {mensaje["content"]}
+  </div>
 </div>
 """,
             unsafe_allow_html=True,
         )
     else:
-        # Mensaje del asistente
+        # Burbuja de MercedarIA (gris suave)
         st.markdown(
             f"""
 <div style="text-align: left; margin: 4px 0;">
-    <div style="
-        display: inline-block;
-        background-color: #23263d;
-        padding: 8px 12px;
-        border-radius: 12px;
-        max-width: 80%;
-        ">
-        <b>MercedarIA:</b> {mensaje["content"]}
-    </div>
+  <div style="
+      display: inline-block;
+      background-color: #E0E0E0;
+      color: #111;
+      padding: 8px 12px;
+      border-radius: 12px;
+      max-width: 80%;
+  ">
+    <b>MercedarIA:</b> {mensaje["content"]}
+  </div>
 </div>
 """,
             unsafe_allow_html=True,
         )
 
-# Entrada de nueva pregunta
-pregunta = st.text_input("Escribí tu pregunta:")
-
-if st.button("Enviar pregunta"):
-    if pregunta.strip():
-        # Guardar pregunta en historial
-        st.session_state.chat.append({
-            "role": "user",
-            "content": pregunta.strip()
-        })
-
-        # Construir contexto y obtener respuesta
-        contexto = construir_contexto_completo(curso_usuario)
-        respuesta = consultar_deepseek(pregunta, contexto)
-
-        # Guardar respuesta en historial
-        st.session_state.chat.append({
-            "role": "assistant",
-            "content": respuesta
-        })
-
-        st.rerun()
+st.markdown("---")
 
 # ============================================
-# PANEL DE TAREAS (MENOS INTRUSIVO)
+# PANEL DE TAREAS (CON EXPANDER)
 # ============================================
 
-with st.expander("📝 Ver tareas del curso", expanded=False):
+st.header("📝 Tareas")
+
+with st.expander("Ver tareas del curso", expanded=False):
     st.subheader("Tareas del curso")
 
     tareas_del_curso = [t for t in tareas if t["curso"] == curso_usuario]
@@ -468,13 +465,15 @@ with st.expander("📝 Ver tareas del curso", expanded=False):
 """
             )
 
+    # Profes pueden crear tareas
     if rol == "profe":
-        st.subheader("➕ Crear nueva tarea (solo profes)")
-        titulo = st.text_input("Título de la tarea", key="titulo_tarea")
-        descr = st.text_area("Descripción", key="descr_tarea")
-        fecha = st.date_input("Fecha límite", key="fecha_tarea")
+        st.subheader("➕ Crear nueva tarea")
 
-        if st.button("Agregar tarea"):
+        titulo = st.text_input("Título de la tarea", key="nuevo_titulo")
+        descr = st.text_area("Descripción", key="nuevo_descr")
+        fecha = st.date_input("Fecha límite", key="nuevo_fecha")
+
+        if st.button("Agregar tarea", key="btn_agregar_tarea"):
             if titulo.strip() == "":
                 st.warning("Tenés que poner un título.")
             else:
@@ -509,7 +508,8 @@ if rol == "profe":
     else:
         materia_sel = st.selectbox(
             "Materia a editar:",
-            [f"{c['curso']} — {c['materia']}" for c in materias_mias]
+            [f"{c['curso']} — {c['materia']}" for c in materias_mias],
+            key="select_materia_prof"
         )
 
         curso_edit = materia_sel.split(" — ")[0]
@@ -521,10 +521,11 @@ if rol == "profe":
         nuevo = st.text_area(
             "Contenido editable del archivo:",
             value=contenido_actual,
-            height=400
+            height=400,
+            key="textarea_base_materia"
         )
 
-        if st.button("💾 Guardar cambios en esta materia"):
+        if st.button("💾 Guardar cambios en esta materia", key="btn_guardar_materia"):
             escribir_archivo_github(path, nuevo)
             st.success("Cambios guardados.")
 
@@ -541,14 +542,14 @@ if rol == "admin":
 
     st.subheader("Crear nuevo usuario")
 
-    em = st.text_input("Email nuevo")
-    nom = st.text_input("Nombre")
-    ape = st.text_input("Apellido")
-    r = st.selectbox("Rol", ["alumno", "profe", "admin"])
-    c = st.text_input("Curso (solo alumnos)")
-    pw = st.text_input("Contraseña")
+    em = st.text_input("Email nuevo", key="admin_email_nuevo")
+    nom = st.text_input("Nombre", key="admin_nombre_nuevo")
+    ape = st.text_input("Apellido", key="admin_apellido_nuevo")
+    r = st.selectbox("Rol", ["alumno", "profe", "admin"], key="admin_rol_nuevo")
+    c = st.text_input("Curso (solo alumnos)", key="admin_curso_nuevo")
+    pw = st.text_input("Contraseña", key="admin_pw_nuevo")
 
-    if st.button("Crear usuario"):
+    if st.button("Crear usuario", key="btn_admin_crear_usuario"):
         usuarios.append({
             "email": em,
             "nombre": nom,
@@ -567,12 +568,12 @@ if rol == "admin":
 
     st.subheader("Agregar curso/materia")
 
-    idc = st.text_input("ID del curso")
-    curso_n = st.text_input("Curso (ej: 1° A)")
-    materia_n = st.text_input("Materia (ej: Matemática)")
-    prof_n = st.text_input("Email del profesor")
+    idc = st.text_input("ID del curso", key="admin_id_curso")
+    curso_n = st.text_input("Curso (ej: 1° A)", key="admin_curso_nombre")
+    materia_n = st.text_input("Materia (ej: Matemática)", key="admin_materia_nombre")
+    prof_n = st.text_input("Email del profesor", key="admin_prof_email")
 
-    if st.button("Crear materia nueva"):
+    if st.button("Crear materia nueva", key="btn_admin_crear_materia"):
         cursos.append({
             "id": idc,
             "curso": curso_n,
@@ -582,5 +583,3 @@ if rol == "admin":
         guardar_cursos(cursos)
         st.success("Materia agregada.")
         st.rerun()
-
-
