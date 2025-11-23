@@ -310,6 +310,7 @@ rol = usuario["rol"]
 email_usuario = usuario["email"]
 curso_usuario = usuario["curso"]
 
+# recargar por si hubo cambios
 usuarios = cargar_usuarios()
 cursos = cargar_cursos()
 tareas = cargar_tareas()
@@ -356,15 +357,43 @@ def consultar_deepseek(pregunta, contexto_txt):
 def construir_contexto_completo(curso_usuario):
     contexto = "BASE DEL COLEGIO:\n\n"
 
+    # General
     for p, r in BASE_GENERAL:
         contexto += f"{p} -> {r}\n"
 
+    # Info específica del curso (preguntas fijas)
     contexto += "\nBASE DEL CURSO:\n"
     faqs = BASES_ESPECIFICAS.get(curso_usuario, [])
     for p, r in faqs:
         contexto += f"{p} -> {r}\n"
 
-    contexto += "\nBASE DE MATERIAS:\n"
+    # Usuarios (sobre todo profes y cursos)
+    contexto += "\nBASE DE USUARIOS (roles, cursos, mails):\n"
+    for u in usuarios:
+        contexto += (
+            f"Usuario: {u['nombre']} {u['apellido']} "
+            f"({u['email']}), rol: {u['rol']}, curso: {u['curso']}.\n"
+        )
+
+    # Cursos y materias con profesor asignado
+    contexto += "\nBASE DE CURSOS Y PROFESORES:\n"
+    for c in cursos:
+        # buscar el nombre del profe por email
+        prof = next((u for u in usuarios if u["email"] == c["email"]), None)
+        if prof:
+            contexto += (
+                f"En el curso {c['curso']}, la materia {c['materia']} "
+                f"la dicta {prof['nombre']} {prof['apellido']} "
+                f"({prof['email']}).\n"
+            )
+        else:
+            contexto += (
+                f"En el curso {c['curso']}, la materia {c['materia']} "
+                f"la dicta el profesor con email {c['email']}.\n"
+            )
+
+    # Bases por materia según TXT
+    contexto += "\nBASE DE MATERIAS (faq + tareas guardadas en txt):\n"
 
     for c in cursos:
         if c["curso"] == curso_usuario:
@@ -395,7 +424,6 @@ if enviar and pregunta.strip():
     st.session_state.chat_history.append({"role": "user", "content": pregunta.strip()})
     st.session_state.chat_history.append({"role": "assistant", "content": respuesta})
 
-# Mostrar historial como chat
 st.markdown("### 🗨️ Historial de conversación")
 
 for mensaje in st.session_state.chat_history:
@@ -488,7 +516,10 @@ with st.expander("Ver tareas del curso", expanded=False):
                 }
 
                 tareas.append(nueva)
+                # 👉 Esto guarda TODAS las tareas (incluida la nueva)
+                #    en BASES_ROOT/tasks.txt de tu repo GitHub
                 guardar_tareas(tareas)
+                # Y también la mete en los txt por materia del curso
                 agregar_tarea_a_bases_de_curso(curso_usuario, nueva, cursos)
 
                 st.success("Tarea agregada correctamente.")
