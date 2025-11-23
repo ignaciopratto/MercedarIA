@@ -253,19 +253,30 @@ if st.session_state.usuario is None:
 # USUARIO LOGUEADO
 # ============================================
 
-usuario = st.session_state.usuario
+# Recuperar usuario guardado en la sesión
+usuario = st.session_state.get("usuario", None)
+
+# SI NO HAY USUARIO, DETENER EL SCRIPT
+if usuario is None:
+    st.warning("Por favor, iniciá sesión para continuar.")
+    st.stop()
+
+# Ahora es seguro acceder a los datos del usuario
 rol = usuario["rol"]
 email_usuario = usuario["email"]
 curso_usuario = usuario["curso"]
 
+# Cargar bases de datos (ahora seguro)
 usuarios = cargar_usuarios()
 cursos = cargar_cursos()
 tareas = cargar_tareas()
 
+# Mostrar estado del usuario en pantalla
 st.info(
     f"Conectado como **{usuario['nombre']} {usuario['apellido']}** — "
     f"Rol: **{rol}** — Curso: **{curso_usuario}**"
 )
+
 # ============================================
 # BASES DE CONOCIMIENTO (Q&A) Y DEEPSEEK
 # ============================================
@@ -932,4 +943,5 @@ st.markdown("---")
 if st.button("🚪 Cerrar sesión"):
     st.session_state.clear()
     st.success("Sesión cerrada. Volvé a recargar la página para iniciar de nuevo.")
+
 
