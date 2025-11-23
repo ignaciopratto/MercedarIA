@@ -1,163 +1,163 @@
-1;1° A;Biología;profe1@insm.edu
-2;1° A;Artes Visuales;profe1@insm.edu
-3;1° A;Lengua y Literatura;profe1@insm.edu
-4;1° A;Física;profe1@insm.edu
-5;1° A;Geografía;profe1@insm.edu
-6;1° A;Educación Tecnológica;profe1@insm.edu
-7;1° A;Matemática;profe1@insm.edu
-8;1° A;ERE;profe1@insm.edu
-9;1° A;Ciudadanía y Participación;profe1@insm.edu
-10;1° A;Inglés;profe1@insm.edu
+1;1° A;Biología;cecilia.viotti@institutolamerced.edu.ar
+2;1° A;Artes Visuales;marisa.brisio@institutolamerced.edu.ar
+3;1° A;Lengua y Literatura;virginia.gardella@institutolamerced.edu.ar
+4;1° A;Física;cecilia.viotti@institutolamerced.edu.ar
+5;1° A;Geografía;andrea.miretti@institutolamerced.edu.ar
+6;1° A;Educación Tecnológica;facundo.gil@institutolamerced.edu.ar
+7;1° A;Matemática;alejandra.pissane@institutolamerced.edu.ar
+8;1° A;ERE;gabriela.mugas@institutolamerced.edu.ar
+9;1° A;Ciudadanía y Participación;yanina.moya@institutolamerced.edu.ar
+10;1° A;Inglés;ivana.marioni@institutolamerced.edu.ar
 11;1° A;Educación Física;profe1@insm.edu
 
-12;1° B;Física;profe2@insm.edu
-13;1° B;Matemática;profe2@insm.edu
-14;1° B;Artes Visuales;profe2@insm.edu
-15;1° B;Inglés;profe2@insm.edu
-16;1° B;ERE;profe2@insm.edu
-17;1° B;Lengua y Literatura;profe2@insm.edu
-18;1° B;Geografía;profe2@insm.edu
-19;1° B;Ciudadanía y Participación;profe2@insm.edu
-20;1° B;Educación Tecnológica;profe2@insm.edu
-21;1° B;Biología;profe2@insm.edu
+12;1° B;Física;soledad.picard@institutolamerced.edu.ar
+13;1° B;Matemática;alejandra.pissane@institutolamerced.edu.ar
+14;1° B;Artes Visuales;marisa.brisio@institutolamerced.edu.ar
+15;1° B;Inglés;ivana.marioni@institutolamerced.edu.ar
+16;1° B;ERE;paula.radichi@institutolamerced.edu.ar
+17;1° B;Lengua y Literatura;yanina.moya@institutolamerced.edu.ar
+18;1° B;Geografía;andrea.miretti@institutolamerced.edu.ar
+19;1° B;Ciudadanía y Participación;yanina.moya@institutolamerced.edu.ar
+20;1° B;Educación Tecnológica;facundo.gil@institutolamerced.edu.ar
+21;1° B;Biología;soledad.picard@institutolamerced.edu.ar
 22;1° B;Educación Física;profe2@insm.edu
 
-23;2° A;Matemática;profe3@insm.edu
-24;2° A;Lengua y Literatura;profe3@insm.edu
-25;2° A;ERE;profe3@insm.edu
-26;2° A;Música;profe3@insm.edu
-27;2° A;Historia;profe3@insm.edu
-28;2° A;Educación Tecnológica;profe3@insm.edu
-29;2° A;Química;profe3@insm.edu
-30;2° A;Computación;profe3@insm.edu
-31;2° A;Ciudadanía y Participación;profe3@insm.edu
-32;2° A;Biología;profe3@insm.edu
-33;2° A;Inglés;profe3@insm.edu
+23;2° A;Matemática;alejandra.pissane@institutolamerced.edu.ar
+24;2° A;Lengua y Literatura;virginia.gardella@institutolamerced.edu.ar
+25;2° A;ERE;gabriela.mugas@institutolamerced.edu.ar
+26;2° A;Música;gerardo.lemos@institutolamerced.edu.ar
+27;2° A;Historia;florencia.andino@institutolamerced.edu.ar
+28;2° A;Educación Tecnológica;mj.esposito@institutolamerced.edu.ar
+29;2° A;Química;alicia.vocos@institutolamerced.edu.ar
+30;2° A;Computación;enzoeara019@gmail.com
+31;2° A;Ciudadanía y Participación;milagros.bergonzo@institutolamerced.edu.ar
+32;2° A;Biología;cecilia.viotti@institutolamerced.edu.ar
+33;2° A;Inglés;maria.guzman@institutolamerced.edu.ar
 34;2° A;Educación Física;profe3@insm.edu
 
-35;2° B;Música;profe4@insm.edu
-36;2° B;Historia;profe4@insm.edu
-37;2° B;ERE;profe4@insm.edu
-38;2° B;Ciudadanía y Participación;profe4@insm.edu
-39;2° B;Inglés;profe4@insm.edu
-40;2° B;Matemática;profe4@insm.edu
-41;2° B;Lengua y Literatura;profe4@insm.edu
-42;2° B;Educación Tecnológica;profe4@insm.edu
-43;2° B;Química;profe4@insm.edu
-44;2° B;Biología;profe4@insm.edu
+35;2° B;Música;gerardo.lemos@institutolamerced.edu.ar
+36;2° B;Historia;florencia.andino@institutolamerced.edu.ar
+37;2° B;ERE;paula.radichi@institutolamerced.edu.ar
+38;2° B;Ciudadanía y Participación;milagros.bergonzo@institutolamerced.edu.ar
+39;2° B;Inglés;maria.guzman@institutolamerced.edu.ar
+40;2° B;Matemática;tamara.rochia@institutolamerced.edu.ar
+41;2° B;Lengua y Literatura;yanina.moya@institutolamerced.edu.ar
+42;2° B;Educación Tecnológica;mj.esposito@institutolamerced.edu.ar
+43;2° B;Química;soledad.picard@institutolamerced.edu.ar
+44;2° B;Biología;soledad.picard@institutolamerced.edu.ar
 45;2° B;Educación Física;profe4@insm.edu
 
-46;3° A;Lengua y Literatura;profe5@insm.edu
-47;3° A;Inglés;profe5@insm.edu
-48;3° A;Historia;profe5@insm.edu
-49;3° A;Geografía;profe5@insm.edu
-50;3° A;Química;profe5@insm.edu
-51;3° A;Educación Tecnológica;profe5@insm.edu
-52;3° A;Física;profe5@insm.edu
-53;3° A;ERE;profe5@insm.edu
-54;3° A;FVT;profe5@insm.edu
-55;3° A;Matemática;profe5@insm.edu
-56;3° A;Artes Visuales;profe5@insm.edu
-57;3° A;Música;profe5@insm.edu
-58;3° A;Computación;profe5@insm.edu
+46;3° A;Lengua y Literatura;virginia.gardella@institutolamerced.edu.ar
+47;3° A;Inglés;ivana.marioni@institutolamerced.edu.ar
+48;3° A;Historia;florencia.andino@institutolamerced.edu.ar
+49;3° A;Geografía;andrea.miretti@institutolamerced.edu.ar
+50;3° A;Química;alicia.vocos@institutolamerced.edu.ar
+51;3° A;Educación Tecnológica;facundo.gil@institutolamerced.edu.ar
+52;3° A;Física;cecilia.viotti@institutolamerced.edu.ar
+53;3° A;ERE;gabriela.mugas@institutolamerced.edu.ar
+54;3° A;FVT;milagros.bergonzo@institutolamerced.edu.ar
+55;3° A;Matemática;alejandra.pissane@institutolamerced.edu.ar
+56;3° A;Artes Visuales;marisa.brisio@institutolamerced.edu.ar
+57;3° A;Música;gerardo.lemos@institutolamerced.edu.ar
+58;3° A;Computación;carlos.clara@institutolamerced.edu.ar
 59;3° A;Educación Física;profe5@insm.edu
 
-60;3° B;Lengua y Literatura;profe6@insm.edu
-61;3° B;FVT;profe6@insm.edu
-62;3° B;Física;profe6@insm.edu
-63;3° B;Historia;profe6@insm.edu
-64;3° B;Geografía;profe6@insm.edu
-65;3° B;Artes Visuales;profe6@insm.edu
-66;3° B;Música;profe6@insm.edu
-67;3° B;Matemática;profe6@insm.edu
-68;3° B;Educación Tecnológica;profe6@insm.edu
-69;3° B;Química;profe6@insm.edu
-70;3° B;Computación;profe6@insm.edu
-71;3° B;ERE;profe6@insm.edu
+60;3° B;Lengua y Literatura;yanina.moya@institutolamerced.edu.ar
+61;3° B;FVT;milagros.bergonzo@institutolamerced.edu.ar
+62;3° B;Física;soledad.picard@institutolamerced.edu.ar
+63;3° B;Historia;florencia.andino@institutolamerced.edu.ar
+64;3° B;Geografía;andrea.miretti@institutolamerced.edu.ar
+65;3° B;Artes Visuales;marisa.brisio@institutolamerced.edu.ar
+66;3° B;Música;gerardo.lemos@institutolamerced.edu.ar
+67;3° B;Matemática;tamara.rochia@institutolamerced.edu.ar
+68;3° B;Educación Tecnológica;facundo.gil@institutolamerced.edu.ar
+69;3° B;Química;soledad.picard@institutolamerced.edu.ar
+70;3° B;Computación;carlos.clara@institutolamerced.edu.ar
+71;3° B;ERE;paula.radichi@institutolamerced.edu.ar
 72;3° B;Educación Física;profe6@insm.edu
-73;3° B;Inglés;profe6@insm.edu
+73;3° B;Inglés;ivana.marioni@institutolamerced.edu.ar
 
-74;4° A;Historia;profe7@insm.edu
-75;4° A;Lengua y Literatura;profe7@insm.edu
-76;4° A;Biología;profe7@insm.edu
-77;4° A;ERE;profe7@insm.edu
-78;4° A;Matemática;profe7@insm.edu
-79;4° A;Geografía;profe7@insm.edu
-80;4° A;Educación Artística;profe7@insm.edu
-81;4° A;FVT;profe7@insm.edu
-82;4° A;TIC;profe7@insm.edu
-83;4° A;Sociedad y Comunicación;profe7@insm.edu
-84;4° A;Antropología;profe7@insm.edu
+74;4° A;Historia;silvana.bravo@institutolamerced.edu.ar
+75;4° A;Lengua y Literatura;virginia.gardella@institutolamerced.edu.ar
+76;4° A;Biología;macarena.deyong@institutolamerced.edu.ar
+77;4° A;ERE;gabriela.mugas@institutolamerced.edu.ar
+78;4° A;Matemática;eliana.cabrera@institutolamerced.edu.ar
+79;4° A;Geografía;andrea.miretti@institutolamerced.edu.ar
+80;4° A;Educación Artística;marisa.brisio@institutolamerced.edu.ar
+81;4° A;FVT;milagros.bergonzo@institutolamerced.edu.ar
+82;4° A;TIC;facundo.gil@institutolamerced.edu.ar
+83;4° A;Sociedad y Comunicación;romina.brizzio@institutolamerced.edu.ar
+84;4° A;Antropología;analuz.torressi@institutolamerced.edu.ar
 85;4° A;Educación Física;profe7@insm.edu
-86;4° A;Inglés;profe7@insm.edu
+86;4° A;Inglés;ivana.marioni@institutolamerced.edu.ar
 
-87;4° B;Lengua y Literatura;profe8@insm.edu
-88;4° B;Biología;profe8@insm.edu
-89;4° B;ERE;profe8@insm.edu
-90;4° B;Historia;profe8@insm.edu
-91;4° B;Programación;profe8@insm.edu
-92;4° B;Geografía;profe8@insm.edu
-93;4° B;Matemática;profe8@insm.edu
-94;4° B;Sistemas Digitales;profe8@insm.edu
-95;4° B;FVT;profe8@insm.edu
-96;4° B;Educación Artística;profe8@insm.edu
+87;4° B;Lengua y Literatura;virginia.gardella@institutolamerced.edu.ar
+88;4° B;Biología;macarena.deyong@institutolamerced.edu.ar
+89;4° B;ERE;gabriela.mugas@institutolamerced.edu.ar
+90;4° B;Historia;silvana.bravo@institutolamerced.edu.ar
+91;4° B;Programación;carlos.clara@institutolamerced.edu.ar
+92;4° B;Geografía;andrea.miretti@institutolamerced.edu.ar
+93;4° B;Matemática;eliana.cabrera@institutolamerced.edu.ar
+94;4° B;Sistemas Digitales;gustavo.mendoza@institutolamerced.edu.ar
+95;4° B;FVT;milagros.bergonzo@institutolamerced.edu.ar
+96;4° B;Educación Artística;marisa.brisio@institutolamerced.edu.ar
 97;4° B;Educación Física;profe8@insm.edu
-98;4° B;Inglés;profe8@insm.edu
+98;4° B;Inglés;maria.guzman@institutolamerced.edu.ar
 
-99;5° A;Metodología;profe9@insm.edu
-100;5° A;Historia;profe9@insm.edu
-101;5° A;Física;profe9@insm.edu
-102;5° A;Geografía;profe9@insm.edu
-103;5° A;Arte Cultural y Social;profe9@insm.edu
-104;5° A;ERE;profe9@insm.edu
-105;5° A;Lengua y Literatura;profe9@insm.edu
-106;5° A;FVT;profe9@insm.edu
-107;5° A;Matemática;profe9@insm.edu
+99;5° A;Metodología;marisa.ferrero@institutolamerced.edu.ar
+100;5° A;Historia;florencia.andino@institutolamerced.edu.ar
+101;5° A;Física;silvana.bravo@institutolamerced.edu.ar
+102;5° A;Geografía;andrea.miretti@institutolamerced.edu.ar
+103;5° A;Arte Cultural y Social;marisa.brisio@institutolamerced.edu.ar
+104;5° A;ERE;gabriela.mugas@institutolamerced.edu.ar
+105;5° A;Lengua y Literatura;ivana.lario@institutolamerced.edu.ar
+106;5° A;FVT;milagros.bergonzo@institutolamerced.edu.ar
+107;5° A;Matemática;eliana.cabrera@institutolamerced.edu.ar
 108;5° A;Educación Física;profe9@insm.edu
-109;5° A;Psicología;profe9@insm.edu
-110;5° A;Sociología;profe9@insm.edu
-111;5° A;Inglés;profe9@insm.edu
+109;5° A;Psicología;luciana.noriega@institutolamerced.edu.ar
+110;5° A;Sociología;luciana.noriega@institutolamerced.edu.ar
+111;5° A;Inglés;ivana.marioni@institutolamerced.edu.ar
 
-112;5° B;Robótica;profe10@insm.edu
-113;5° B;Música;profe10@insm.edu
-114;5° B;Física;profe10@insm.edu
-115;5° B;Matemática;profe10@insm.edu
-116;5° B;Historia;profe10@insm.edu
-117;5° B;Lengua y Literatura;profe10@insm.edu
-118;5° B;FVT;profe10@insm.edu
-119;5° B;Sistemas Digitales;profe10@insm.edu
-120;5° B;Geografía;profe10@insm.edu
-121;5° B;Psicología;profe10@insm.edu
+112;5° B;Robótica;carlos.clara@institutolamerced.edu.ar
+113;5° B;Música;gerardo.lemos@institutolamerced.edu.ar
+114;5° B;Física;silvana.bravo@institutolamerced.edu.ar
+115;5° B;Matemática;tamara.rochia@institutolamerced.edu.ar
+116;5° B;Historia;florencia.andino@institutolamerced.edu.ar
+117;5° B;Lengua y Literatura;laura.bertea@institutolamerced.edu.ar
+118;5° B;FVT;milagros.bergonzo@institutolamerced.edu.ar
+119;5° B;Sistemas Digitales;gustavo.mendoza@institutolamerced.edu.ar
+120;5° B;Geografía;andrea.miretti@institutolamerced.edu.ar
+121;5° B;Psicología;luciana.noriega@institutolamerced.edu.ar
 122;5° B;Educación Física;profe10@insm.edu
-123;5° B;Desarrollo Informático;profe10@insm.edu
-124;5° B;Inglés;profe10@insm.edu
+123;5° B;Desarrollo Informático;carlos.clara@institutolamerced.edu.ar
+124;5° B;Inglés;maria.guzman@institutolamerced.edu.ar
 
-125;6° A;Ciudadanía y Política;profe11@insm.edu
-126;6° A;Economía Política;profe11@insm.edu
-127;6° A;Matemática;profe11@insm.edu
-128;6° A;Geografía;profe11@insm.edu
-129;6° A;Filosofía;profe11@insm.edu
-130;6° A;Química;profe11@insm.edu
-131;6° A;Lengua y Literatura;profe11@insm.edu
-132;6° A;Historia;profe11@insm.edu
-133;6° A;ERE;profe11@insm.edu
-134;6° A;Sociedad y Comunicación;profe11@insm.edu
+125;6° A;Ciudadanía y Política;evangelina.saravia@institutolamerced.edu.ar
+126;6° A;Economía Política;paola.auban@institutolamerced.edu.ar
+127;6° A;Matemática;eliana.cabrera@institutolamerced.edu.ar
+128;6° A;Geografía;andrea.miretti@institutolamerced.edu.ar
+129;6° A;Filosofía;luciana.noriega@institutolamerced.edu.ar
+130;6° A;Química;alicia.vocos@institutolamerced.edu.ar
+131;6° A;Lengua y Literatura;ivana.lario@institutolamerced.edu.ar
+132;6° A;Historia;florencia.andino@institutolamerced.edu.ar
+133;6° A;ERE;gabriela.mugas@institutolamerced.edu.ar
+134;6° A;Sociedad y Comunicación;romina.brizzio@institutolamerced.edu.ar
 135;6° A;Teatro;profe11@insm.edu
-136;6° A;FVT;profe11@insm.edu
+136;6° A;FVT;milagros.bergonzo@institutolamerced.edu.ar
 137;6° A;Educación Física;profe11@insm.edu
-138;6° A;Inglés;profe11@insm.edu
+138;6° A;Inglés;ivana.marioni@institutolamerced.edu.ar
 
-139;6° B;Lengua y Literatura;profe12@insm.edu
+139;6° B;Lengua y Literatura;laura.bertea@institutolamerced.edu.ar
 140;6° B;Comunicación Audiovisual;profe12@insm.edu
-141;6° B;Desarrollo de Soluciones Informáticas;profe12@insm.edu
-142;6° B;Informática Aplicada;profe12@insm.edu
-143;6° B;Filosofía;profe12@insm.edu
-144;6° B;Formación para la Vida y el Trabajo;profe12@insm.edu
-145;6° B;Química;profe12@insm.edu
-146;6° B;Matemática;profe12@insm.edu
-147;6° B;ERE;profe12@insm.edu
-148;6° B;Ciudadanía y Política;profe12@insm.edu
+141;6° B;Desarrollo de Soluciones Informáticas;carlos.clara@institutolamerced.edu.ar
+142;6° B;Informática Aplicada;diamela.alvarez@institutolamerced.edu.ar
+143;6° B;Filosofía;santiago.romero@institutolamerced.edu.ar
+144;6° B;Formación para la Vida y el Trabajo;evangelina.saravia@institutolamerced.edu.ar
+145;6° B;Química;macarena.deyong@institutolamerced.edu.ar
+146;6° B;Matemática;tamara.rochia@institutolamerced.edu.ar
+147;6° B;ERE;gabriela.mugas@institutolamerced.edu.ar
+148;6° B;Ciudadanía y Política;evangelina.saravia@institutolamerced.edu.ar
 149;6° B;Teatro;profe12@insm.edu
 150;6° B;Educación Física;profe12@insm.edu
-151;6° B;Aplicaciones Informáticas;profe12@insm.edu
-152;6° B;Inglés;profe12@insm.edu
+151;6° B;Aplicaciones Informáticas;diamela.alvarez@institutolamerced.edu.ar
+152;6° B;Inglés;maria.guzman@institutolamerced.edu.ar
