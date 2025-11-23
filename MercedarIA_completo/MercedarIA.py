@@ -320,6 +320,43 @@ st.info(
     f"Rol: **{rol}** — Curso: **{curso_usuario}**"
 )
 
+# ============================================
+# FUNCIÓN DE DEEPSEEK
+# ============================================
+
+def consultar_deepseek(pregunta, contexto_txt):
+    """
+    Envía la pregunta + contexto a la API de DeepSeek.
+    """
+    url = "https://api.deepseek.com/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY"],
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": contexto_txt},
+            {"role": "user", "content": pregunta}
+        ],
+        "max_tokens": 600,
+    }
+
+    try:
+        r = requests.post(url, json=payload, headers=headers, timeout=18)
+        r.raise_for_status()
+        data = r.json()
+        if "choices" in data:
+            return data["choices"][0]["message"]["content"]
+        return "Error interpretando la respuesta."
+    except Exception as e:
+        return f"Error al consultar DeepSeek: {e}"
+
+# ============================================
+# FUNCIÓN PARA ARMAR CONTEXTO COMPLETO
+# ============================================
+
 def construir_contexto_completo(curso_usuario):
     contexto = "INFORMACIÓN DEL USUARIO LOGUEADO:\n"
     contexto += f"El usuario actual pertenece al curso {curso_usuario}.\n"
@@ -485,8 +522,7 @@ with st.expander("Ver tareas del curso", expanded=False):
                 }
 
                 tareas.append(nueva)
-                # 👉 Esto guarda TODAS las tareas (incluida la nueva)
-                #    en BASES_ROOT/tasks.txt de tu repo GitHub
+                # Guarda TODAS las tareas en tasks.txt del repo
                 guardar_tareas(tareas)
                 # Y también la mete en los txt por materia del curso
                 agregar_tarea_a_bases_de_curso(curso_usuario, nueva, cursos)
@@ -583,4 +619,3 @@ if rol == "admin":
         guardar_cursos(cursos)
         st.success("Materia agregada.")
         st.rerun()
-
