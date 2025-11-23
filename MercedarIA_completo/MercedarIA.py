@@ -320,42 +320,14 @@ st.info(
     f"Rol: **{rol}** — Curso: **{curso_usuario}**"
 )
 
-# ============================================
-# FUNCIÓN DE DEEPSEEK
-# ============================================
-
-def consultar_deepseek(pregunta, contexto_txt):
-    url = "https://api.deepseek.com/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "system", "content": contexto_txt},
-            {"role": "user", "content": pregunta}
-        ],
-        "max_tokens": 600,
-    }
-
-    try:
-        r = requests.post(url, json=payload, headers=headers, timeout=18)
-        r.raise_for_status()
-        data = r.json()
-        if "choices" in data:
-            return data["choices"][0]["message"]["content"]
-        return "Error interpretando la respuesta."
-    except Exception as e:
-        return f"Error al consultar DeepSeek: {e}"
-
-# ============================================
-# FUNCIÓN PARA ARMAR CONTEXTO COMPLETO
-# ============================================
-
 def construir_contexto_completo(curso_usuario):
-    contexto = "BASE DEL COLEGIO:\n\n"
+    contexto = "INFORMACIÓN DEL USUARIO LOGUEADO:\n"
+    contexto += f"El usuario actual pertenece al curso {curso_usuario}.\n"
+    contexto += f"Nombre: {usuario['nombre']} {usuario['apellido']}.\n"
+    contexto += f"Rol: {usuario['rol']}.\n"
+    contexto += f"Email: {usuario['email']}.\n\n"
+
+    contexto += "BASE DEL COLEGIO:\n\n"
 
     # General
     for p, r in BASE_GENERAL:
@@ -378,13 +350,11 @@ def construir_contexto_completo(curso_usuario):
     # Cursos y materias con profesor asignado
     contexto += "\nBASE DE CURSOS Y PROFESORES:\n"
     for c in cursos:
-        # buscar el nombre del profe por email
         prof = next((u for u in usuarios if u["email"] == c["email"]), None)
         if prof:
             contexto += (
                 f"En el curso {c['curso']}, la materia {c['materia']} "
-                f"la dicta {prof['nombre']} {prof['apellido']} "
-                f"({prof['email']}).\n"
+                f"la dicta {prof['nombre']} {prof['apellido']} ({prof['email']}).\n"
             )
         else:
             contexto += (
@@ -394,7 +364,6 @@ def construir_contexto_completo(curso_usuario):
 
     # Bases por materia según TXT
     contexto += "\nBASE DE MATERIAS (faq + tareas guardadas en txt):\n"
-
     for c in cursos:
         if c["curso"] == curso_usuario:
             path = archivo_base_curso_materia(c["curso"], c["materia"])
@@ -614,3 +583,4 @@ if rol == "admin":
         guardar_cursos(cursos)
         st.success("Materia agregada.")
         st.rerun()
+
