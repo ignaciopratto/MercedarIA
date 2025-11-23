@@ -384,7 +384,9 @@ if st.button("Enviar pregunta"):
     if pregunta.strip():
         contexto = construir_contexto_completo(curso_usuario)
         respuesta = consultar_deepseek(pregunta, contexto)
-        st.text_area("Respuesta:", value=respuesta, height=220, disabled=True)
+
+        st.markdown("### 🧠 Respuesta de MercedarIA:")
+        st.write(respuesta)
 
 # ============================================
 # PANEL DE TAREAS
@@ -517,3 +519,4 @@ if rol == "admin":
         guardar_cursos(cursos)
         st.success("Materia agregada.")
         st.rerun()
+
