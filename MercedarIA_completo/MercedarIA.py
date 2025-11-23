@@ -264,7 +264,7 @@ cursos = cargar_cursos()
 tareas = cargar_tareas()
 
 # ============================================
-# LOGIN
+# CONFIG STREAMLIT / LOGIN
 # ============================================
 
 st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
@@ -272,6 +272,10 @@ st.title("🎓 MercedarIA - Asistente del Colegio INSM")
 
 if "usuario" not in st.session_state:
     st.session_state.usuario = None
+
+# Historial de chat en sesión
+if "chat" not in st.session_state:
+    st.session_state.chat = []  # cada item: {"role": "user"/"assistant", "content": "texto"}
 
 if st.session_state.usuario is None:
     st.subheader("🔐 Iniciar sesión")
@@ -307,6 +311,7 @@ rol = usuario["rol"]
 email_usuario = usuario["email"]
 curso_usuario = usuario["curso"]
 
+# Releer siempre para tener lo último desde GitHub
 usuarios = cargar_usuarios()
 cursos = cargar_cursos()
 tareas = cargar_tareas()
@@ -373,64 +378,122 @@ def construir_contexto_completo(curso_usuario):
     return contexto
 
 # ============================================
-# CHAT
+# CHAT ESTILO CONVERSACIÓN
 # ============================================
 
-st.title("💬 Chat con MercedarIA")
+st.header("💬 Chat con MercedarIA")
 
+# Mostrar historial de mensajes (tipo chat)
+for mensaje in st.session_state.chat:
+    if mensaje["role"] == "user":
+        # Mensaje del usuario
+        st.markdown(
+            f"""
+<div style="text-align: right; margin: 4px 0;">
+    <div style="
+        display: inline-block;
+        background-color: #DCF8C6;
+        padding: 8px 12px;
+        border-radius: 12px;
+        max-width: 80%;
+        ">
+        <b>Vos:</b> {mensaje["content"]}
+    </div>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+    else:
+        # Mensaje del asistente
+        st.markdown(
+            f"""
+<div style="text-align: left; margin: 4px 0;">
+    <div style="
+        display: inline-block;
+        background-color: #EEEEEE;
+        padding: 8px 12px;
+        border-radius: 12px;
+        max-width: 80%;
+        ">
+        <b>MercedarIA:</b> {mensaje["content"]}
+    </div>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+
+# Entrada de nueva pregunta
 pregunta = st.text_input("Escribí tu pregunta:")
 
 if st.button("Enviar pregunta"):
     if pregunta.strip():
+        # Guardar pregunta en historial
+        st.session_state.chat.append({
+            "role": "user",
+            "content": pregunta.strip()
+        })
+
+        # Construir contexto y obtener respuesta
         contexto = construir_contexto_completo(curso_usuario)
         respuesta = consultar_deepseek(pregunta, contexto)
 
-        st.markdown("### 🧠 Respuesta de MercedarIA:")
-        st.write(respuesta)
+        # Guardar respuesta en historial
+        st.session_state.chat.append({
+            "role": "assistant",
+            "content": respuesta
+        })
+
+        st.rerun()
 
 # ============================================
-# PANEL DE TAREAS
+# PANEL DE TAREAS (MENOS INTRUSIVO)
 # ============================================
 
-st.header("📝 Tareas")
+with st.expander("📝 Ver tareas del curso", expanded=False):
+    st.subheader("Tareas del curso")
 
-tareas_del_curso = [t for t in tareas if t["curso"] == curso_usuario]
+    tareas_del_curso = [t for t in tareas if t["curso"] == curso_usuario]
 
-for t in tareas_del_curso:
-    st.markdown(f"""
-    **{t['titulo']}**  
-    📌 *{t['descripcion']}*  
-    ⏳ **Vence:** {t['fecha_limite']}  
-    👨‍🏫 **Profesor:** {t['creador']}  
-    ---
-    """)
+    if not tareas_del_curso:
+        st.write("No hay tareas cargadas para tu curso.")
+    else:
+        for t in tareas_del_curso:
+            st.markdown(
+                f"""
+**{t['titulo']}**  
+📌 *{t['descripcion']}*  
+⏳ **Vence:** {t['fecha_limite']}  
+👨‍🏫 **Profesor:** {t['creador']}  
+---
+"""
+            )
 
-if rol == "profe":
-    st.subheader("➕ Crear nueva tarea (solo profes)")
-    titulo = st.text_input("Título de la tarea")
-    descr = st.text_area("Descripción")
-    fecha = st.date_input("Fecha límite")
+    if rol == "profe":
+        st.subheader("➕ Crear nueva tarea (solo profes)")
+        titulo = st.text_input("Título de la tarea", key="titulo_tarea")
+        descr = st.text_area("Descripción", key="descr_tarea")
+        fecha = st.date_input("Fecha límite", key="fecha_tarea")
 
-    if st.button("Agregar tarea"):
-        if titulo.strip() == "":
-            st.warning("Tenés que poner un título.")
-        else:
-            nuevo_id = str(len(tareas) + 1)
-            nueva = {
-                "id": nuevo_id,
-                "titulo": titulo,
-                "descripcion": descr,
-                "curso": curso_usuario,
-                "creador": email_usuario,
-                "fecha_limite": str(fecha)
-            }
+        if st.button("Agregar tarea"):
+            if titulo.strip() == "":
+                st.warning("Tenés que poner un título.")
+            else:
+                nuevo_id = str(len(tareas) + 1)
+                nueva = {
+                    "id": nuevo_id,
+                    "titulo": titulo,
+                    "descripcion": descr,
+                    "curso": curso_usuario,
+                    "creador": email_usuario,
+                    "fecha_limite": str(fecha)
+                }
 
-            tareas.append(nueva)
-            guardar_tareas(tareas)
-            agregar_tarea_a_bases_de_curso(curso_usuario, nueva, cursos)
+                tareas.append(nueva)
+                guardar_tareas(tareas)
+                agregar_tarea_a_bases_de_curso(curso_usuario, nueva, cursos)
 
-            st.success("Tarea agregada correctamente.")
-            st.rerun()
+                st.success("Tarea agregada correctamente.")
+                st.rerun()
 
 # ============================================
 # PANEL DEL PROFESOR (EDITAR BASES)
@@ -519,4 +582,3 @@ if rol == "admin":
         guardar_cursos(cursos)
         st.success("Materia agregada.")
         st.rerun()
-
