@@ -347,6 +347,16 @@ curso_usuario = usuario["curso"]
 
 usuarios = cargar_usuarios()
 cursos = cargar_cursos()
+# Diagnóstico: Ver si courses.txt realmente se leyó
+st.subheader("📁 Diagnóstico de carga de cursos (courses.txt)")
+
+st.write("Cursos cargados:", cursos)
+
+if len(cursos) == 0:
+    st.error("❌ ERROR: courses.txt NO se está leyendo. cursos está vacío.")
+else:
+    st.success(f"✔ Se cargaron {len(cursos)} cursos correctamente desde courses.txt")
+
 tareas = cargar_tareas()
 
 # Inicializar bases por materia según courses.txt
@@ -578,5 +588,6 @@ if rol == "admin":
 
         st.success("Materia creada y base inicial generada.")
         st.experimental_rerun()
+
 
 
