@@ -302,6 +302,18 @@ def agregar_tarea_a_bases_de_curso(curso, tarea, cursos):
             escribir_archivo_github(path, nuevo_contenido)
 
 # ============================================
+# CARGA INICIAL (ANTES DEL LOGIN)
+# ============================================
+
+# Cargamos las listas base
+usuarios = cargar_usuarios()
+cursos = cargar_cursos()
+tareas = cargar_tareas()
+
+# Creamos todas las bases por materia apenas arranca la app
+inicializar_bases_por_materia(cursos)
+
+# ============================================
 # LOGIN
 # ============================================
 
@@ -345,22 +357,18 @@ rol = usuario["rol"]
 email_usuario = usuario["email"]
 curso_usuario = usuario["curso"]
 
+# Recargamos datos por si algo cambió (admin)
 usuarios = cargar_usuarios()
 cursos = cargar_cursos()
-# Diagnóstico: Ver si courses.txt realmente se leyó
+tareas = cargar_tareas()
+
+# Diagnóstico opcional: courses.txt leído
 st.subheader("📁 Diagnóstico de carga de cursos (courses.txt)")
-
 st.write("Cursos cargados:", cursos)
-
 if len(cursos) == 0:
     st.error("❌ ERROR: courses.txt NO se está leyendo. cursos está vacío.")
 else:
     st.success(f"✔ Se cargaron {len(cursos)} cursos correctamente desde courses.txt")
-
-tareas = cargar_tareas()
-
-# Inicializar bases por materia según courses.txt
-inicializar_bases_por_materia(cursos)
 
 st.info(
     f"Conectado como **{usuario['nombre']} {usuario['apellido']}** — "
@@ -402,7 +410,6 @@ def consultar_deepseek(pregunta, contexto_txt):
     except Exception as e:
         return f"Error al consultar DeepSeek: {e}"
 
-
 # ============================================
 # FUNCIÓN PARA ARMAR EL CONTEXTO DE UN CURSO
 # ============================================
@@ -432,7 +439,6 @@ def construir_contexto_completo(curso_usuario):
 
     return contexto
 
-
 # ============================================
 # CHAT DEL ALUMNO
 # ============================================
@@ -446,7 +452,6 @@ if st.button("Enviar pregunta"):
         contexto = construir_contexto_completo(curso_usuario)
         respuesta = consultar_deepseek(pregunta, contexto)
         st.text_area("Respuesta:", value=respuesta, height=220)
-
 
 # ============================================
 # PANEL DE TAREAS (ALUMNOS Y PROFES)
@@ -496,7 +501,6 @@ if rol == "profe":
 
             st.success("Tarea agregada correctamente.")
             st.experimental_rerun()
-
 
 # ============================================
 # PANEL DEL PROFESOR (EDITAR SOLO SUS MATERIAS)
@@ -588,6 +592,3 @@ if rol == "admin":
 
         st.success("Materia creada y base inicial generada.")
         st.experimental_rerun()
-
-
-
