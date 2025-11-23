@@ -289,7 +289,7 @@ if st.session_state.usuario is None:
         if user:
             st.session_state.usuario = user
             st.success(f"Bienvenido/a {user['nombre']} {user['apellido']}.")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Email o contraseña incorrectos.")
             st.stop()
@@ -436,7 +436,7 @@ if rol == "profe":
             agregar_tarea_a_bases_de_curso(curso_usuario, nueva, cursos)
 
             st.success("Tarea agregada correctamente.")
-            st.experimental_rerun()
+            st.rerun()
 
 # ============================================
 # PANEL DEL PROFESOR (EDITAR BASES)
@@ -502,7 +502,7 @@ if rol == "admin":
         })
         guardar_usuarios(usuarios)
         st.success("Usuario creado.")
-        st.experimental_rerun()
+        st.rerun()
 
     st.subheader("Cursos existentes")
     for c_obj in cursos:
@@ -524,4 +524,5 @@ if rol == "admin":
         })
         guardar_cursos(cursos)
         st.success("Materia agregada.")
-        st.experimental_rerun()
+        st.rerun()
+
