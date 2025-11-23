@@ -311,14 +311,6 @@ usuarios = cargar_usuarios()
 cursos = cargar_cursos()
 tareas = cargar_tareas()
 
-# Diagnóstico opcional
-st.subheader("📁 Diagnóstico de carga de cursos (courses.txt)")
-st.write("Cursos cargados:", cursos)
-if len(cursos) == 0:
-    st.error("❌ ERROR: courses.txt NO se está leyendo.")
-else:
-    st.success(f"✔ Se cargaron {len(cursos)} cursos correctamente.")
-
 st.info(
     f"Conectado como **{usuario['nombre']} {usuario['apellido']}** — "
     f"Rol: **{rol}** — Curso: **{curso_usuario}**"
@@ -392,7 +384,7 @@ if st.button("Enviar pregunta"):
     if pregunta.strip():
         contexto = construir_contexto_completo(curso_usuario)
         respuesta = consultar_deepseek(pregunta, contexto)
-        st.text_area("Respuesta:", value=respuesta, height=220)
+        st.text_area("Respuesta:", value=respuesta, height=220, disabled=True)
 
 # ============================================
 # PANEL DE TAREAS
@@ -525,4 +517,3 @@ if rol == "admin":
         guardar_cursos(cursos)
         st.success("Materia agregada.")
         st.rerun()
-
