@@ -1,0 +1,3 @@
+juan.perez@insm.edu;Juan;Pérez;alumno;1° B;juan123
+profe.marta@insm.edu;Marta;González;profe;1° B;marta456
+admin@insm.edu;Admin;General;admin;General;admin123
