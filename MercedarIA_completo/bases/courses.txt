@@ -1,0 +1,163 @@
+1;1° A;Biología;profe1@insm.edu
+2;1° A;Artes Visuales;profe1@insm.edu
+3;1° A;Lengua y Literatura;profe1@insm.edu
+4;1° A;Física;profe1@insm.edu
+5;1° A;Geografía;profe1@insm.edu
+6;1° A;Educación Tecnológica;profe1@insm.edu
+7;1° A;Matemática;profe1@insm.edu
+8;1° A;ERE;profe1@insm.edu
+9;1° A;Ciudadanía y Participación;profe1@insm.edu
+10;1° A;Inglés;profe1@insm.edu
+11;1° A;Educación Física;profe1@insm.edu
+
+12;1° B;Física;profe2@insm.edu
+13;1° B;Matemática;profe2@insm.edu
+14;1° B;Artes Visuales;profe2@insm.edu
+15;1° B;Inglés;profe2@insm.edu
+16;1° B;ERE;profe2@insm.edu
+17;1° B;Lengua y Literatura;profe2@insm.edu
+18;1° B;Geografía;profe2@insm.edu
+19;1° B;Ciudadanía y Participación;profe2@insm.edu
+20;1° B;Educación Tecnológica;profe2@insm.edu
+21;1° B;Biología;profe2@insm.edu
+22;1° B;Educación Física;profe2@insm.edu
+
+23;2° A;Matemática;profe3@insm.edu
+24;2° A;Lengua y Literatura;profe3@insm.edu
+25;2° A;ERE;profe3@insm.edu
+26;2° A;Música;profe3@insm.edu
+27;2° A;Historia;profe3@insm.edu
+28;2° A;Educación Tecnológica;profe3@insm.edu
+29;2° A;Química;profe3@insm.edu
+30;2° A;Computación;profe3@insm.edu
+31;2° A;Ciudadanía y Participación;profe3@insm.edu
+32;2° A;Biología;profe3@insm.edu
+33;2° A;Inglés;profe3@insm.edu
+34;2° A;Educación Física;profe3@insm.edu
+
+35;2° B;Música;profe4@insm.edu
+36;2° B;Historia;profe4@insm.edu
+37;2° B;ERE;profe4@insm.edu
+38;2° B;Ciudadanía y Participación;profe4@insm.edu
+39;2° B;Inglés;profe4@insm.edu
+40;2° B;Matemática;profe4@insm.edu
+41;2° B;Lengua y Literatura;profe4@insm.edu
+42;2° B;Educación Tecnológica;profe4@insm.edu
+43;2° B;Química;profe4@insm.edu
+44;2° B;Biología;profe4@insm.edu
+45;2° B;Educación Física;profe4@insm.edu
+
+46;3° A;Lengua y Literatura;profe5@insm.edu
+47;3° A;Inglés;profe5@insm.edu
+48;3° A;Historia;profe5@insm.edu
+49;3° A;Geografía;profe5@insm.edu
+50;3° A;Química;profe5@insm.edu
+51;3° A;Educación Tecnológica;profe5@insm.edu
+52;3° A;Física;profe5@insm.edu
+53;3° A;ERE;profe5@insm.edu
+54;3° A;FVT;profe5@insm.edu
+55;3° A;Matemática;profe5@insm.edu
+56;3° A;Artes Visuales;profe5@insm.edu
+57;3° A;Música;profe5@insm.edu
+58;3° A;Computación;profe5@insm.edu
+59;3° A;Educación Física;profe5@insm.edu
+
+60;3° B;Lengua y Literatura;profe6@insm.edu
+61;3° B;FVT;profe6@insm.edu
+62;3° B;Física;profe6@insm.edu
+63;3° B;Historia;profe6@insm.edu
+64;3° B;Geografía;profe6@insm.edu
+65;3° B;Artes Visuales;profe6@insm.edu
+66;3° B;Música;profe6@insm.edu
+67;3° B;Matemática;profe6@insm.edu
+68;3° B;Educación Tecnológica;profe6@insm.edu
+69;3° B;Química;profe6@insm.edu
+70;3° B;Computación;profe6@insm.edu
+71;3° B;ERE;profe6@insm.edu
+72;3° B;Educación Física;profe6@insm.edu
+73;3° B;Inglés;profe6@insm.edu
+
+74;4° A;Historia;profe7@insm.edu
+75;4° A;Lengua y Literatura;profe7@insm.edu
+76;4° A;Biología;profe7@insm.edu
+77;4° A;ERE;profe7@insm.edu
+78;4° A;Matemática;profe7@insm.edu
+79;4° A;Geografía;profe7@insm.edu
+80;4° A;Educación Artística;profe7@insm.edu
+81;4° A;FVT;profe7@insm.edu
+82;4° A;TIC;profe7@insm.edu
+83;4° A;Sociedad y Comunicación;profe7@insm.edu
+84;4° A;Antropología;profe7@insm.edu
+85;4° A;Educación Física;profe7@insm.edu
+86;4° A;Inglés;profe7@insm.edu
+
+87;4° B;Lengua y Literatura;profe8@insm.edu
+88;4° B;Biología;profe8@insm.edu
+89;4° B;ERE;profe8@insm.edu
+90;4° B;Historia;profe8@insm.edu
+91;4° B;Programación;profe8@insm.edu
+92;4° B;Geografía;profe8@insm.edu
+93;4° B;Matemática;profe8@insm.edu
+94;4° B;Sistemas Digitales;profe8@insm.edu
+95;4° B;FVT;profe8@insm.edu
+96;4° B;Educación Artística;profe8@insm.edu
+97;4° B;Educación Física;profe8@insm.edu
+98;4° B;Inglés;profe8@insm.edu
+
+99;5° A;Metodología;profe9@insm.edu
+100;5° A;Historia;profe9@insm.edu
+101;5° A;Física;profe9@insm.edu
+102;5° A;Geografía;profe9@insm.edu
+103;5° A;Arte Cultural y Social;profe9@insm.edu
+104;5° A;ERE;profe9@insm.edu
+105;5° A;Lengua y Literatura;profe9@insm.edu
+106;5° A;FVT;profe9@insm.edu
+107;5° A;Matemática;profe9@insm.edu
+108;5° A;Educación Física;profe9@insm.edu
+109;5° A;Psicología;profe9@insm.edu
+110;5° A;Sociología;profe9@insm.edu
+111;5° A;Inglés;profe9@insm.edu
+
+112;5° B;Robótica;profe10@insm.edu
+113;5° B;Música;profe10@insm.edu
+114;5° B;Física;profe10@insm.edu
+115;5° B;Matemática;profe10@insm.edu
+116;5° B;Historia;profe10@insm.edu
+117;5° B;Lengua y Literatura;profe10@insm.edu
+118;5° B;FVT;profe10@insm.edu
+119;5° B;Sistemas Digitales;profe10@insm.edu
+120;5° B;Geografía;profe10@insm.edu
+121;5° B;Psicología;profe10@insm.edu
+122;5° B;Educación Física;profe10@insm.edu
+123;5° B;Desarrollo Informático;profe10@insm.edu
+124;5° B;Inglés;profe10@insm.edu
+
+125;6° A;Ciudadanía y Política;profe11@insm.edu
+126;6° A;Economía Política;profe11@insm.edu
+127;6° A;Matemática;profe11@insm.edu
+128;6° A;Geografía;profe11@insm.edu
+129;6° A;Filosofía;profe11@insm.edu
+130;6° A;Química;profe11@insm.edu
+131;6° A;Lengua y Literatura;profe11@insm.edu
+132;6° A;Historia;profe11@insm.edu
+133;6° A;ERE;profe11@insm.edu
+134;6° A;Sociedad y Comunicación;profe11@insm.edu
+135;6° A;Teatro;profe11@insm.edu
+136;6° A;FVT;profe11@insm.edu
+137;6° A;Educación Física;profe11@insm.edu
+138;6° A;Inglés;profe11@insm.edu
+
+139;6° B;Lengua y Literatura;profe12@insm.edu
+140;6° B;Comunicación Audiovisual;profe12@insm.edu
+141;6° B;Desarrollo de Soluciones Informáticas;profe12@insm.edu
+142;6° B;Informática Aplicada;profe12@insm.edu
+143;6° B;Filosofía;profe12@insm.edu
+144;6° B;Formación para la Vida y el Trabajo;profe12@insm.edu
+145;6° B;Química;profe12@insm.edu
+146;6° B;Matemática;profe12@insm.edu
+147;6° B;ERE;profe12@insm.edu
+148;6° B;Ciudadanía y Política;profe12@insm.edu
+149;6° B;Teatro;profe12@insm.edu
+150;6° B;Educación Física;profe12@insm.edu
+151;6° B;Aplicaciones Informáticas;profe12@insm.edu
+152;6° B;Inglés;profe12@insm.edu
