@@ -317,52 +317,53 @@ if st.session_state.usuario is None and not st.session_state.modo_anonimo:
 
     # ---------- REGISTRO ----------
     with col_reg:
-        st.markdown("### 🧾 Crear cuenta")
-
-        new_email = st.text_input("Email nuevo", key="reg_email")
-        new_nombre = st.text_input("Nombre", key="reg_nombre")
-        new_apellido = st.text_input("Apellido", key="reg_apellido")
-
-        tipo_cuenta = st.selectbox("Tipo de cuenta", ["alumno", "profe"], key="reg_tipo")
-
-        if tipo_cuenta == "alumno":
-            cursos_disponibles = sorted({c["curso"] for c in cursos})
-            new_curso = st.selectbox("Curso", cursos_disponibles, key="reg_curso")
-        else:
-            new_curso = "-"
-
-        new_pw = st.text_input("Contraseña nueva", type="password", key="reg_pw")
-
-        if tipo_cuenta == "profe":
-            admin_pw = st.text_input(
-                "Contraseña de administrador para crear profesor",
-                type="password",
-                key="reg_admin_pw"
+        st.subheader("🧾 Crear cuenta")
+    
+        new_email = st.text_input("Nuevo email", key="reg_email_main")
+        new_nombre = st.text_input("Nombre", key="reg_nombre_main")
+        new_apellido = st.text_input("Apellido", key="reg_apellido_main")
+    
+        tipo = st.selectbox("Tipo de cuenta", ["alumno", "profe"], key="reg_tipo_main")
+    
+        if tipo == "alumno":
+            new_curso = st.selectbox(
+                "Curso",
+                sorted({c["curso"] for c in cursos}),
+                key="reg_curso_main"
             )
         else:
-            admin_pw = ""
-
-        if st.button("Crear cuenta"):
+            new_curso = "-"
+    
+        new_pw = st.text_input("Contraseña", type="password", key="reg_pw_main")
+    
+        admin_key = ""
+        if tipo == "profe":
+            admin_key = st.text_input(
+                "Contraseña de administrador",
+                type="password",
+                key="reg_admin_pw_main"
+            )
+    
+        if st.button("Crear cuenta", key="reg_btn_main"):
             usuarios = cargar_usuarios()
-
+    
             if any(u["email"].lower() == new_email.lower() for u in usuarios):
-                st.error("Ya existe un usuario con ese email.")
-            elif tipo_cuenta == "profe" and admin_pw != ADMIN_MASTER_KEY:
-                st.error("Contraseña de administrador incorrecta.")
-            elif not new_email or not new_nombre or not new_apellido or not new_pw:
-                st.error("Completá todos los campos.")
+                st.error("Ese email ya existe")
+            elif tipo == "profe" and admin_key != ADMIN_MASTER_KEY:
+                st.error("Contraseña admin incorrecta")
             else:
                 usuarios.append({
                     "email": new_email.strip(),
                     "nombre": new_nombre.strip(),
                     "apellido": new_apellido.strip(),
-                    "rol": tipo_cuenta,
-                    "curso": normalizar_curso(new_curso.strip()),
-                    "password": new_pw.strip(),
+                    "rol": tipo,
+                    "curso": new_curso,
+                    "password": new_pw.strip()
                 })
                 guardar_usuarios(usuarios)
-                st.success("Cuenta creada. Podés iniciar sesión.")
+                st.success("Cuenta creada correctamente.")
                 st.rerun()
+
 
     # ---------- MODO ANÓNIMO ----------
     with col_anon:
@@ -929,3 +930,4 @@ if rol == "admin":
                     st.rerun()
         else:
             st.info("No hay cursos en courses.txt.")
+
