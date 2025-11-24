@@ -409,7 +409,7 @@ col_info, col_logout = st.columns([4, 1])
 
 with col_info:
     if rol == "anonimo":
-        st.info("Conectado en **modo invitado** — solo se usa la base general.")
+        st.info("Conectado en **modo invitado** — solo se usa la base general de conocimiento.")
     else:
         st.info(
             f"Conectado como **{usuario['nombre']} {usuario['apellido']}** — "
@@ -925,3 +925,4 @@ if rol == "admin":
                     st.rerun()
         else:
             st.info("No hay cursos en courses.txt.")
+
