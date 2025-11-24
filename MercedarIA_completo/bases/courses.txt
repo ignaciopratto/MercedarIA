@@ -7,9 +7,9 @@
 7;1° A;Matemática;alejandra.pissane@institutolamerced.edu.ar
 8;1° A;ERE;gabriela.mugas@institutolamerced.edu.ar
 9;1° A;Ciudadanía y Participación;yanina.moya@institutolamerced.edu.ar
-
 10;1° A;Inglés;ivana.marioni@institutolamerced.edu.ar
 11;1° A;Educación Física;cecilia.viotti@institutolamerced.edu.ar
+
 12;1° B;Física;soledad.picard@institutolamerced.edu.ar
 13;1° B;Matemática;enzoeara019@gmail.com
 14;1° B;Artes Visuales;sin_profesor@insm.edu
@@ -161,4 +161,5 @@
 150;6° B;Educación Física;sin_profesor@insm.edu
 151;6° B;Aplicaciones Informáticas;sin_profesor@insm.edu
 152;6° B;Inglés;sin_profesor@insm.edu
+
 
