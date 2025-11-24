@@ -9,3 +9,155 @@
 9;TP de Ciudadanía;Completar cuadro sobre derechos y responsabilidades.;1° A;Ciudadanía y Participación;yanina.moya@institutolamerced.edu.ar;2025-03-30
 10;Vocabulario Unidad 1;Aprender 20 palabras nuevas.;1° A;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-04-01
 11;Ficha de condición física;Completar planilla de EF.;1° A;Educación Física;profe1@insm.edu;2025-04-02
+
+12;Guía de Física;Resolver ejercicios del 1 al 6.;1° B;Física;soledad.picard@institutolamerced.edu.ar;2025-03-20
+13;Práctica de Matemática;Ejercicios de suma y resta de fracciones.;1° B;Matemática;enzoeara019@gmail.com;2025-03-21
+14;Trabajo plástico;Hacer una lámina sobre texturas.;1° B;Artes Visuales;marisa.brisio@institutolamerced.edu.ar;2025-03-22
+15;Lista de vocabulario Unidad 1;Aprender 15 palabras.;1° B;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-03-23
+16;Trabajo de reflexión;Escribir sobre el valor del respeto.;1° B;ERE;gabriela.mugas@institutolamerced.edu.ar;2025-03-24
+17;Producción escrita;Escribir una redacción narrativa.;1° B;Lengua y Literatura;yanina.moya@institutolamerced.edu.ar;2025-03-25
+18;Mapa físico;Completar mapa de Argentina.;1° B;Geografía;andrea.miretti@institutolamerced.edu.ar;2025-03-26
+19;Guía de ciudadanía;Completar cuadro de normas escolares.;1° B;Ciudadanía y Participación;yanina.moya@institutolamerced.edu.ar;2025-03-27
+20;Proyecto tecnológico;Hacer informe sobre herramientas.;1° B;Educación Tecnológica;facundo.gil@institutolamerced.edu.ar;2025-03-28
+21;Cuestionario de Biología;Responder preguntas de la unidad 2.;1° B;Biología;soledad.picard@institutolamerced.edu.ar;2025-03-29
+22;Planilla física;Completar autoevaluación de condición física.;1° B;Educación Física;profe2@insm.edu;2025-03-30
+
+23;Práctica de Matemática;Resolver guía de potencias.;2° A;Matemática;alejandra.pissane@institutolamerced.edu.ar;2025-03-20
+24;Producción escrita;Escribir una opinión argumentada.;2° A;Lengua y Literatura;virginia.gardella@institutolamerced.edu.ar;2025-03-21
+25;Trabajo sobre la fe;Escribir reflexión sobre valores.;2° A;ERE;gabriela.mugas@institutolamerced.edu.ar;2025-03-22
+26;Canción en flauta;Practicar melodía asignada.;2° A;Música;gerardo.lemos@institutolamerced.edu.ar;2025-03-23
+27;Cuadro histórico;Resumir causas de la revolución.;2° A;Historia;florencia.andino@institutolamerced.edu.ar;2025-03-24
+28;Informe tecnológico;Explicar componentes de un circuito.;2° A;Educación Tecnológica;mj.esposito@institutolamerced.edu.ar;2025-03-25
+29;Guía de química;Resolver ejercicios de estados de la materia.;2° A;Química;alicia.vocos@institutolamerced.edu.ar;2025-03-26
+30;Actividad de computación;Realizar presentación en PowerPoint.;2° A;Computación;enzoeara019@gmail.com;2025-03-27
+31;Cuadro comparativo;Comparar ciudadanía antigua y moderna.;2° A;Ciudadanía y Participación;milagros.bergonzo@institutolamerced.edu.ar;2025-03-28
+32;Trabajo sobre células;Completar cuestionario del libro.;2° A;Biología;cecilia.viotti@institutolamerced.edu.ar;2025-03-29
+33;Vocabulario;Estudiar verbos irregulares.;2° A;Inglés;maria.guzman@institutolamerced.edu.ar;2025-03-30
+34;Planilla física;Completar rutinas básicas.;2° A;Educación Física;profe3@insm.edu;2025-04-01
+
+35;Actividad musical;Practicar la melodía asignada.;2° B;Música;gerardo.lemos@institutolamerced.edu.ar;2025-03-20
+36;Trabajo práctico de Historia;Realizar un cuadro cronológico.;2° B;Historia;florencia.andino@institutolamerced.edu.ar;2025-03-21
+37;Trabajo de fe y valores;Escribir reflexión sobre la empatía.;2° B;ERE;paula.radichi@institutolamerced.edu.ar;2025-03-22
+38;Ficha cívica;Completar conceptos de ciudadanía.;2° B;Ciudadanía y Participación;milagros.bergonzo@institutolamerced.edu.ar;2025-03-23
+39;Vocabulario Unidad 1;Estudiar verbos básicos.;2° B;Inglés;maria.guzman@institutolamerced.edu.ar;2025-03-24
+40;Guía de Matemática;Ejercicios de potencias.;2° B;Matemática;enzoeara019@gmail.com;2025-03-25
+41;Comprensión lectora;Leer cuento breve y responder preguntas.;2° B;Lengua y Literatura;yanina.moya@institutolamerced.edu.ar;2025-03-26
+42;Circuitos básicos;Armar un esquema eléctrico.;2° B;Educación Tecnológica;mj.esposito@institutolamerced.edu.ar;2025-03-27
+43;Guía de química;Resolver ejercicios de mezclas.;2° B;Química;soledad.picard@institutolamerced.edu.ar;2025-03-28
+44;Trabajo de Biología;Cuestionario sobre nutrición.;2° B;Biología;soledad.picard@institutolamerced.edu.ar;2025-03-29
+45;Planilla de EF;Rendir prueba de flexibilidad.;2° B;Educación Física;profe4@insm.edu;2025-03-30
+
+46;Práctica de Lengua;Escribir un texto argumentativo.;3° A;Lengua y Literatura;virginia.gardella@institutolamerced.edu.ar;2025-03-20
+47;Vocabulario Inglés;Aprender 20 palabras.;3° A;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-03-21
+48;Trabajo de Historia;Síntesis sobre la Revolución Francesa.;3° A;Historia;florencia.andino@institutolamerced.edu.ar;2025-03-22
+49;Mapa temático;Armar mapa de climas.;3° A;Geografía;andrea.miretti@institutolamerced.edu.ar;2025-03-23
+50;TP de Química;Resolver problemas de enlaces químicos.;3° A;Química;macarena.deyong@institutolamerced.edu.ar;2025-03-24
+51;Proyecto Tecnológico;Realizar un informe de sensores.;3° A;Educación Tecnológica;facundo.gil@institutolamerced.edu.ar;2025-03-25
+52;Guía de Física;Resolver ejercicios de MRU.;3° A;Física;cecilia.viotti@institutolamerced.edu.ar;2025-03-26
+53;Trabajo de ERE;Reflexión sobre convivencia.;3° A;ERE;gabriela.mugas@institutolamerced.edu.ar;2025-03-27
+54;Trabajo de FVT;Analizar escena audiovisual.;3° A;FVT;silvana.bravo@institutolamerced.edu.ar;2025-03-28
+55;Práctica de Matemática;Resolver ecuaciones.;3° A;Matemática;alejandra.pissane@institutolamerced.edu.ar;2025-03-29
+56;Trabajo plástico;Crear una lámina expresiva.;3° A;Artes Visuales;marisa.brisio@institutolamerced.edu.ar;2025-03-30
+57;Actividades de Música;Practicar ritmo asignado.;3° A;Música;gerardo.lemos@institutolamerced.edu.ar;2025-04-01
+58;Actividad en PowerPoint;Realizar diapositivas con imágenes.;3° A;Computación;carlos.clara@institutolamerced.edu.ar;2025-04-02
+59;Planilla motriz;Completar test físico.;3° A;Educación Física;profe5@insm.edu;2025-04-03
+
+60;Redacción argumentativa;Escribir opinión crítica.;3° B;Lengua y Literatura;yanina.moya@institutolamerced.edu.ar;2025-03-20
+61;Trabajo de FVT;Analizar una secuencia cinematográfica.;3° B;FVT;silvana.bravo@institutolamerced.edu.ar;2025-03-21
+62;Guía de Física;Resolver ejercicios de dinámica.;3° B;Física;soledad.picard@institutolamerced.edu.ar;2025-03-22
+63;Trabajo histórico;Completar línea de tiempo.;3° B;Historia;florencia.andino@institutolamerced.edu.ar;2025-03-23
+64;Mapa político mundial;Completar mapa.;3° B;Geografía;andrea.miretti@institutolamerced.edu.ar;2025-03-24
+65;Trabajo artístico;Crear collage.;3° B;Artes Visuales;marisa.brisio@institutolamerced.edu.ar;2025-03-25
+66;Trabajo musical;Practicar ritmo con palmas.;3° B;Música;gerardo.lemos@institutolamerced.edu.ar;2025-03-26
+67;Ejercicios de Matemática;Resolver desigualdades.;3° B;Matemática;tamara.rochia@institutolamerced.edu.ar;2025-03-27
+68;Trabajo tecnológico;Armar cuadro de partes de hardware.;3° B;Educación Tecnológica;facundo.gil@institutolamerced.edu.ar;2025-03-28
+69;Guía de Química;Resolver ejercicios de mezclas.;3° B;Química;macarena.deyong@institutolamerced.edu.ar;2025-03-29
+70;Proyecto de programación;Hacer una presentación.;3° B;Computación;carlos.clara@institutolamerced.edu.ar;2025-03-30
+71;Reflexión ERE;Completar preguntas sobre convivencia.;3° B;ERE;paula.radichi@institutolamerced.edu.ar;2025-04-01
+72;Ficha de EF;Rendir test físico.;3° B;Educación Física;profe6@insm.edu;2025-04-02
+73;Vocabulario;Aprender verbos regulares.;3° B;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-04-03
+
+74;Síntesis histórica;Realizar cuadro comparativo.;4° A;Historia;silvana.bravo@institutolamerced.edu.ar;2025-03-20
+75;TP Lengua;Análisis literario.;4° A;Lengua y Literatura;virginia.gardella@institutolamerced.edu.ar;2025-03-21
+76;Guía de Biología;Resolver actividad de ADN.;4° A;Biología;macarena.deyong@institutolamerced.edu.ar;2025-03-22
+77;Trabajo ERE;Reflexión espiritual.;4° A;ERE;gabriela.mugas@institutolamerced.edu.ar;2025-03-23
+78;Ejercicios de Matemática;Resolver funciones.;4° A;Matemática;eliana.cabrera@institutolamerced.edu.ar;2025-03-24
+79;Mapa geográfico;Regiones naturales.;4° A;Geografía;andrea.miretti@institutolamerced.edu.ar;2025-03-25
+80;Trabajo artístico;Crear lámina expresiva.;4° A;Educación Artística;marisa.brisio@institutolamerced.edu.ar;2025-03-26
+81;Análisis audiovisual;Evaluar escena.;4° A;FVT;silvana.bravo@institutolamerced.edu.ar;2025-03-27
+82;Práctica TIC;Armar proyecto digital.;4° A;TIC;facundo.gil@institutolamerced.edu.ar;2025-03-28
+83;Trabajo de Sociedad y Comunicación;Analizar noticias.;4° A;Sociedad y Comunicación;romina.brizzio@institutolamerced.edu.ar;2025-03-29
+84;Trabajo de Antropología;Definir conceptos clave.;4° A;Antropología;analuz.torressi@institutolamerced.edu.ar;2025-03-30
+85;Planilla EF;Completar evaluación física.;4° A;Educación Física;profe7@insm.edu;2025-04-01
+86;Vocabulario Inglés;Aprender lista de palabras.;4° A;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-04-02
+
+87;Análisis literario;Completar guía.;4° B;Lengua y Literatura;laura.bertea@institutolamerced.edu.ar;2025-03-20
+88;TP de Biología;Resolver actividades celulares.;4° B;Biología;macarena.deyong@institutolamerced.edu.ar;2025-03-21
+89;Trabajo de ERE;Escribir reflexión personal.;4° B;ERE;gabriela.mugas@institutolamerced.edu.ar;2025-03-22
+90;Trabajo histórico;Completar cuadro.;4° B;Historia;florencia.andino@institutolamerced.edu.ar;2025-03-23
+91;Ejercicios de programación;Crear algoritmo básico.;4° B;Programación;carlos.clara@institutolamerced.edu.ar;2025-03-24
+92;Mapa geográfico;Completar mapa mundial.;4° B;Geografía;andrea.miretti@institutolamerced.edu.ar;2025-03-25
+93;Ejercicios de Matemática;Resolver funciones.;4° B;Matemática;eliana.cabrera@institutolamerced.edu.ar;2025-03-26
+94;TP Sistemas Digitales;Resolver tabla de verdad.;4° B;Sistemas Digitales;gustavo.mendoza@institutolamerced.edu.ar;2025-03-27
+95;Trabajo FVT;Analizar escena audiovisual.;4° B;FVT;silvana.bravo@institutolamerced.edu.ar;2025-03-28
+96;Trabajo artístico;Crear lámina con colores complementarios.;4° B;Educación Artística;marisa.brisio@institutolamerced.edu.ar;2025-03-29
+97;Planilla EF;Completar test físico.;4° B;Educación Física;profe8@insm.edu;2025-03-30
+98;Inglés: vocabulario;Aprender 25 palabras.;4° B;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-04-01
+
+99;Trabajo de Metodología;Armar proyecto académico.;5° A;Metodología;marisa.ferrero@institutolamerced.edu.ar;2025-03-20
+100;TP Historia;Redactar resumen de unidad 1.;5° A;Historia;silvana.bravo@institutolamerced.edu.ar;2025-03-21
+101;Ejercicios de Física;Resolver dinámica.;5° A;Física;soledad.picard@institutolamerced.edu.ar;2025-03-22
+102;Trabajo geográfico;Mapa político.;5° A;Geografía;andrea.miretti@institutolamerced.edu.ar;2025-03-23
+103;TP Arte Cultural;Analizar obra visual.;5° A;Arte Cultural y Social;marisa.brisio@institutolamerced.edu.ar;2025-03-24
+104;Reflexión ERE;Escribir reflexión espiritual.;5° A;ERE;gabriela.mugas@institutolamerced.edu.ar;2025-03-25
+105;Lectura literaria;Leer cuento y responder guía.;5° A;Lengua y Literatura;ivana.lario@institutolamerced.edu.ar;2025-03-26
+106;Trabajo de FVT;Analizar corto audiovisual.;5° A;FVT;silvana.bravo@institutolamerced.edu.ar;2025-03-27
+107;Guía Matemática;Funciones lineales.;5° A;Matemática;eliana.cabrera@institutolamerced.edu.ar;2025-03-28
+108;Evaluación física;Completar test.;5° A;Educación Física;profe9@insm.edu;2025-03-29
+109;TP Psicología;Analizar caso práctico.;5° A;Psicología;luciana.noriega@institutolamerced.edu.ar;2025-03-30
+110;Trabajo de Sociología;Responder guía de preguntas.;5° A;Sociología;luciana.noriega@institutolamerced.edu.ar;2025-04-01
+111;Práctica Inglés;Aprender vocabulario.;5° A;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-04-02
+
+112;Proyecto de robótica;Armar circuito básico.;5° B;Robótica;carlos.clara@institutolamerced.edu.ar;2025-03-20
+113;Práctica de Música;Practicar ritmo asignado.;5° B;Música;gerardo.lemos@institutolamerced.edu.ar;2025-03-21
+114;Guía de Física;Resolver ejercicios de ondas.;5° B;Física;soledad.picard@institutolamerced.edu.ar;2025-03-22
+115;Práctica Matemática;Funciones.;5° B;Matemática;enzoeara019@gmail.com;2025-03-23
+116;TP Historia;Resumen de unidad 2.;5° B;Historia;florencia.andino@institutolamerced.edu.ar;2025-03-24
+117;Lectura literaria;Análisis narrativo.;5° B;Lengua y Literatura;laura.bertea@institutolamerced.edu.ar;2025-03-25
+118;Trabajo FVT;Análisis audiovisual.;5° B;FVT;silvana.bravo@institutolamerced.edu.ar;2025-03-26
+119;Tabla de verdad;Resolver ejercicios.;5° B;Sistemas Digitales;gustavo.mendoza@institutolamerced.edu.ar;2025-03-27
+120;Mapa temático;Construir mapa social.;5° B;Geografía;andrea.miretti@institutolamerced.edu.ar;2025-03-28
+121;Práctica Psicología;Analizar caso.;5° B;Psicología;luciana.noriega@institutolamerced.edu.ar;2025-03-29
+122;Planilla EF;Rendir test físico.;5° B;Educación Física;profe10@insm.edu;2025-03-30
+123;Proyecto informático;Armar programa básico.;5° B;Desarrollo Informático;carlos.clara@institutolamerced.edu.ar;2025-04-01
+124;Vocabulario;Aprender verbos.;5° B;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-04-02
+
+125;Trabajo C y Política;Analizar sistema democrático.;6° A;Ciudadanía y Política;evangelina.saravia@institutolamerced.edu.ar;2025-03-20
+126;TP Economía;Hacer cuadro comparativo.;6° A;Economía Política;paola.auban@institutolamerced.edu.ar;2025-03-21
+127;Guía Matemática;Resolver funciones exponenciales.;6° A;Matemática;eliana.cabrera@institutolamerced.edu.ar;2025-03-22
+128;Mapa geopolítico;Completar mapa de continentes.;6° A;Geografía;andrea.miretti@institutolamerced.edu.ar;2025-03-23
+129;Ensayo filosófico;Analizar texto filosófico.;6° A;Filosofía;luciana.noriega@institutolamerced.edu.ar;2025-03-24
+130;TP Química;Resolver ejercicios de reacciones.;6° A;Química;alicia.vocos@institutolamerced.edu.ar;2025-03-25
+131;Análisis literario;Escribir reseña.;6° A;Lengua y Literatura;ivana.lario@institutolamerced.edu.ar;2025-03-26
+132;Trabajo histórico;Completar guía.;6° A;Historia;silvana.bravo@institutolamerced.edu.ar;2025-03-27
+133;Trabajo ERE;Reflexión personal.;6° A;ERE;gabriela.mugas@institutolamerced.edu.ar;2025-03-28
+134;Trabajo de Sociedad y Comunicación;Analizar Redes Sociales.;6° A;Sociedad y Comunicación;romina.brizzio@institutolamerced.edu.ar;2025-03-29
+135;Guión teatral;Crear escena.;6° A;Teatro;profe11@insm.edu;2025-03-30
+136;Trabajo FVT;Analizar escena audiovisual.;6° A;FVT;silvana.bravo@institutolamerced.edu.ar;2025-04-01
+137;Planilla EF;Rendir test físico.;6° A;Educación Física;profe11@insm.edu;2025-04-02
+138;Vocabulario Inglés;Aprender palabras.;6° A;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-04-03
+
+139;Lectura crítica;Realizar análisis literario.;6° B;Lengua y Literatura;laura.bertea@institutolamerced.edu.ar;2025-03-20
+140;TP Comunicación AV;Analizar secuencia audiovisual.;6° B;Comunicación Audiovisual;profe12@insm.edu;2025-03-21
+141;Trabajo DSI;Desarrollar programa en Python.;6° B;Desarrollo de Soluciones Informáticas;carlos.clara@institutolamerced.edu.ar;2025-03-22
+142;Proyecto IA aplicada;Crear formulario digital.;6° B;Informática Aplicada;diamela.alvarez@institutolamerced.edu.ar;2025-03-23
+143;Ensayo filosófico;Interpretar texto.;6° B;Filosofía;santiago.romero@institutolamerced.edu.ar;2025-03-24
+144;Trabajo FVT;Armar escena teatral.;6° B;Formación para la Vida y el Trabajo;paula.radichi@institutolamerced.edu.ar;2025-03-25
+145;Guía Química;Resolver ejercicios de enlace químico.;6° B;Química;macarena.deyong@institutolamerced.edu.ar;2025-03-26
+146;Guía Matemática;Resolver funciones trigonométricas.;6° B;Matemática;eliana.cabrera@institutolamerced.edu.ar;2025-03-27
+147;Reflexión religiosa;Escribir reflexión.;6° B;ERE;gabriela.mugas@institutolamerced.edu.ar;2025-03-28
+148;TP Política;Analizar noticias.;6° B;Ciudadanía y Política;evangelina.saravia@institutolamerced.edu.ar;2025-03-29
+149;Guión teatral;Escribir escena.;6° B;Teatro;profe12@insm.edu;2025-03-30
+150;Planilla EF;Rendir test físico.;6° B;Educación Física;profe12@insm.edu;2025-04-01
+151;Trabajo de Aplicaciones Informáticas;Armar planilla Excel.;6° B;Aplicaciones Informáticas;diamela.alvarez@institutolamerced.edu.ar;2025-04-02
+152;Lista de vocabulario;Aprender palabras Unidad 2.;6° B;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-04-03
