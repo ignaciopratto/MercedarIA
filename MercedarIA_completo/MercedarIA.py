@@ -13,21 +13,134 @@ GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 GITHUB_USER = st.secrets["GITHUB_USER"]
 GITHUB_REPO = st.secrets["GITHUB_REPO"]
 GITHUB_BASE_FOLDER = st.secrets.get("GITHUB_BASE_FOLDER", "MercedarIA_completo")
-
 ADMIN_MASTER_KEY = st.secrets.get("ADMIN_MASTER_KEY", "claveadmin")
 
 BASES_ROOT = f"{GITHUB_BASE_FOLDER}/bases"
 
+st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
 
 # ============================================
-# NORMALIZAR TEXTO (CURSOS/MATERIAS)
+# HELPERS DE NORMALIZACIÓN
 # ============================================
 
-def normalizar(texto: str) -> str:
-    if not texto:
+def normalizar_curso(curso: str) -> str:
+    if not curso:
         return ""
-    return texto.replace("\u00a0", " ").strip()
+    s = str(curso)
+    s = s.replace("\u00a0", " ")      # NBSP → espacio normal
+    s = re.sub(r"\s+", " ", s)       # colapsar espacios
+    return s.strip()
 
+def normalizar_materia(materia: str) -> str:
+    if not materia:
+        return ""
+    s = str(materia)
+    s = s.replace("\u00a0", " ")
+    s = re.sub(r"\s+", " ", s)
+    return s.strip()
+
+def slug_materia(materia: str) -> str:
+    s = (materia or "").lower()
+    s = s.replace("\u00a0", " ")
+    s = re.sub(r"\s+", "_", s)
+    reemplazar = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"}
+    for o, d in reemplazar.items():
+        s = s.replace(o, d)
+    s = re.sub(r"[^a-z0-9_]", "", s)
+    return s or "general"
+
+# ============================================
+# BASE GENERAL DEFAULT
+# ============================================
+
+BASE_GENERAL_DEFAULT = [
+    ("hola", "Hola, ¿cómo estás?"),
+    ("quién eres", "Soy MercedarIA, tu asistente del Colegio Mercedaria."),
+    ("cómo te llamas", "Me llamo MercedarIA, tu asistente virtual."),
+    ("cómo estás", "Estoy funcionando perfectamente, gracias por preguntar."),
+    ("adiós", "¡Hasta luego! Que tengas un buen día."),
+    ("quién es la directora", "La directora es Marisa Brizzio."),
+    ("cuándo son los recreos", "Turno mañana: 8:35, 10:00, 11:35. Turno tarde: 14:40, 16:05, 17:50."),
+    ("dónde queda la escuela", "En Arroyito, Córdoba, calle 9 de Julio 456."),
+    ("cuándo empieza el ciclo lectivo", "El ciclo lectivo comienza el primer día hábil de marzo."),
+    ("cuándo terminan las clases", "Generalmente a mediados de diciembre.")
+]
+
+# ============================================
+# BASES ESPECÍFICAS POR CURSO DEFAULT
+# ============================================
+
+BASES_ESPECIFICAS_DEFAULT = {
+    "1° A": [
+        ("¿Qué materias tengo?", "Biología, Educación en Artes Visuales, Lengua y Literatura, Física, Geografía, Educación Tecnológica, Matemática, Educación Religiosa Escolar, Ciudadanía y Participación, Inglés y Educación Física."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física y Educación Tecnológica."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "1° B": [
+        ("¿Qué materias tengo?", "Física, Matemática, Educación en Artes Visuales, Inglés, Educación Religiosa Escolar, Lengua y Literatura, Geografía, Ciudadanía y Participación, Educación Tecnológica, Biología y Educación Física."),
+        ("¿Cuáles son mis contraturnos?", "Educación Tecnológica y Educación Física."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "2° A": [
+        ("¿Qué materias tengo?", "Matemática, Lengua y Literatura, Educación Religiosa Escolar, Música, Historia, Educación Tecnológica, Química, Computación, Ciudadanía y Participación, Biología, Inglés y Educación Física."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "2° B": [
+        ("¿Qué materias tengo?", "Música, Historia, Educación Religiosa Escolar, Ciudadanía y Participación, Inglés, Matemática, Lengua y Literatura, Educación Tecnológica, Química, Biología y Educación Física."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "3° A": [
+        ("¿Qué materias tengo?", "Lengua y Literatura, Inglés, Historia, Geografía, Química, Educación Tecnológica, Física, Educación Religiosa Escolar, Formación para la Vida y el Trabajo, Matemática, Educación Artística Visual, Música, Computación y Educación Física."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física y Formación para la Vida y el Trabajo."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "3° B": [
+        ("¿Qué materias tengo?", "Lengua y Literatura, Formación para la Vida y el Trabajo, Física, Historia, Geografía, Educación Artística Visual, Música, Matemática, Educación Tecnológica, Química, Computación, Educación Religiosa Escolar, Educación Física e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "4° A": [
+        ("¿Qué materias tengo?", "Historia, Lengua y Literatura, Biología, ERE, Matemática, Geografía, Educ. Artística, FVT, TIC, Sociedad y Comunicación, Antropología, Educación Física e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ],
+    "4° B": [
+        ("¿Qué materias tengo?", "Lengua y Literatura, Biología, ERE, Historia, Programación, Geografía, Matemática, Sistemas Digitales, FVT, Educación Artística, Educación Física e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ],
+    "5° A": [
+        ("¿Qué materias tengo?", "Metodología, Historia, Física, Geografía, Arte Cultural y Social, ERE, Lengua y Literatura, FVT, Matemática, EF, Psicología, Sociología e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Psicología, Sociología e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ],
+    "5° B": [
+        ("¿Qué materias tengo?", "Robótica, Música, Física, Matemática, Historia, Lengua y Literatura, FVT, Sistemas Digitales, Geografía, Psicología, EF, Desarrollo Informático e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Sistemas Digitales, Desarrollo Informático e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ],
+    "6° A": [
+        ("¿Qué materias tengo?", "Ciudadanía y Política, Economía Política, Matemática, Geografía, Filosofía, Química, Lengua y Literatura, Historia, ERE, Sociedad y Comunicación, Teatro, FVT, EF e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Sociedad y Comunicación e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ],
+    "6° B": [
+        ("¿Qué materias tengo?", "Lengua y Literatura, Comunicación Audiovisual, Desarrollo de Soluciones Informáticas, Informática Aplicada, Filosofía, Formación para la Vida y el Trabajo, Química, Matemática, ERE, Ciudadanía y Política, Teatro, EF, Aplicaciones Informáticas e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Aplicaciones Informáticas e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ]
+}
+
+# Inicializar en sesión con claves de curso normalizadas
+if "base_general" not in st.session_state:
+    st.session_state.base_general = BASE_GENERAL_DEFAULT.copy()
+
+if "bases_especificas" not in st.session_state:
+    st.session_state.bases_especificas = {
+        normalizar_curso(k): v.copy() for k, v in BASES_ESPECIFICAS_DEFAULT.items()
+    }
 
 # ============================================
 # FUNCIONES GITHUB
@@ -41,7 +154,7 @@ def github_api_url(path):
 
 def leer_archivo_github(path):
     try:
-        r = requests.get(github_raw_url(path))
+        r = requests.get(github_raw_url(path), timeout=10)
         if r.status_code == 200:
             return r.text
         return ""
@@ -63,7 +176,6 @@ def escribir_archivo_github(path, contenido):
         "message": f"Actualizando {path}",
         "content": base64.b64encode(contenido.encode("utf-8")).decode("utf-8")
     }
-
     if sha:
         data["sha"] = sha
 
@@ -74,9 +186,8 @@ def escribir_archivo_github(path, contenido):
 
     return r_put.status_code in (200, 201)
 
-
 # ============================================
-# USERS
+# FUNCIONES DE DATOS (USERS / COURSES / TASKS)
 # ============================================
 
 def cargar_usuarios():
@@ -91,7 +202,7 @@ def cargar_usuarios():
             "nombre": nombre.strip(),
             "apellido": apellido.strip(),
             "rol": rol.strip(),
-            "curso": normalizar(curso.strip()),
+            "curso": normalizar_curso(curso.strip()),
             "password": pw.strip()
         })
     return usuarios
@@ -103,11 +214,6 @@ def guardar_usuarios(lista):
     )
     escribir_archivo_github(f"{BASES_ROOT}/users.txt", contenido)
 
-
-# ============================================
-# COURSES
-# ============================================
-
 def cargar_cursos():
     texto = leer_archivo_github(f"{BASES_ROOT}/courses.txt")
     cursos = []
@@ -117,8 +223,8 @@ def cargar_cursos():
         id_, curso, materia, email_prof = linea.split(";", 3)
         cursos.append({
             "id": id_.strip(),
-            "curso": normalizar(curso.strip()),
-            "materia": normalizar(materia.strip()),
+            "curso": normalizar_curso(curso.strip()),
+            "materia": normalizar_materia(materia.strip()),
             "email": email_prof.strip()
         })
     return cursos
@@ -129,18 +235,6 @@ def guardar_cursos(lista):
     )
     escribir_archivo_github(f"{BASES_ROOT}/courses.txt", contenido)
 
-
-# ============================================
-# TASKS — ID ÚNICO
-# ============================================
-
-def generar_id_unico(tareas):
-    usados = {int(t["id"]) for t in tareas if t["id"].isdigit()}
-    nuevo = 1
-    while nuevo in usados:
-        nuevo += 1
-    return str(nuevo)
-
 def cargar_tareas():
     texto = leer_archivo_github(f"{BASES_ROOT}/tasks.txt")
     tareas = []
@@ -150,8 +244,8 @@ def cargar_tareas():
         id_, curso, materia, titulo, descr, creador, fecha = linea.split(";", 6)
         tareas.append({
             "id": id_.strip(),
-            "curso": normalizar(curso.strip()),
-            "materia": normalizar(materia.strip()),
+            "curso": normalizar_curso(curso.strip()),
+            "materia": normalizar_materia(materia.strip()),
             "titulo": titulo.strip(),
             "descripcion": descr.strip(),
             "creador": creador.strip(),
@@ -161,67 +255,24 @@ def cargar_tareas():
 
 def guardar_tareas(lista):
     contenido = "\n".join(
-        f"{t['id']};{t['curso']};{t['materia']};{t['titulo']};{t['descripcion']};{t['creador']};{t['fecha_limite']}"
+        f"{t['id']};{t['curso']};{t['materia']};{t['titulo']};"
+        f"{t['descripcion']};{t['creador']};{t['fecha_limite']}"
         for t in lista
     )
     escribir_archivo_github(f"{BASES_ROOT}/tasks.txt", contenido)
 
-
-# ============================================
-# ARCHIVO POR MATERIA (FAQ / BASE ESPECÍFICA)
-# ============================================
-
 def archivo_base_curso_materia(curso, materia):
-    cid = normalizar(curso).replace("°", "").replace(" ", "")
-    mid = re.sub(r"[^a-z0-9]", "", normalizar(materia).lower())
+    cid = normalizar_curso(curso).replace("°", "").replace(" ", "")
+    mid = slug_materia(materia)
     return f"{BASES_ROOT}/{cid}_{mid}.txt"
 
-
 # ============================================
-# BASE GENERAL + BASES POR CURSO
-# (USADAS SOLO POR ADMIN)
-# ============================================
-
-BASE_GENERAL_DEFAULT = [
-    ("hola", "Hola, ¿cómo estás?"),
-    ("quién eres", "Soy MercedarIA, tu asistente del Colegio Mercedaria."),
-    ("cómo te llamas", "Me llamo MercedarIA, tu asistente virtual."),
-    ("cómo estás", "Estoy funcionando correctamente."),
-    ("adiós", "¡Hasta luego!"),
-    ("directora", "La directora es Marisa Brizzio."),
-    ("recreos", "Turno mañana: 8:35, 10:00, 11:35. Turno tarde: 14:40, 16:05, 17:50."),
-    ("ubicación", "Arroyito, Córdoba, calle 9 de Julio 456.")
-]
-
-BASES_ESPECIFICAS_DEFAULT = {
-    "1° A": [("¿Qué materias tengo?", "Biología, Lengua...")],
-    "1° B": [("¿Qué materias tengo?", "Física, Matemática...")],
-    # (Puedes pegar tus bases completas aquí)
-}
-
-if "base_general" not in st.session_state:
-    st.session_state.base_general = BASE_GENERAL_DEFAULT.copy()
-
-if "bases_por_curso" not in st.session_state:
-    st.session_state.bases_por_curso = {
-        c: v.copy() for c, v in BASES_ESPECIFICAS_DEFAULT.items()
-    }
-
-
-# ============================================
-# CARGA INICIAL
+# CARGA INICIAL + ESTADO
 # ============================================
 
 usuarios = cargar_usuarios()
 cursos = cargar_cursos()
 tareas = cargar_tareas()
-
-
-# ============================================
-# CONFIG DE PÁGINA
-# ============================================
-
-st.set_page_config(page_title="MercedarIA", page_icon="🤖", layout="wide")
 
 if "usuario" not in st.session_state:
     st.session_state.usuario = None
@@ -229,128 +280,136 @@ if "usuario" not in st.session_state:
 if "modo_anonimo" not in st.session_state:
     st.session_state.modo_anonimo = False
 
-st.title("🎓 MercedarIA — Asistente del Colegio")
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
+st.title("🎓 MercedarIA — Asistente del Colegio INSM")
 
 # ============================================
-# LOGIN / REGISTRO / INVITADO
+# LOGIN / REGISTRO / MODO INVITADO
 # ============================================
 
 if st.session_state.usuario is None and not st.session_state.modo_anonimo:
+    st.subheader("🔐 Iniciar sesión")
 
     col_login, col_reg, col_anon = st.columns([2, 2, 1])
 
     # ---------- LOGIN ----------
     with col_login:
-        st.subheader("🔐 Iniciar sesión")
-
-        email = st.text_input("Email")
-        pw = st.text_input("Contraseña", type="password")
+        email = st.text_input("Email", key="login_email")
+        password = st.text_input("Contraseña", type="password", key="login_password")
 
         if st.button("Ingresar"):
             usuarios = cargar_usuarios()
             user = next(
-                (u for u in usuarios if u["email"].lower() == email.lower() and u["password"] == pw),
+                (u for u in usuarios
+                 if u["email"].lower() == email.lower()
+                 and u["password"] == password),
                 None
             )
             if user:
                 st.session_state.usuario = user
-                st.success(f"Bienvenido/a {user['nombre']} {user['apellido']}")
+                st.success(f"Bienvenido/a {user['nombre']} {user['apellido']}.")
                 st.rerun()
             else:
-                st.error("Datos incorrectos")
+                st.error("Email o contraseña incorrectos.")
                 st.stop()
 
     # ---------- REGISTRO ----------
     with col_reg:
-        st.subheader("🧾 Crear cuenta")
+        st.markdown("### 🧾 Crear cuenta")
 
-        new_email = st.text_input("Nuevo email")
-        new_nombre = st.text_input("Nombre")
-        new_apellido = st.text_input("Apellido")
+        new_email = st.text_input("Email nuevo", key="reg_email")
+        new_nombre = st.text_input("Nombre", key="reg_nombre")
+        new_apellido = st.text_input("Apellido", key="reg_apellido")
 
-        tipo = st.selectbox("Tipo de cuenta", ["alumno", "profe"])
+        tipo_cuenta = st.selectbox("Tipo de cuenta", ["alumno", "profe"], key="reg_tipo")
 
-        if tipo == "alumno":
-            new_curso = st.selectbox("Curso", sorted({c["curso"] for c in cursos}))
+        if tipo_cuenta == "alumno":
+            cursos_disponibles = sorted({c["curso"] for c in cursos})
+            new_curso = st.selectbox("Curso", cursos_disponibles, key="reg_curso")
         else:
             new_curso = "-"
 
-        new_pw = st.text_input("Contraseña", type="password")
+        new_pw = st.text_input("Contraseña nueva", type="password", key="reg_pw")
 
-        admin_key = ""
-        if tipo == "profe":
-            admin_key = st.text_input("Contraseña de administrador", type="password")
+        if tipo_cuenta == "profe":
+            admin_pw = st.text_input(
+                "Contraseña de administrador para crear profesor",
+                type="password",
+                key="reg_admin_pw"
+            )
+        else:
+            admin_pw = ""
 
         if st.button("Crear cuenta"):
             usuarios = cargar_usuarios()
 
             if any(u["email"].lower() == new_email.lower() for u in usuarios):
-                st.error("Ese email ya existe")
-            elif tipo == "profe" and admin_key != ADMIN_MASTER_KEY:
-                st.error("Contraseña admin incorrecta")
+                st.error("Ya existe un usuario con ese email.")
+            elif tipo_cuenta == "profe" and admin_pw != ADMIN_MASTER_KEY:
+                st.error("Contraseña de administrador incorrecta.")
+            elif not new_email or not new_nombre or not new_apellido or not new_pw:
+                st.error("Completá todos los campos.")
             else:
                 usuarios.append({
                     "email": new_email.strip(),
                     "nombre": new_nombre.strip(),
                     "apellido": new_apellido.strip(),
-                    "rol": tipo,
-                    "curso": new_curso,
-                    "password": new_pw.strip()
+                    "rol": tipo_cuenta,
+                    "curso": normalizar_curso(new_curso.strip()),
+                    "password": new_pw.strip(),
                 })
                 guardar_usuarios(usuarios)
-                st.success("Cuenta creada")
+                st.success("Cuenta creada. Podés iniciar sesión.")
                 st.rerun()
 
-    # ---------- INVITADO ----------
+    # ---------- MODO ANÓNIMO ----------
     with col_anon:
-        st.subheader("Invitado")
+        st.markdown("### 👤 Invitado")
         if st.button("Entrar como invitado"):
             st.session_state.modo_anonimo = True
+            st.session_state.usuario = None
+            st.session_state.chat_history = []
             st.rerun()
 
-
 # ============================================
-# CONTINUAR SOLO SI SESIÓN ACTIVA
+# CREAR USUARIO LÓGICO (ALUMNO/PROFE/ADMIN/ANÓNIMO)
 # ============================================
 
 if st.session_state.modo_anonimo:
     usuario = {
-        "email": "anonimo",
         "nombre": "Invitado",
         "apellido": "",
         "rol": "anonimo",
+        "email": "anonimo@insm.edu",
         "curso": "General"
     }
 else:
     usuario = st.session_state.usuario
-# ============================================
-# DATOS DEL USUARIO ACTUAL + RECARGA DE BASES
-# ============================================
 
-# Si por alguna razón no hay usuario, cortamos
 if usuario is None:
-    st.warning("Iniciá sesión o entrá como invitado para continuar.")
+    st.warning("Iniciá sesión o entrá como invitado.")
     st.stop()
 
 rol = usuario["rol"]
 email_usuario = usuario["email"]
-curso_usuario = normalizar(usuario.get("curso", ""))
+curso_usuario = normalizar_curso(usuario["curso"])
 
-# Recargamos siempre por si hubo cambios en GitHub
+# refrescar listas (por si hubo cambios)
 usuarios = cargar_usuarios()
 cursos = cargar_cursos()
 tareas = cargar_tareas()
 
 # ============================================
-# BARRA SUPERIOR: INFO + CERRAR SESIÓN
+# BARRA SUPERIOR: INFO USUARIO + LOGOUT
 # ============================================
 
 col_info, col_logout = st.columns([4, 1])
 
 with col_info:
     if rol == "anonimo":
-        st.info("Conectado en **modo invitado** — solo podés usar la base general.")
+        st.info("Conectado en **modo invitado** — solo se usa la base general de conocimiento.")
     else:
         st.info(
             f"Conectado como **{usuario['nombre']} {usuario['apellido']}** — "
@@ -359,20 +418,10 @@ with col_info:
 
 with col_logout:
     if st.button("Cerrar sesión"):
-        # Limpio todo lo relacionado al usuario
+        st.session_state.chat_history = []
         st.session_state.usuario = None
         st.session_state.modo_anonimo = False
-        st.session_state.chat_history = []
         st.rerun()
-
-# ============================================
-# PREPARAR HISTORIAL DE CHAT
-# ============================================
-
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-
-
 # ============================================
 # FUNCIÓN DEEPSEEK
 # ============================================
@@ -400,39 +449,30 @@ def consultar_deepseek(pregunta, contexto):
     except Exception as e:
         return f"Error consultando DeepSeek: {e}"
 
-
 # ============================================
 # CONSTRUCCIÓN DEL CONTEXTO DEL CHATBOT
 # ============================================
 
-def construir_contexto(usuario_actual, usuarios, cursos, tareas):
-    """
-    Arma el contexto que se le pasa a DeepSeek.
-    - Invitado: solo base general
-    - Alumno (y resto de roles no anónimos): base general + base por curso + users + courses + tasks
-    """
-
-    rol_u = usuario_actual["rol"]
-    curso_u = normalizar(usuario_actual.get("curso", ""))
+def construir_contexto(usuario_actual):
 
     # ---------- MODO INVITADO ----------
-    if rol_u == "anonimo":
+    if usuario_actual["rol"] == "anonimo":
         contexto = (
-            "Estás respondiendo a un usuario INVITADO.\n"
-            "Solo podés usar la BASE GENERAL del colegio.\n"
-            "No inventes datos personales, ni de cursos específicos.\n\n"
+            "Estás respondiendo a un usuario invitado. "
+            "Solo podés usar la BASE GENERAL del colegio.\n\n"
         )
-        contexto += "BASE GENERAL DEL COLEGIO:\n"
+        contexto += "BASE GENERAL:\n"
         for p, r in st.session_state.base_general:
             contexto += f"{p} -> {r}\n"
         return contexto
 
-    # ---------- USUARIO LOGUEADO ----------
-    contexto = "INFORMACIÓN DEL USUARIO LOGUEADO:\n"
-    contexto += f"- Nombre: {usuario_actual['nombre']} {usuario_actual['apellido']}\n"
-    contexto += f"- Rol: {rol_u}\n"
-    contexto += f"- Email: {usuario_actual['email']}\n"
-    contexto += f"- Curso: {curso_u}\n\n"
+    curso_u = normalizar_curso(usuario_actual["curso"])
+
+    contexto = "INFORMACIÓN DEL USUARIO:\n"
+    contexto += f"Nombre: {usuario_actual['nombre']} {usuario_actual['apellido']}\n"
+    contexto += f"Rol: {usuario_actual['rol']}\n"
+    contexto += f"Email: {usuario_actual['email']}\n"
+    contexto += f"Curso: {curso_u}\n\n"
 
     # ---------- BASE GENERAL ----------
     contexto += "BASE GENERAL DEL COLEGIO:\n"
@@ -440,75 +480,68 @@ def construir_contexto(usuario_actual, usuarios, cursos, tareas):
         contexto += f"{p} -> {r}\n"
 
     # ---------- BASE ESPECÍFICA DEL CURSO ----------
-    base_curso = st.session_state.bases_por_curso.get(curso_u, [])
+    base_curso = st.session_state.bases_especificas.get(curso_u, [])
     if base_curso:
         contexto += f"\nBASE ESPECÍFICA DEL CURSO {curso_u}:\n"
         for p, r in base_curso:
             contexto += f"{p} -> {r}\n"
 
-    # ---------- USERS (solo para conocer roles y cursos) ----------
-    contexto += "\nUSUARIOS REGISTRADOS (para referencia de roles y cursos):\n"
+    # ---------- USERS (solo para roles y cursos) ----------
+    contexto += "\nUSUARIOS (solo para saber roles y cursos):\n"
     for u in usuarios:
         contexto += (
-            f"- {u['nombre']} {u['apellido']} ({u['email']}), "
+            f"{u['nombre']} {u['apellido']} ({u['email']}), "
             f"rol: {u['rol']}, curso: {u['curso']}.\n"
         )
 
-    # ---------- COURSES (solo del curso del usuario) ----------
+    # ---------- COURSES (del curso del usuario) ----------
     contexto += f"\nMATERIAS DEL CURSO {curso_u}:\n"
-    materias_curso = [c for c in cursos if c["curso"] == curso_u]
-    for c in materias_curso:
-        contexto += f"- {c['materia']} dictada por {c['email']}.\n"
+    for c in cursos:
+        if c["curso"] == curso_u:
+            contexto += f"{c['materia']} dictada por {c['email']}.\n"
 
     # ---------- TASKS (solo del curso del usuario) ----------
     contexto += f"\nTAREAS DEL CURSO {curso_u}:\n"
-    tareas_curso = [t for t in tareas if t["curso"] == curso_u]
-    for t in tareas_curso:
-        contexto += (
-            f"- [{t['materia']}] {t['titulo']} — vence {t['fecha_limite']} — "
-            f"creada por {t['creador']}.\n"
-        )
+    for t in tareas:
+        if t["curso"] == curso_u:
+            contexto += (
+                f"[{t['materia']}] {t['titulo']} — "
+                f"vence {t['fecha_limite']} — creada por {t['creador']}.\n"
+            )
 
-    # ---------- BASES TXT POR MATERIA (solo curso del usuario) ----------
-    contexto += (
-        f"\nBASES POR MATERIA (archivos TXT en GitHub) del curso {curso_u}.\n"
-        "El formato suele ser: pregunta;respuesta, una por línea.\n"
-    )
-    for c in materias_curso:
-        path = archivo_base_curso_materia(c["curso"], c["materia"])
-        contenido = leer_archivo_github(path)
-        if contenido.strip():
-            contexto += f"\n[MATERIA: {c['materia']}]\n{contenido}\n"
+    # ---------- BASES TXT POR MATERIA (del curso del usuario) ----------
+    contexto += f"\nBASES POR MATERIA (archivos txt) DEL CURSO {curso_u}:\n"
+    for c in cursos:
+        if c["curso"] == curso_u:
+            path = archivo_base_curso_materia(c["curso"], c["materia"])
+            contenido = leer_archivo_github(path)
+            if contenido.strip():
+                contexto += f"\n[{c['materia']}]\n{contenido}\n"
 
     contexto += (
-        "\nINSTRUCCIÓN IMPORTANTE:\n"
-        "- Respondé siempre pensando en el CURSO del usuario.\n"
-        "- Si pregunta por cosas de otros cursos, aclarar que solo tenés información "
-        "del curso actual.\n"
-        "- No inventes datos si no están en las bases o en el contexto.\n"
+        "\nIMPORTANTE: respondé SIEMPRE pensando en el curso del usuario. "
+        "Si pregunta algo de otro curso, aclarar que solo tenés información de su curso.\n"
     )
 
     return contexto
 
-
 # ============================================
-# CHAT CON BURBUJAS (COLORES PERSONALIZADOS)
+# CHAT CON BURBUJAS (OPCIÓN B)
 # ============================================
 
 st.subheader("💬 Chat con MercedarIA")
 
-col_inp, col_btn = st.columns([4, 1])
+col_in, col_btn = st.columns([4, 1])
 
-with col_inp:
+with col_in:
     pregunta = st.text_input("Escribí tu pregunta:", key="input_pregunta")
 
 with col_btn:
-    if st.button("Enviar", key="btn_enviar_pregunta"):
+    if st.button("Enviar", key="btn_enviar"):
         if pregunta.strip():
-            contexto = construir_contexto(usuario, usuarios, cursos, tareas)
+            contexto = construir_contexto(usuario)
             respuesta = consultar_deepseek(pregunta, contexto)
 
-            # Guardar en historial
             st.session_state.chat_history.append(
                 {"role": "user", "content": pregunta.strip()}
             )
@@ -520,20 +553,18 @@ with col_btn:
 # Render del historial en burbujas
 for msg in st.session_state.chat_history:
     if msg["role"] == "user":
-        # BURBUJA USUARIO → derecha, verde #71b548
         st.markdown(
             f"""
-<div style="text-align:right; margin:6px 0;">
+<div style="text-align:right; margin:4px 0;">
   <div style="
       display:inline-block;
-      background-color:#71b548;
+      background:#71b548;
       color:#ffffff;
       padding:10px 14px;
       border-radius:16px;
-      max-width:75%;
+      max-width:70%;
       box-shadow:0 0 6px rgba(0,0,0,0.25);
       word-wrap:break-word;
-      white-space:pre-wrap;
   ">
     {msg["content"]}
   </div>
@@ -542,20 +573,18 @@ for msg in st.session_state.chat_history:
             unsafe_allow_html=True,
         )
     else:
-        # BURBUJA IA → izquierda, azul oscuro #23263d
         st.markdown(
             f"""
-<div style="text-align:left; margin:6px 0;">
+<div style="text-align:left; margin:4px 0;">
   <div style="
       display:inline-block;
-      background-color:#23263d;
+      background:#23263d;
       color:#ffffff;
       padding:10px 14px;
       border-radius:16px;
-      max-width:75%;
+      max-width:70%;
       box-shadow:0 0 6px rgba(0,0,0,0.25);
       word-wrap:break-word;
-      white-space:pre-wrap;
   ">
     {msg["content"]}
   </div>
@@ -566,23 +595,18 @@ for msg in st.session_state.chat_history:
 
 st.markdown("---")
 # ============================================
-# SECCIÓN TAREAS / PANEL DE ROLES
+# 📝 TAREAS — ALUMNO / PROFE / ADMIN
 # ============================================
 
 st.header("📝 Tareas")
-
-# ---------- INVITADO ----------
+# ---------- ANONIMO ----------
 if rol == "anonimo":
-    st.info("🔒 Iniciá sesión para ver tus tareas.")
+    st.info("🔐 Iniciá sesión como alumno para ver tus tareas.")
     st.stop()
 
-# ==========================================================
-# =====================  ALUMNO  ===========================
-# ==========================================================
-
+# ---------- ALUMNO ----------
 if rol == "alumno":
-
-    st.subheader("📘 Tareas de tu curso")
+    st.subheader("Tareas de tu curso")
 
     tareas_curso = [t for t in tareas if t["curso"] == curso_usuario]
 
@@ -591,116 +615,111 @@ if rol == "alumno":
     else:
         for t in tareas_curso:
             st.markdown(f"""
-### 📚 {t['titulo']}
-**Materia:** {t['materia']}  
-**Descripción:** {t['descripcion']}  
-**Fecha límite:** {t['fecha_limite']}  
-**Profesor:** {t['creador']}  
+**📌 {t['titulo']}**  
+📚 *Materia:* {t['materia']}  
+📝 *Descripción:* {t['descripcion']}  
+⏳ *Fecha límite:* {t['fecha_limite']}  
+👨‍🏫 *Profesor:* {t['creador']}  
 ---
 """)
 
-
-# ==========================================================
-# =====================  PROFESOR  =========================
-# ==========================================================
-
+# ---------- PROFESOR ----------
 elif rol == "profe":
 
-    st.subheader("📘 Mis materias asignadas")
+    st.subheader("Crear nueva tarea")
 
     materias_mias = [c for c in cursos if c["email"] == email_usuario]
 
     if not materias_mias:
         st.info("No tenés materias asignadas.")
     else:
-
-        # -----------------------
-        # CREAR NUEVA TAREA
-        # -----------------------
-        st.markdown("## ➕ Crear nueva tarea")
-
         opcion = st.selectbox(
-            "Elegí curso — materia",
+            "Elegí curso y materia",
             [f"{c['curso']} — {c['materia']}" for c in materias_mias],
-            key="select_crear_tarea"
+            key="select_curso_materia_tarea"
         )
 
         curso_sel, materia_sel = opcion.split(" — ", 1)
+        curso_sel = normalizar_curso(curso_sel)
+        materia_sel = normalizar_materia(materia_sel)
 
-        titulo = st.text_input("Título de la tarea")
-        descripcion = st.text_area("Descripción")
-        fecha = st.date_input("Fecha límite")
+        titulo = st.text_input("Título de la tarea", key="new_titulo_tarea")
+        descr = st.text_area("Descripción", key="new_descr_tarea")
+        fecha = st.date_input("Fecha límite", key="new_fecha_tarea")
 
-        if st.button("Agregar tarea", key="btn_agregar_tarea"):
-            tareas = cargar_tareas()  # recarga para evitar desync
-            nuevo_id = generar_id_unico(tareas)
+        if st.button("Agregar tarea", key="btn_add_tarea"):
+            if not titulo.strip():
+                st.warning("Tenés que poner un título.")
+            else:
+                nuevo_id = str(max([int(t["id"]) for t in tareas] + [0]) + 1)
+                nueva = {
+                    "id": nuevo_id,
+                    "curso": curso_sel,
+                    "materia": materia_sel,
+                    "titulo": titulo.strip(),
+                    "descripcion": descr.strip(),
+                    "creador": email_usuario,
+                    "fecha_limite": str(fecha),
+                }
+                tareas.append(nueva)
+                guardar_tareas(tareas)
+                st.success("Tarea agregada correctamente.")
+                st.rerun()
 
-            nueva = {
-                "id": nuevo_id,
-                "curso": curso_sel,
-                "materia": materia_sel,
-                "titulo": titulo.strip(),
-                "descripcion": descripcion.strip(),
-                "creador": email_usuario,
-                "fecha_limite": str(fecha)
-            }
+        st.markdown("---")
+        st.subheader("Editar / borrar mis tareas")
 
-            tareas.append(nueva)
-            guardar_tareas(tareas)
+        mis_tareas = [t for t in tareas if t["creador"] == email_usuario]
 
-            st.success("📌 Tarea agregada correctamente.")
-            st.rerun()
-
-        st.divider()
-
-
-        # -----------------------
-        # EDITAR / BORRAR TAREAS
-        # -----------------------
-        st.markdown("## ✏️ Editar o borrar mis tareas")
-
-        tareas_mias = [t for t in tareas if t["creador"] == email_usuario]
-
-        if not tareas_mias:
+        if not mis_tareas:
             st.info("Todavía no creaste tareas.")
         else:
-            for t in tareas_mias:
-                with st.expander(f"{t['curso']} — {t['materia']} — {t['titulo']}"):
-
-                    ntitulo = st.text_input("Título", t["titulo"], key=f"ti_{t['id']}")
-                    ndesc = st.text_area("Descripción", t["descripcion"], key=f"de_{t['id']}")
-                    nfecha = st.text_input("Fecha límite", t["fecha_limite"], key=f"fe_{t['id']}")
+            for t in mis_tareas:
+                with st.expander(f"{t['curso']} — {t['materia']} — {t['titulo']}", expanded=False):
+                    nt = st.text_input("Título", value=t["titulo"], key=f"edit_t_{t['id']}")
+                    nd = st.text_area("Descripción", value=t["descripcion"], key=f"edit_d_{t['id']}")
+                    nf = st.text_input("Fecha límite (YYYY-MM-DD)", value=t["fecha_limite"], key=f"edit_f_{t['id']}")
 
                     col1, col2 = st.columns(2)
 
                     with col1:
-                        if st.button(f"Guardar cambios {t['id']}", key=f"save_{t['id']}"):
-                            tareas = cargar_tareas()
-
-                            for x in tareas:
-                                if x["id"] == t["id"]:
-                                    x["titulo"] = ntitulo
-                                    x["descripcion"] = ndesc
-                                    x["fecha_limite"] = nfecha
-
+                        if st.button("Guardar cambios", key=f"btn_save_{t['id']}"):
+                            t["titulo"] = nt.strip()
+                            t["descripcion"] = nd.strip()
+                            t["fecha_limite"] = nf.strip()
                             guardar_tareas(tareas)
-                            st.success("Cambios guardados.")
+                            st.success("Tarea actualizada.")
                             st.rerun()
 
                     with col2:
-                        if st.button(f"Eliminar tarea {t['id']}", key=f"del_{t['id']}"):
-                            tareas = cargar_tareas()
+                        if st.button("Eliminar tarea", key=f"btn_del_{t['id']}"):
                             tareas = [x for x in tareas if x["id"] != t["id"]]
                             guardar_tareas(tareas)
                             st.success("Tarea eliminada.")
                             st.rerun()
 
-
-# ==========================================================
-# =====================  ADMIN  ============================
-# ==========================================================
-
+# ---------- ADMIN ----------
 elif rol == "admin":
+    st.subheader("Todas las tareas (modo admin)")
+    if not tareas:
+        st.info("No hay tareas cargadas.")
+    else:
+        for t in tareas:
+            st.markdown(f"""
+**[{t['id']}] {t['titulo']}**  
+🏫 Curso: {t['curso']} — 📚 Materia: {t['materia']}  
+📌 {t['descripcion']}  
+⏳ Vence: {t['fecha_limite']}  
+👨‍🏫 Creador: {t['creador']}  
+---
+""")
+
+
+# ============================================
+# ⚙️ PANEL DEL ADMINISTRADOR
+# ============================================
+
+if rol == "admin":
 
     st.header("⚙️ Panel de Administración")
 
@@ -708,179 +727,205 @@ elif rol == "admin":
         ["👥 Usuarios", "📘 Cursos y materias", "📚 Bases de conocimiento"]
     )
 
-    # ============================================
-    # ============  TAB 1 — USUARIOS  ============
-    # ============================================
-
+    # ---------- TAB USUARIOS ----------
     with tab_users:
-
-        st.subheader("Usuarios registrados")
+        st.subheader("Usuarios existentes")
 
         for u in usuarios:
-            st.markdown(f"- **{u['email']}** — {u['rol']} — Curso: {u['curso']}")
+            st.markdown(f"- **{u['email']}** — Rol: {u['rol']} — Curso: {u['curso']}")
 
-        st.divider()
+        st.markdown("---")
+        st.subheader("Modificar / eliminar usuario")
 
-        st.subheader("Modificar / Eliminar usuario")
+        if usuarios:
+            email_sel = st.selectbox(
+                "Elegí un usuario",
+                [u["email"] for u in usuarios],
+                key="admin_sel_user"
+            )
+            user_sel = next(u for u in usuarios if u["email"] == email_sel)
 
-        email_sel = st.selectbox(
-            "Seleccioná usuario",
-            [u["email"] for u in usuarios],
-            key="seleccion_usuario_admin"
-        )
+            nn = st.text_input("Nombre", user_sel["nombre"], key="admin_u_nom")
+            na = st.text_input("Apellido", user_sel["apellido"], key="admin_u_ape")
+            nr = st.selectbox(
+                "Rol",
+                ["alumno", "profe", "admin"],
+                index=["alumno", "profe", "admin"].index(user_sel["rol"]),
+                key="admin_u_rol"
+            )
+            nc = st.text_input("Curso (para alumnos, ej: 6° B; para otros -)", user_sel["curso"], key="admin_u_curso")
+            npw = st.text_input("Contraseña", user_sel["password"], key="admin_u_pw")
 
-        u = next(u for u in usuarios if u["email"] == email_sel)
+            col1, col2 = st.columns(2)
 
-        nn = st.text_input("Nombre", u["nombre"])
-        na = st.text_input("Apellido", u["apellido"])
-        nr = st.selectbox("Rol", ["alumno", "profe", "admin"],
-                          index=["alumno", "profe", "admin"].index(u["rol"]))
-        nc = st.text_input("Curso", u["curso"])
-        npw = st.text_input("Contraseña", u["password"])
+            with col1:
+                if st.button("💾 Guardar cambios usuario", key="btn_admin_save_user"):
+                    user_sel["nombre"] = nn.strip()
+                    user_sel["apellido"] = na.strip()
+                    user_sel["rol"] = nr.strip()
+                    user_sel["curso"] = normalizar_curso(nc.strip())
+                    user_sel["password"] = npw.strip()
+                    guardar_usuarios(usuarios)
+                    st.success("Usuario actualizado.")
+                    st.rerun()
 
-        col1, col2 = st.columns(2)
+            with col2:
+                if st.button("🗑 Eliminar usuario", key="btn_admin_del_user"):
+                    usuarios = [u for u in usuarios if u["email"] != email_sel]
+                    guardar_usuarios(usuarios)
+                    st.success("Usuario eliminado.")
+                    st.rerun()
 
-        with col1:
-            if st.button("Guardar cambios usuario", key="admin_guardar_usuario"):
-                usuarios = cargar_usuarios()
-                for x in usuarios:
-                    if x["email"] == email_sel:
-                        x["nombre"] = nn
-                        x["apellido"] = na
-                        x["rol"] = nr
-                        x["curso"] = nc
-                        x["password"] = npw
-
-                guardar_usuarios(usuarios)
-                st.success("Usuario actualizado.")
-                st.rerun()
-
-        with col2:
-            if st.button("Eliminar usuario", key="admin_borrar_usuario"):
-                usuarios = cargar_usuarios()
-                usuarios = [x for x in usuarios if x["email"] != email_sel]
-                guardar_usuarios(usuarios)
-                st.success("Usuario eliminado.")
-                st.rerun()
-
-
-    # ============================================
-    # =======  TAB 2 — CURSOS Y MATERIAS  ========
-    # ============================================
-
+    # ---------- TAB CURSOS ----------
     with tab_courses:
-
-        st.subheader("Materias registradas")
+        st.subheader("Cursos y materias actuales")
 
         for c in cursos:
-            st.markdown(f"- **{c['curso']} — {c['materia']}** (prof: {c['email']})")
+            st.markdown(
+                f"- **{c['id']} — {c['curso']} — {c['materia']}** (prof: {c['email']})"
+            )
 
-        st.divider()
+        st.markdown("---")
+        st.subheader("Agregar curso/materia")
 
-        st.subheader("➕ Agregar nueva materia")
+        nid = st.text_input("ID", key="admin_c_id")
+        ncurso = st.text_input("Curso (ej: 6° B)", key="admin_c_curso")
+        nmat = st.text_input("Materia", key="admin_c_mat")
+        nprof = st.text_input("Email del profesor", key="admin_c_prof")
 
-        nid = st.text_input("ID")
-        ncurso = st.text_input("Curso (Ej: 6° B)")
-        nmat = st.text_input("Materia")
-        nprof = st.text_input("Email del profesor")
-
-        if st.button("Crear materia", key="admin_crear_materia"):
-            cursos = cargar_cursos()
+        if st.button("Crear materia nueva", key="btn_admin_add_course"):
             cursos.append({
-                "id": nid,
-                "curso": normalizar(ncurso),
-                "materia": normalizar(nmat),
-                "email": nprof
+                "id": nid.strip(),
+                "curso": normalizar_curso(ncurso.strip()),
+                "materia": normalizar_materia(nmat.strip()),
+                "email": nprof.strip()
             })
             guardar_cursos(cursos)
-            st.success("Materia creada.")
+            st.success("Materia agregada.")
             st.rerun()
 
-        st.divider()
+        st.markdown("---")
+        st.subheader("Editar / eliminar materia")
 
-        st.subheader("✏️ Editar/Eliminar materia")
+        if cursos:
+            sel = st.selectbox(
+                "Elegí materia",
+                [f"{c['id']} — {c['curso']} — {c['materia']}" for c in cursos],
+                key="admin_sel_course"
+            )
+            idsel = sel.split(" — ")[0]
+            cobj = next(c for c in cursos if c["id"] == idsel)
 
-        mat_sel = st.selectbox(
-            "Seleccionar materia",
-            [f"{c['id']} — {c['curso']} — {c['materia']}" for c in cursos],
-            key="admin_edit_materia"
+            ei = st.text_input("ID", cobj["id"], key="admin_edit_c_id")
+            ec = st.text_input("Curso", cobj["curso"], key="admin_edit_c_curso")
+            em = st.text_input("Materia", cobj["materia"], key="admin_edit_c_mat")
+            ep = st.text_input("Profesor (email)", cobj["email"], key="admin_edit_c_prof")
+
+            colc1, colc2 = st.columns(2)
+
+            with colc1:
+                if st.button("💾 Guardar cambios materia", key="btn_admin_save_course"):
+                    cobj["id"] = ei.strip()
+                    cobj["curso"] = normalizar_curso(ec.strip())
+                    cobj["materia"] = normalizar_materia(em.strip())
+                    cobj["email"] = ep.strip()
+                    guardar_cursos(cursos)
+                    st.success("Materia actualizada.")
+                    st.rerun()
+
+            with colc2:
+                if st.button("🗑 Eliminar materia", key="btn_admin_del_course"):
+                    cursos = [c for c in cursos if c["id"] != idsel]
+                    guardar_cursos(cursos)
+                    st.success("Materia eliminada.")
+                    st.rerun()
+
+    # ---------- TAB BASES ----------
+    with tab_bases:
+        st.subheader("📖 Base general (pregunta;respuesta por línea)")
+
+        texto_bg = "\n".join(f"{p};{r}" for p, r in st.session_state.base_general)
+
+        edit_bg = st.text_area(
+            "Editar base general:",
+            value=texto_bg,
+            height=200,
+            key="admin_bg_text"
         )
 
-        idsel = mat_sel.split(" — ")[0]
-        cobj = next(c for c in cursos if c["id"] == idsel)
-
-        eid = st.text_input("ID", cobj["id"])
-        ecurso = st.text_input("Curso", cobj["curso"])
-        emat = st.text_input("Materia", cobj["materia"])
-        eprof = st.text_input("Profesor", cobj["email"])
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            if st.button("Guardar cambios materia", key="save_materia"):
-                cursos = cargar_cursos()
-                for x in cursos:
-                    if x["id"] == idsel:
-                        x["id"] = eid
-                        x["curso"] = normalizar(ecurso)
-                        x["materia"] = normalizar(emat)
-                        x["email"] = eprof
-
-                guardar_cursos(cursos)
-                st.success("Materia actualizada.")
-                st.rerun()
-
-        with col2:
-            if st.button("Eliminar materia", key="del_materia"):
-                cursos = cargar_cursos()
-                cursos = [x for x in cursos if x["id"] != idsel]
-                guardar_cursos(cursos)
-                st.success("Materia eliminada.")
-                st.rerun()
-
-
-    # ============================================
-    # =======  TAB 3 — BASES DE CONOCIMIENTO =====
-    # ============================================
-
-    with tab_bases:
-
-        st.subheader("📖 Base general")
-
-        bg_text = "\n".join(f"{p};{r}" for p, r in st.session_state.base_general)
-
-        edit_bg = st.text_area("Editar base general", bg_text, height=200)
-
-        if st.button("Guardar base general", key="save_base_general"):
+        if st.button("💾 Guardar base general", key="btn_admin_save_bg"):
             nueva = []
             for linea in edit_bg.splitlines():
                 if ";" in linea:
                     p, r = linea.split(";", 1)
                     nueva.append((p.strip(), r.strip()))
-            st.session_state.base_general = nueva
-            st.success("Base general actualizada.")
-            st.rerun()
+            if nueva:
+                st.session_state.base_general = nueva
+                st.success("Base general actualizada (se guarda solo en sesión).")
+            else:
+                st.error("No se detectaron líneas válidas.")
 
-        st.divider()
+        st.markdown("---")
+        st.subheader("📘 Base específica por curso (pregunta;respuesta por línea)")
 
-        st.subheader("📘 Base específica por curso")
+        cursos_base = sorted(st.session_state.bases_especificas.keys())
 
-        cursos_existentes = sorted({c["curso"] for c in cursos})
+        if cursos_base:
+            curso_base_sel = st.selectbox(
+                "Curso a editar",
+                cursos_base,
+                key="admin_sel_base_curso"
+            )
+            lista_faq = st.session_state.bases_especificas.get(curso_base_sel, [])
+            texto_faq = "\n".join(f"{p};{r}" for p, r in lista_faq)
 
-        curso_sel = st.selectbox("Seleccionar curso", cursos_existentes)
+            edit_faq = st.text_area(
+                f"Editar base específica de {curso_base_sel}:",
+                value=texto_faq,
+                height=200,
+                key="admin_texto_base_especifica"
+            )
 
-        base_curso = st.session_state.bases_por_curso.get(curso_sel, [])
-        base_text = "\n".join(f"{p};{r}" for p, r in base_curso)
+            if st.button("💾 Guardar base específica del curso", key="btn_admin_save_base_curso"):
+                nueva_faq = []
+                for linea in edit_faq.splitlines():
+                    if ";" in linea:
+                        p, r = linea.split(";", 1)
+                        nueva_faq.append((p.strip(), r.strip()))
+                st.session_state.bases_especificas[curso_base_sel] = nueva_faq
+                st.success("Base específica actualizada (solo en sesión).")
+        else:
+            st.info("No hay bases específicas por curso cargadas.")
 
-        edit_bc = st.text_area(f"Editar base de {curso_sel}", base_text, height=200)
+        st.markdown("---")
+        st.subheader("📂 Bases por materia (archivos txt en GitHub)")
 
-        if st.button(f"Guardar base {curso_sel}", key="save_base_curso"):
-            nueva = []
-            for linea in edit_bc.splitlines():
-                if ";" in linea:
-                    p, r = linea.split(";", 1)
-                    nueva.append((p.strip(), r.strip()))
+        cursos_unicos = sorted({c["curso"] for c in cursos})
+        if cursos_unicos:
+            curso_sel_bases = st.selectbox(
+                "Curso",
+                cursos_unicos,
+                key="admin_sel_curso_txt"
+            )
+            materias_sel = [c for c in cursos if c["curso"] == curso_sel_bases]
 
-            st.session_state.bases_por_curso[curso_sel] = nueva
-            st.success(f"Base de {curso_sel} actualizada.")
-            st.rerun()
+            for c in materias_sel:
+                cname = f"{c['curso']} — {c['materia']}"
+                st.markdown(f"### {cname}")
+
+                path = archivo_base_curso_materia(c["curso"], c["materia"])
+                contenido_m = leer_archivo_github(path)
+
+                edit_m = st.text_area(
+                    f"Contenido de {c['materia']} (txt en GitHub):",
+                    value=contenido_m,
+                    height=160,
+                    key=f"admin_txt_{c['id']}"
+                )
+
+                if st.button(f"💾 Guardar {cname}", key=f"btn_admin_save_txt_{c['id']}"):
+                    escribir_archivo_github(path, edit_m)
+                    st.success(f"Base de {cname} actualizada.")
+                    st.rerun()
+        else:
+            st.info("No hay cursos en courses.txt.")
