@@ -1,4 +1,4 @@
-juan.perez@insm.edu;Juan;Pérez;alumno;1° B;juan123
+juan.perez@insm.edu;Juan;Pérez;alumno;1° A;juan123
 enzoeara019@gmail.com;Enzo Agustín;Romano Almaraz;profe;;1234
 cecilia.viotti@institutolamerced.edu.ar;Cecilia Lucía;Viotti;profe;;1234
 marisa.brisio@institutolamerced.edu.ar;Marisa Angélica;Brisio;admin;;1234
@@ -33,3 +33,4 @@ evangelina.saravia@institutolamerced.edu.ar;Evangelina Beatriz;Saravia;profe;;12
 paola.auban@institutolamerced.edu.ar;Paola Yanina;Auban;profe;;1234
 santiago.romero@institutolamerced.edu.ar;Santiago Manuel;Romero;profe;;1234
 diamela.alvarez@institutolamerced.edu.ar;Diamela;Álvarez Novara;profe;;1234
+
