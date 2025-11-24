@@ -193,6 +193,7 @@ if "base_general" not in st.session_state:
 
 usuarios = cargar_usuarios()
 
+# --- PANTALLA DE LOGIN ---
 if st.session_state.usuario is None and not st.session_state.modo_anonimo:
     st.subheader("🔐 Iniciar sesión")
 
@@ -200,19 +201,24 @@ if st.session_state.usuario is None and not st.session_state.modo_anonimo:
     password = st.text_input("Contraseña", type="password")
 
     if st.button("Ingresar"):
-        user = next((u for u in usuarios if u["email"].lower() == email.lower() and u["password"] == password), None)
+        user = next(
+            (u for u in usuarios
+             if u["email"].lower() == email.lower()
+             and u["password"] == password),
+            None
+        )
         if user:
             st.session_state.usuario = user
             st.rerun()
         else:
             st.error("Email o contraseña incorrectos.")
-            st.stop()
 
     st.markdown("### 👤 Modo anónimo")
     if st.button("Entrar como invitado"):
         st.session_state.modo_anonimo = True
         st.rerun()
 
+# --- DEFINIR USUARIO ---
 if st.session_state.modo_anonimo:
     usuario = {
         "nombre": "Invitado",
@@ -224,13 +230,20 @@ if st.session_state.modo_anonimo:
 else:
     usuario = st.session_state.usuario
 
+# --- VALIDAR USUARIO ---
+if usuario is None:
+    st.warning("Por favor, iniciá sesión o entrá en modo anónimo para continuar.")
+    st.stop()
+
+# --- DATOS DEL USUARIO ---
 rol = usuario["rol"]
 email_usuario = usuario["email"]
 curso_usuario = usuario["curso"]
 
-# Recargar datos
+# --- RECARGAR BASES ---
 cursos = cargar_cursos()
 tareas = cargar_tareas()
+
 
 # ============================================
 # CHAT IA
@@ -430,3 +443,4 @@ if rol == "admin":
             cursos.append({"id": idc, "curso": curso_n, "materia": materia_n, "email": email_prof})
             guardar_cursos(cursos)
             st.rerun()
+
