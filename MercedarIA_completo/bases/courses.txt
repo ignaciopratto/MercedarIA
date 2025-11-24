@@ -142,14 +142,14 @@
 132;6° A;Historia;sin_profesor@insm.edu
 133;6° A;ERE;sin_profesor@insm.edu
 134;6° A;Sociedad y Comunicación;romina.brizzio@institutolamerced.edu.ar
-135;6° A;Teatro;sin_profesor@insm.edu
+135;6° A;Teatro;ayelen.juan@institutolamerced.edu.ar
 136;6° A;FVT;milagros.bergonzo@institutolamerced.edu.ar
 137;6° A;Educación Física;alicia.vocos@institutolamerced.edu.ar
 138;6° A;Inglés;sin_profesor@insm.edu
 
 139;6° B;Lengua y Literatura;sin_profesor@insm.edu
 140;6° B;Comunicación Audiovisual;sin_profesor@insm.edu
-141;6° B;Desarrollo de Soluciones Informáticas;sin_profesor@insm.edu
+141;6° B;Desarrollo de Soluciones Informáticas;carlos.clara@institutolamerced.edu.ar
 142;6° B;Informática Aplicada;diamela.alvarez@institutolamerced.edu.ar
 143;6° B;Filosofía;santiago.romero@institutolamerced.edu.ar
 144;6° B;Formación para la Vida y el Trabajo;paula.radichi@institutolamerced.edu.ar
@@ -157,7 +157,8 @@
 146;6° B;Matemática;sin_profesor@insm.edu
 147;6° B;ERE;gabriela.mugas@institutolamerced.edu.ar
 148;6° B;Ciudadanía y Política;evangelina.saravia@institutolamerced.edu.ar
-149;6° B;Teatro;sin_profesor@insm.edu
+149;6° B;Teatro;ayelen.juan@institutolamerced.edu.ar
 150;6° B;Educación Física;sin_profesor@insm.edu
 151;6° B;Aplicaciones Informáticas;sin_profesor@insm.edu
 152;6° B;Inglés;sin_profesor@insm.edu
+
