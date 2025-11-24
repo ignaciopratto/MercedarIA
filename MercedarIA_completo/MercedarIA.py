@@ -16,6 +16,48 @@ GITHUB_BASE_FOLDER = st.secrets.get("GITHUB_BASE_FOLDER", "MercedarIA_completo")
 BASES_ROOT = f"{GITHUB_BASE_FOLDER}/bases"
 
 # ============================================
+# TEST DE CONEXIÓN A GITHUB (OPCIONAL)
+# ============================================
+
+def test_github_write():
+    """Comprueba si el token realmente permite escribir en el repo."""
+    test_path = f"{BASES_ROOT}/test_token.txt"
+    url = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/contents/{test_path}"
+
+    contenido = "Prueba de conexión exitosa desde MercedarIA."
+
+    # Primero obtengo el SHA del archivo (si existe)
+    r_get = requests.get(url, headers={
+        "Authorization": f"Bearer {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    })
+
+    sha = r_get.json().get("sha") if r_get.status_code == 200 else None
+
+    data = {
+        "message": "Test de escritura desde MercedarIA",
+        "content": base64.b64encode(contenido.encode("utf-8")).decode("utf-8")
+    }
+
+    if sha:
+        data["sha"] = sha
+
+    r_put = requests.put(url, json=data, headers={
+        "Authorization": f"Bearer {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    })
+
+    if r_put.status_code in (200, 201):
+        return True, "✔ TEST OK — Pude escribir en GitHub."
+    else:
+        return False, f"❌ ERROR {r_put.status_code}: {r_put.text}"
+
+# Botón para probar la conexión
+ok, msg = test_github_write()
+st.warning("Resultado del test de GitHub:")
+st.write(msg)
+
+# ============================================
 # BASES EN CÓDIGO (VALORES POR DEFECTO)
 # ============================================
 
@@ -934,3 +976,4 @@ if rol == "admin":
                 st.success("Base específica actualizada (solo en esta sesión).")
         else:
             st.info("No hay bases específicas cargadas.")
+
