@@ -1,5 +1,4 @@
 marisa.brisio@institutolamerced.edu.ar;Marisa;Brizzio;admin;-;admin123
-
 enzoeara019@gmail.com;Enzo Agustín;Romano Almaraz;profe;-;profe123
 cecilia.viotti@institutolamerced.edu.ar;Cecilia Lucía;Viotti;profe;-;profe123
 marisa.brisio@institutolamerced.edu.ar;Marisa Angélica;Brisio;profe;-;profe123
@@ -34,6 +33,4 @@ evangelina.saravia@institutolamerced.edu.ar;Evangelina Beatriz;Saravia;profe;-;p
 paola.auban@institutolamerced.edu.ar;Paola Yanina;Auban;profe;-;profe123
 santiago.romero@institutolamerced.edu.ar;Santiago Manuel;Romero;profe;-;profe123
 diamela.alvarez@institutolamerced.edu.ar;Diamela;Álvarez Novara;profe;-;profe123
-
 juanperez@insm.edu;Juan;Pérez;alumno;1° B;alumno123
-maria.lopez@insm.edu;María;López;alumno;1° A;alumno123
