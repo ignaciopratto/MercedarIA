@@ -601,7 +601,7 @@ st.markdown("---")
 st.header("📝 Tareas")
 # ---------- ANONIMO ----------
 if rol == "anonimo":
-    st.info("🔐 Iniciá sesión para ver tus tareas.")
+    st.info("🔐 Iniciá sesión como alumno para ver tus tareas.")
     st.stop()
 
 # ---------- ALUMNO ----------
@@ -929,5 +929,6 @@ if rol == "admin":
                     st.rerun()
         else:
             st.info("No hay cursos en courses.txt.")
+
 
 
