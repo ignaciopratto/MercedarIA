@@ -1,2 +1,11 @@
-1;Práctica de Matemática;Resolver las actividades de la página 42.;1° B;profe.marta@insm.edu;2025-04-10
-2;Resumen de Lengua;Hacer un resumen del capítulo 3.;1° B;profe.marta@insm.edu;2025-04-12
+1;TP 1: Introducción a Biología;Leer y resumir páginas 10–12 del libro.;1° A;Biología;cecilia.viotti@institutolamerced.edu.ar;2025-03-20
+2;Trabajo de color y forma;Realizar una lámina sobre composición visual.;1° A;Artes Visuales;marisa.brisio@institutolamerced.edu.ar;2025-03-22
+3;Práctica de Lengua;Escribir un texto narrativo breve.;1° A;Lengua y Literatura;virginia.gardella@institutolamerced.edu.ar;2025-03-24
+4;Guía de ejercicios de Física;Resolver ejercicios del cuaderno 1 al 5.;1° A;Física;cecilia.viotti@institutolamerced.edu.ar;2025-03-25
+5;Mapa político;Dibujar un mapa de América del Sur.;1° A;Geografía;andrea.miretti@institutolamerced.edu.ar;2025-03-26
+6;Proyecto tecnológico 1;Armar un informe sobre máquinas simples.;1° A;Educación Tecnológica;facundo.gil@institutolamerced.edu.ar;2025-03-27
+7;Práctica de Matemática;Resolver ejercicios de fracciones.;1° A;Matemática;alejandra.pissane@institutolamerced.edu.ar;2025-03-28
+8;Trabajo sobre valores;Realizar un escrito sobre la solidaridad.;1° A;ERE;gabriela.mugas@institutolamerced.edu.ar;2025-03-29
+9;TP de Ciudadanía;Completar cuadro sobre derechos y responsabilidades.;1° A;Ciudadanía y Participación;yanina.moya@institutolamerced.edu.ar;2025-03-30
+10;Vocabulario Unidad 1;Aprender 20 palabras nuevas.;1° A;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-04-01
+11;Ficha de condición física;Completar planilla de EF.;1° A;Educación Física;profe1@insm.edu;2025-04-02
