@@ -1,3 +1,35 @@
 juan.perez@insm.edu;Juan;Pérez;alumno;1° B;juan123
-profe.marta@insm.edu;Marta;González;profe;1° B;marta456
-admin@insm.edu;Admin;General;admin;General;admin123
+enzoeara019@gmail.com;Enzo Agustín;Romano Almaraz;profe;;1234
+cecilia.viotti@institutolamerced.edu.ar;Cecilia Lucía;Viotti;profe;;1234
+marisa.brisio@institutolamerced.edu.ar;Marisa Angélica;Brisio;admin;;1234
+virginia.gardella@institutolamerced.edu.ar;Virginia;Gardella;profe;;1234
+alejandra.pissane@institutolamerced.edu.ar;María Alejandra;Pissane;profe;;1234
+andrea.miretti@institutolamerced.edu.ar;Andrea Verónica;Miretti;profe;;1234
+gabriela.mugas@institutolamerced.edu.ar;Gabriela Aylen;Mugas;profe;;1234
+yanina.moya@institutolamerced.edu.ar;Priscila Yanina;Moya;profe;;1234
+ivana.marioni@institutolamerced.edu.ar;Ivana del Valle;Marioni;profe;;1234
+facundo.gil@institutolamerced.edu.ar;Facundo;Gil;profe;;1234
+soledad.picard@institutolamerced.edu.ar;María Soledad;Picard;profe;;1234
+gerardo.lemos@institutolamerced.edu.ar;Gerardo Enrique;Lemos;profe;;1234
+florencia.andino@institutolamerced.edu.ar;María Florencia;Andino;profe;;1234
+mj.esposito@institutolamerced.edu.ar;María José;Espósito;profe;;1234
+alicia.vocos@institutolamerced.edu.ar;Alicia Inés;Vocos;profe;;1234
+maria.guzman@institutolamerced.edu.ar;María Belén;Guzmán;profe;;1234
+milagros.bergonzo@institutolamerced.edu.ar;Milagros;Bergonzo;profe;;1234
+paula.radichi@institutolamerced.edu.ar;Paula Ailén;Radichi;profe;;1234
+tamara.rochia@institutolamerced.edu.ar;Tamara del Carmen;Rochia;profe;;1234
+carlos.clara@institutolamerced.edu.ar;Carlos Enrique;Clara;profe;;1234
+silvana.bravo@institutolamerced.edu.ar;Silvana Soledad;Bravo;profe;;1234
+macarena.deyong@institutolamerced.edu.ar;María Macarena;De Yong;profe;;1234
+romina.brizzio@institutolamerced.edu.ar;Romina Paola;Brizzio;profe;;1234
+eliana.cabrera@institutolamerced.edu.ar;Eliana Micaela;Cabrera;profe;;1234
+analuz.torressi@institutolamerced.edu.ar;Ana Luz;Torressi;profe;;1234
+gustavo.mendoza@institutolamerced.edu.ar;Carlos Gustavo;Mendoza;profe;;1234
+marisa.ferrero@institutolamerced.edu.ar;Marisa Silvana;Ferrero;profe;;1234
+ivana.lario@institutolamerced.edu.ar;Ivana Josefina;Lario;profe;;1234
+laura.bertea@institutolamerced.edu.ar;Laura Alejandra;Bertea;profe;;1234
+luciana.noriega@institutolamerced.edu.ar;Luciana Celeste;Noriega;profe;;1234
+evangelina.saravia@institutolamerced.edu.ar;Evangelina Beatriz;Saravia;profe;;1234
+paola.auban@institutolamerced.edu.ar;Paola Yanina;Auban;profe;;1234
+santiago.romero@institutolamerced.edu.ar;Santiago Manuel;Romero;profe;;1234
+diamela.alvarez@institutolamerced.edu.ar;Diamela;Álvarez Novara;profe;;1234
