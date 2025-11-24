@@ -431,6 +431,8 @@ with col_i:
 
 with col_o:
     if st.button("Cerrar sesión"):
+        # 🔥 BORRAR CHAT Y ESTADO
+        st.session_state.chat_history = []
         st.session_state.usuario = None
         st.session_state.modo_anonimo = False
         st.rerun()
@@ -955,3 +957,4 @@ if rol == "admin":
                 escribir_archivo_github(path, edit)
                 st.success(f"{cname} actualizado.")
                 st.rerun()
+
