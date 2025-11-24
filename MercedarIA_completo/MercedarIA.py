@@ -16,7 +16,7 @@ GITHUB_BASE_FOLDER = st.secrets.get("GITHUB_BASE_FOLDER", "MercedarIA_completo")
 BASES_ROOT = f"{GITHUB_BASE_FOLDER}/bases"
 
 # ============================================
-# BASES EN CÓDIGO
+# BASES EN CÓDIGO (FAQ "quemados")
 # ============================================
 
 BASE_GENERAL = [
@@ -118,10 +118,14 @@ def escribir_archivo_github(path_relativo: str, contenido: str) -> (bool, str):
     url = github_api_url(path_relativo)
 
     try:
-        r_get = requests.get(url, headers={
-            "Authorization": f"token {GITHUB_TOKEN}",
-            "Accept": "application/vnd.github+json"
-        })
+        r_get = requests.get(
+            url,
+            headers={
+                "Authorization": f"token {GITHUB_TOKEN}",
+                "Accept": "application/vnd.github+json"
+            },
+            timeout=10
+        )
         sha = r_get.json().get("sha") if r_get.status_code == 200 else None
     except:
         sha = None
@@ -134,10 +138,15 @@ def escribir_archivo_github(path_relativo: str, contenido: str) -> (bool, str):
         data["sha"] = sha
 
     try:
-        r_put = requests.put(url, json=data, headers={
-            "Authorization": f"token {GITHUB_TOKEN}",
-            "Accept": "application/vnd.github+json"
-        })
+        r_put = requests.put(
+            url,
+            json=data,
+            headers={
+                "Authorization": f"token {GITHUB_TOKEN}",
+                "Accept": "application/vnd.github+json"
+            },
+            timeout=10
+        )
         if r_put.status_code in (200, 201):
             return True, "✔ Guardado en GitHub."
         else:
@@ -146,11 +155,34 @@ def escribir_archivo_github(path_relativo: str, contenido: str) -> (bool, str):
         return False, f"Error al guardar: {e}"
 
 # ============================================
-# HELPERS CURSO/MATERIA → ARCHIVO
+# HELPERS CURSO / MATERIA
 # ============================================
 
+def normalizar_curso(curso: str) -> str:
+    """
+    Convierte variantes como '1b', '1°B', '1 º b' en '1° B'
+    """
+    if not curso:
+        return ""
+    s = curso.strip()
+    s = s.replace("º", "°")
+
+    # Caso ya con °
+    m = re.match(r"(\d)\s*°\s*([A-Za-z])", s)
+    if m:
+        return f"{m.group(1)}° {m.group(2).upper()}"
+
+    # Caso tipo '1b' o '1 a'
+    s = s.lower().replace(" ", "")
+    m = re.match(r"(\d)([a-z])", s)
+    if m:
+        return f"{m.group(1)}° {m.group(2).upper()}"
+
+    return curso.strip()
+
 def curso_to_id(curso: str) -> str:
-    return curso.replace("°", "").replace(" ", "").strip() or "General"
+    curso_norm = normalizar_curso(curso)
+    return curso_norm.replace("°", "").replace(" ", "") or "General"
 
 def slugify_materia(materia: str) -> str:
     s = (materia or "").lower().strip()
@@ -175,7 +207,10 @@ def cargar_usuarios():
     for linea in texto.splitlines():
         if ";" not in linea:
             continue
-        email, nombre, apellido, rol, curso, password = linea.split(";", 5)
+        partes = linea.split(";", 5)
+        if len(partes) != 6:
+            continue
+        email, nombre, apellido, rol, curso, password = partes
         usuarios.append({
             "email": email.strip(),
             "nombre": nombre.strip(),
@@ -199,7 +234,10 @@ def cargar_cursos():
     for linea in texto.splitlines():
         if ";" not in linea:
             continue
-        id_, curso, materia, email = linea.split(";", 3)
+        partes = linea.split(";", 3)
+        if len(partes) != 4:
+            continue
+        id_, curso, materia, email = partes
         cursos.append({
             "id": id_.strip(),
             "curso": curso.strip(),
@@ -221,7 +259,10 @@ def cargar_tareas():
     for linea in texto.splitlines():
         if ";" not in linea:
             continue
-        id_, titulo, descr, curso, creador, fecha = linea.split(";", 5)
+        partes = linea.split(";", 5)
+        if len(partes) != 6:
+            continue
+        id_, titulo, descr, curso, creador, fecha = partes
         tareas.append({
             "id": id_.strip(),
             "titulo": titulo.strip(),
@@ -242,16 +283,16 @@ def guardar_tareas(lista):
 def agregar_tarea_a_bases_de_curso(curso, tarea, cursos):
     """
     Agrega la tarea como línea en cada base de materia del curso.
+    Formato: TAREA: titulo;descripcion;fecha_limite
     """
+    curso_norm = normalizar_curso(curso)
     for c in cursos:
-        if c["curso"].strip() == curso.strip():
+        if normalizar_curso(c["curso"]) == curso_norm:
             path = archivo_base_curso_materia(c["curso"], c["materia"])
             texto = leer_archivo_github(path)
-
             lineas = [l for l in texto.splitlines() if l.strip() != ""]
             linea_tarea = f"TAREA: {tarea['titulo']};{tarea['descripcion']};{tarea['fecha_limite']}"
             lineas.append(linea_tarea)
-
             nuevo = "\n".join(lineas)
             escribir_archivo_github(path, nuevo)
 
@@ -309,6 +350,7 @@ if usuario is None:
 rol = usuario["rol"]
 email_usuario = usuario["email"]
 curso_usuario = usuario["curso"]
+curso_usuario_norm = normalizar_curso(curso_usuario)
 
 # recargar por si hubo cambios
 usuarios = cargar_usuarios()
@@ -317,7 +359,7 @@ tareas = cargar_tareas()
 
 st.info(
     f"Conectado como **{usuario['nombre']} {usuario['apellido']}** — "
-    f"Rol: **{rol}** — Curso: **{curso_usuario}**"
+    f"Rol: **{rol}** — Curso: **{curso_usuario_norm}**"
 )
 
 # ============================================
@@ -325,21 +367,33 @@ st.info(
 # ============================================
 
 def consultar_deepseek(pregunta, contexto_txt):
-    """
-    Envía la pregunta + contexto a la API de DeepSeek.
-    """
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
         "Content-Type": "application/json"
     }
 
+    mensajes = [
+        {
+            "role": "system",
+            "content": (
+                "Sos MercedarIA, asistente virtual del Colegio Mercedaria. "
+                "Respondé SIEMPRE en español y usá prioritariamente la información "
+                "del contexto del colegio que te doy.\n\n"
+                "Si la pregunta es sobre profesores, materias, cursos o tareas, "
+                "respondé usando esos datos específicos.\n\n"
+                "Contexto del colegio:\n" + contexto_txt
+            ),
+        },
+        {
+            "role": "user",
+            "content": pregunta
+        }
+    ]
+
     payload = {
         "model": "deepseek-chat",
-        "messages": [
-            {"role": "system", "content": contexto_txt},
-            {"role": "user", "content": pregunta}
-        ],
+        "messages": mensajes,
         "max_tokens": 600,
     }
 
@@ -347,9 +401,9 @@ def consultar_deepseek(pregunta, contexto_txt):
         r = requests.post(url, json=payload, headers=headers, timeout=18)
         r.raise_for_status()
         data = r.json()
-        if "choices" in data:
+        if "choices" in data and len(data["choices"]) > 0:
             return data["choices"][0]["message"]["content"]
-        return "Error interpretando la respuesta."
+        return "No pude obtener una respuesta de la IA."
     except Exception as e:
         return f"Error al consultar DeepSeek: {e}"
 
@@ -357,56 +411,86 @@ def consultar_deepseek(pregunta, contexto_txt):
 # FUNCIÓN PARA ARMAR CONTEXTO COMPLETO
 # ============================================
 
-def construir_contexto_completo(curso_usuario):
-    contexto = "INFORMACIÓN DEL USUARIO LOGUEADO:\n"
-    contexto += f"El usuario actual pertenece al curso {curso_usuario}.\n"
+def construir_contexto_completo(curso_norm):
+    contexto = ""
+
+    # Info del usuario actual
+    contexto += "INFORMACIÓN DEL USUARIO LOGUEADO:\n"
     contexto += f"Nombre: {usuario['nombre']} {usuario['apellido']}.\n"
     contexto += f"Rol: {usuario['rol']}.\n"
-    contexto += f"Email: {usuario['email']}.\n\n"
+    contexto += f"Email: {usuario['email']}.\n"
+    contexto += f"Curso declarado: {usuario['curso']} (normalizado: {curso_norm}).\n\n"
 
-    contexto += "BASE DEL COLEGIO:\n\n"
-
-    # General
+    # Base general
+    contexto += "BASE GENERAL DEL COLEGIO:\n"
     for p, r in BASE_GENERAL:
         contexto += f"{p} -> {r}\n"
 
-    # Info específica del curso (preguntas fijas)
-    contexto += "\nBASE DEL CURSO:\n"
-    faqs = BASES_ESPECIFICAS.get(curso_usuario, [])
+    # Base específica del curso
+    contexto += "\nBASE ESPECÍFICA DEL CURSO:\n"
+    faqs = BASES_ESPECIFICAS.get(curso_norm, [])
     for p, r in faqs:
         contexto += f"{p} -> {r}\n"
 
-    # Usuarios (sobre todo profes y cursos)
+    # Usuarios (quién es quién)
     contexto += "\nBASE DE USUARIOS (roles, cursos, mails):\n"
     for u in usuarios:
         contexto += (
             f"Usuario: {u['nombre']} {u['apellido']} "
-            f"({u['email']}), rol: {u['rol']}, curso: {u['curso']}.\n"
+            f"({u['email']}), rol: {u['rol']}, curso principal: {u['curso']}.\n"
         )
 
-    # Cursos y materias con profesor asignado
-    contexto += "\nBASE DE CURSOS Y PROFESORES:\n"
+    # Profesores del curso actual (por materia)
+    contexto += f"\nPROFESORES DEL CURSO {curso_norm} (por materia):\n"
     for c in cursos:
-        prof = next((u for u in usuarios if u["email"] == c["email"]), None)
-        if prof:
+        if normalizar_curso(c["curso"]) == curso_norm:
+            prof = next((u for u in usuarios if u["email"] == c["email"]), None)
+            if prof:
+                contexto += (
+                    f"En {curso_norm}, la materia {c['materia']} la da "
+                    f"{prof['nombre']} {prof['apellido']} ({prof['email']}).\n"
+                )
+            else:
+                contexto += (
+                    f"En {curso_norm}, la materia {c['materia']} la da "
+                    f"el profesor con email {c['email']}.\n"
+                )
+
+    # Mapa global de qué da cada profe y dónde
+    contexto += "\nMAPA GLOBAL DE PROFESORES, CURSOS Y MATERIAS:\n"
+    clases_por_prof = {}
+    for c in cursos:
+        cur_norm = normalizar_curso(c["curso"])
+        clases_por_prof.setdefault(c["email"], []).append((cur_norm, c["materia"]))
+
+    for u in usuarios:
+        email = u["email"]
+        if email in clases_por_prof and u["rol"] in ("profe", "admin"):
+            lista = clases_por_prof[email]
+            partes = [f"{mat} en {cur}" for (cur, mat) in lista]
             contexto += (
-                f"En el curso {c['curso']}, la materia {c['materia']} "
-                f"la dicta {prof['nombre']} {prof['apellido']} ({prof['email']}).\n"
-            )
-        else:
-            contexto += (
-                f"En el curso {c['curso']}, la materia {c['materia']} "
-                f"la dicta el profesor con email {c['email']}.\n"
+                f"{u['nombre']} {u['apellido']} ({email}) dicta: "
+                + "; ".join(partes)
+                + ".\n"
             )
 
-    # Bases por materia según TXT
-    contexto += "\nBASE DE MATERIAS (faq + tareas guardadas en txt):\n"
+    # Tareas del curso actual
+    contexto += f"\nTAREAS DEL CURSO {curso_norm}:\n"
+    for t in tareas:
+        if normalizar_curso(t["curso"]) == curso_norm:
+            contexto += (
+                f"Tarea: {t['titulo']} - {t['descripcion']} "
+                f"(vence {t['fecha_limite']}, creada por {t['creador']}).\n"
+            )
+
+    # Bases por materia (txt de cada materia del curso)
+    contexto += "\nBASES POR MATERIA (FAQ + tareas pegadas en los txt):\n"
     for c in cursos:
-        if c["curso"] == curso_usuario:
+        if normalizar_curso(c["curso"]) == curso_norm:
             path = archivo_base_curso_materia(c["curso"], c["materia"])
             texto = leer_archivo_github(path)
             if texto.strip():
-                contexto += f"\n[{c['materia']}]\n{texto}\n"
+                contexto += f"\n[{c['materia']} - {curso_norm}]\n{texto}\n"
 
     return contexto
 
@@ -423,7 +507,7 @@ with col_btn:
     enviar = st.button("Enviar", key="btn_enviar_chat")
 
 if enviar and pregunta.strip():
-    contexto = construir_contexto_completo(curso_usuario)
+    contexto = construir_contexto_completo(curso_usuario_norm)
     respuesta = consultar_deepseek(pregunta, contexto)
 
     # Guardar en historial
@@ -434,13 +518,13 @@ st.markdown("### 🗨️ Historial de conversación")
 
 for mensaje in st.session_state.chat_history:
     if mensaje["role"] == "user":
-        # Burbuja del usuario (verde suave)
+        # Burbuja del usuario (verde suave, bajo brillo)
         st.markdown(
             f"""
 <div style="text-align: right; margin: 4px 0;">
   <div style="
       display: inline-block;
-      background-color: #CFE8C0;
+      background-color: #D6F3C8;
       color: #111;
       padding: 8px 12px;
       border-radius: 12px;
@@ -459,7 +543,7 @@ for mensaje in st.session_state.chat_history:
 <div style="text-align: left; margin: 4px 0;">
   <div style="
       display: inline-block;
-      background-color: #E0E0E0;
+      background-color: #E5E5E5;
       color: #111;
       padding: 8px 12px;
       border-radius: 12px;
@@ -481,54 +565,94 @@ st.markdown("---")
 st.header("📝 Tareas")
 
 with st.expander("Ver tareas del curso", expanded=False):
-    st.subheader("Tareas del curso")
+    if rol == "alumno":
+        # Alumno: ve solo su curso
+        curso_visto = curso_usuario_norm
+        st.subheader(f"Tareas de {curso_visto}")
+        tareas_vistas = [
+            t for t in tareas if normalizar_curso(t["curso"]) == curso_visto
+        ]
 
-    tareas_del_curso = [t for t in tareas if t["curso"] == curso_usuario]
-
-    if not tareas_del_curso:
-        st.write("No hay tareas cargadas para tu curso.")
-    else:
-        for t in tareas_del_curso:
-            st.markdown(
-                f"""
+        if not tareas_vistas:
+            st.write("No hay tareas cargadas para tu curso.")
+        else:
+            for t in tareas_vistas:
+                st.markdown(
+                    f"""
 **{t['titulo']}**  
 📌 *{t['descripcion']}*  
 ⏳ **Vence:** {t['fecha_limite']}  
 👨‍🏫 **Profesor:** {t['creador']}  
 ---
 """
+                )
+
+    else:
+        # Profe o admin: puede elegir curso donde da clases
+        cursos_prof = sorted(
+            set(
+                normalizar_curso(c["curso"])
+                for c in cursos
+                if c["email"] == email_usuario
+            )
+        )
+
+        if not cursos_prof:
+            st.info("No tenés cursos asignados en courses.txt.")
+        else:
+            curso_sel = st.selectbox(
+                "Seleccioná un curso para ver y crear tareas:",
+                cursos_prof,
+                key="curso_tareas_prof"
             )
 
-    # Profes pueden crear tareas
-    if rol == "profe":
-        st.subheader("➕ Crear nueva tarea")
+            st.subheader(f"Tareas de {curso_sel}")
 
-        titulo = st.text_input("Título de la tarea", key="nuevo_titulo")
-        descr = st.text_area("Descripción", key="nuevo_descr")
-        fecha = st.date_input("Fecha límite", key="nuevo_fecha")
+            tareas_vistas = [
+                t for t in tareas if normalizar_curso(t["curso"]) == curso_sel
+            ]
 
-        if st.button("Agregar tarea", key="btn_agregar_tarea"):
-            if titulo.strip() == "":
-                st.warning("Tenés que poner un título.")
+            if not tareas_vistas:
+                st.write("No hay tareas cargadas para este curso.")
             else:
-                nuevo_id = str(len(tareas) + 1)
-                nueva = {
-                    "id": nuevo_id,
-                    "titulo": titulo,
-                    "descripcion": descr,
-                    "curso": curso_usuario,
-                    "creador": email_usuario,
-                    "fecha_limite": str(fecha)
-                }
+                for t in tareas_vistas:
+                    st.markdown(
+                        f"""
+**{t['titulo']}**  
+📌 *{t['descripcion']}*  
+⏳ **Vence:** {t['fecha_limite']}  
+👨‍🏫 **Profesor:** {t['creador']}  
+---
+"""
+                    )
 
-                tareas.append(nueva)
-                # Guarda TODAS las tareas en tasks.txt del repo
-                guardar_tareas(tareas)
-                # Y también la mete en los txt por materia del curso
-                agregar_tarea_a_bases_de_curso(curso_usuario, nueva, cursos)
+            # Crear nuevas tareas (solo profe/admin)
+            st.subheader("➕ Crear nueva tarea")
 
-                st.success("Tarea agregada correctamente.")
-                st.rerun()
+            titulo = st.text_input("Título de la tarea", key="nuevo_titulo")
+            descr = st.text_area("Descripción", key="nuevo_descr")
+            fecha = st.date_input("Fecha límite", key="nuevo_fecha")
+
+            if st.button("Agregar tarea", key="btn_agregar_tarea"):
+                if titulo.strip() == "":
+                    st.warning("Tenés que poner un título.")
+                else:
+                    nuevo_id = str(len(tareas) + 1)
+                    nueva = {
+                        "id": nuevo_id,
+                        "titulo": titulo.strip(),
+                        "descripcion": descr.strip(),
+                        "curso": curso_sel,  # curso normalizado
+                        "creador": email_usuario,
+                        "fecha_limite": str(fecha)
+                    }
+
+                    tareas.append(nueva)
+                    guardar_tareas(tareas)
+                    agregar_tarea_a_bases_de_curso(curso_sel, nueva, cursos)
+
+                    st.success("Tarea agregada correctamente.")
+                    st.rerun()
 
 # ============================================
 # PANEL DEL PROFESOR (EDITAR BASES)
@@ -540,22 +664,29 @@ if rol == "profe":
     materias_mias = [c for c in cursos if c["email"] == email_usuario]
 
     if not materias_mias:
-        st.info("No tenés materias asignadas.")
+        st.info("No tenés materias asignadas en courses.txt.")
     else:
-        materia_sel = st.selectbox(
-            "Materia a editar:",
-            [f"{c['curso']} — {c['materia']}" for c in materias_mias],
+        opcion_materia = st.selectbox(
+            "Materia a editar (curso — materia):",
+            [f"{normalizar_curso(c['curso'])} — {c['materia']}" for c in materias_mias],
             key="select_materia_prof"
         )
 
-        curso_edit = materia_sel.split(" — ")[0]
-        materia_edit = materia_sel.split(" — ")[1]
+        curso_edit, materia_edit = [x.strip() for x in opcion_materia.split("—", 1)]
 
-        path = archivo_base_curso_materia(curso_edit, materia_edit)
+        # Ojo: en el archivo, el curso puede estar con el formato original,
+        # usamos el de courses.txt para el path:
+        curso_original = next(
+            (c["curso"] for c in materias_mias
+             if normalizar_curso(c["curso"]) == curso_edit and c["materia"] == materia_edit),
+            curso_edit
+        )
+
+        path = archivo_base_curso_materia(curso_original, materia_edit)
         contenido_actual = leer_archivo_github(path)
 
         nuevo = st.text_area(
-            "Contenido editable del archivo:",
+            "Contenido editable del archivo (pregunta;respuesta por línea, más las TAREA: ...):",
             value=contenido_actual,
             height=400,
             key="textarea_base_materia"
@@ -574,50 +705,50 @@ if rol == "admin":
 
     st.subheader("Usuarios existentes")
     for u in usuarios:
-        st.markdown(f"- **{u['email']}** — {u['rol']} — {u['curso']}")
+        st.markdown(f"- **{u['email']}** — {u['rol']} — curso: {u['curso']}")
 
     st.subheader("Crear nuevo usuario")
 
     em = st.text_input("Email nuevo", key="admin_email_nuevo")
     nom = st.text_input("Nombre", key="admin_nombre_nuevo")
     ape = st.text_input("Apellido", key="admin_apellido_nuevo")
-    r = st.selectbox("Rol", ["alumno", "profe", "admin"], key="admin_rol_nuevo")
-    c = st.text_input("Curso (solo alumnos)", key="admin_curso_nuevo")
+    r_rol = st.selectbox("Rol", ["alumno", "profe", "admin"], key="admin_rol_nuevo")
+    c_user = st.text_input("Curso principal (ej: 1° B o 1b)", key="admin_curso_nuevo")
     pw = st.text_input("Contraseña", key="admin_pw_nuevo")
 
     if st.button("Crear usuario", key="btn_admin_crear_usuario"):
         usuarios.append({
-            "email": em,
-            "nombre": nom,
-            "apellido": ape,
-            "rol": r,
-            "curso": c,
-            "password": pw
+            "email": em.strip(),
+            "nombre": nom.strip(),
+            "apellido": ape.strip(),
+            "rol": r_rol.strip(),
+            "curso": c_user.strip(),
+            "password": pw.strip()
         })
         guardar_usuarios(usuarios)
         st.success("Usuario creado.")
         st.rerun()
 
-    st.subheader("Cursos existentes")
+    st.subheader("Cursos existentes (courses.txt)")
     for c_obj in cursos:
-        st.markdown(f"- **{c_obj['curso']} — {c_obj['materia']}** (prof: {c_obj['email']})")
+        st.markdown(
+            f"- **{c_obj['curso']} — {c_obj['materia']}** (prof: {c_obj['email']})"
+        )
 
     st.subheader("Agregar curso/materia")
 
-    idc = st.text_input("ID del curso", key="admin_id_curso")
-    curso_n = st.text_input("Curso (ej: 1° A)", key="admin_curso_nombre")
+    idc = st.text_input("ID del curso (número)", key="admin_id_curso")
+    curso_n = st.text_input("Curso (ej: 1° B)", key="admin_curso_nombre")
     materia_n = st.text_input("Materia (ej: Matemática)", key="admin_materia_nombre")
     prof_n = st.text_input("Email del profesor", key="admin_prof_email")
 
     if st.button("Crear materia nueva", key="btn_admin_crear_materia"):
         cursos.append({
-            "id": idc,
-            "curso": curso_n,
-            "materia": materia_n,
-            "email": prof_n
+            "id": idc.strip(),
+            "curso": curso_n.strip(),
+            "materia": materia_n.strip(),
+            "email": prof_n.strip()
         })
         guardar_cursos(cursos)
         st.success("Materia agregada.")
         st.rerun()
-
-
