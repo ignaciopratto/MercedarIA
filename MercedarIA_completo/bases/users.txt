@@ -1,38 +1,39 @@
-juan.perez@insm.edu;Juan;Pérez;alumno;1° A;juan123
+marisa.brisio@institutolamerced.edu.ar;Marisa;Brizzio;admin;-;admin123
 
-marisa.brisio@institutolamerced.edu.ar;Marisa;Brisio;admin;1° A,1° B,3° A,3° B,4° A;Educación Artística,Arte Cultura y Sociales;admin123
+enzoeara019@gmail.com;Enzo Agustín;Romano Almaraz;profe;-;profe123
+cecilia.viotti@institutolamerced.edu.ar;Cecilia Lucía;Viotti;profe;-;profe123
+marisa.brisio@institutolamerced.edu.ar;Marisa Angélica;Brisio;profe;-;profe123
+virginia.gardella@institutolamerced.edu.ar;Virginia;Gardella;profe;-;profe123
+alejandra.pissane@institutolamerced.edu.ar;María Alejandra;Pissane;profe;-;profe123
+andrea.miretti@institutolamerced.edu.ar;Andrea Verónica;Miretti;profe;-;profe123
+gabriela.mugas@institutolamerced.edu.ar;Gabriela Aylen;Mugas;profe;-;profe123
+yanina.moya@institutolamerced.edu.ar;Priscila Yanina;Moya;profe;-;profe123
+ivana.marioni@institutolamerced.edu.ar;Ivana del Valle;Marioni;profe;-;profe123
+facundo.gil@institutolamerced.edu.ar;Facundo;Gil;profe;-;profe123
+soledad.picard@institutolamerced.edu.ar;María Soledad;Picard;profe;-;profe123
+gerardo.lemos@institutolamerced.edu.ar;Gerardo Enrique;Lemos;profe;-;profe123
+florencia.andino@institutolamerced.edu.ar;María Florencia;Andino;profe;-;profe123
+mj.esposito@institutolamerced.edu.ar;María José;Espósito;profe;-;profe123
+alicia.vocos@institutolamerced.edu.ar;Alicia Inés;Vocos;profe;-;profe123
+maria.guzman@institutolamerced.edu.ar;María Belén;Guzmán;profe;-;profe123
+milagros.bergonzo@institutolamerced.edu.ar;Milagros;Bergonzo;profe;-;profe123
+paula.radichi@institutolamerced.edu.ar;Paula Ailén;Radichi;profe;-;profe123
+tamara.rochia@institutolamerced.edu.ar;Tamara del Carmen;Rochia;profe;-;profe123
+carlos.clara@institutolamerced.edu.ar;Carlos Enrique;Clara;profe;-;profe123
+silvana.bravo@institutolamerced.edu.ar;Silvana Soledad;Bravo;profe;-;profe123
+macarena.deyong@institutolamerced.edu.ar;María Macarena;De Yong;profe;-;profe123
+romina.brizzio@institutolamerced.edu.ar;Romina Paola;Brizzio;profe;-;profe123
+eliana.cabrera@institutolamerced.edu.ar;Eliana Micaela;Cabrera;profe;-;profe123
+analuz.torressi@institutolamerced.edu.ar;Ana Luz;Torressi;profe;-;profe123
+gustavo.mendoza@institutolamerced.edu.ar;Carlos Gustavo;Mendoza;profe;-;profe123
+marisa.ferrero@institutolamerced.edu.ar;Marisa Silvana;Ferrero;profe;-;profe123
+ivana.lario@institutolamerced.edu.ar;Ivana Josefina;Lario;profe;-;profe123
+laura.bertea@institutolamerced.edu.ar;Laura Alejandra;Bertea;profe;-;profe123
+luciana.noriega@institutolamerced.edu.ar;Luciana Celeste;Noriega;profe;-;profe123
+evangelina.saravia@institutolamerced.edu.ar;Evangelina Beatriz;Saravia;profe;-;profe123
+paola.auban@institutolamerced.edu.ar;Paola Yanina;Auban;profe;-;profe123
+santiago.romero@institutolamerced.edu.ar;Santiago Manuel;Romero;profe;-;profe123
+diamela.alvarez@institutolamerced.edu.ar;Diamela;Álvarez Novara;profe;-;profe123
 
-enzoeara019@gmail.com;Enzo Agustín;Romano Almaraz;profe;1° B,2° B;Matemática,Computación;enzo123
-cecilia.viotti@institutolamerced.edu.ar;Cecilia;Viotti;profe;1° A,2° A;Biología,Física;ceci123
-marisa.brisio@institutolamerced.edu.ar;Marisa;Brisio;profe;1° A,1° B,3° A,3° B,4° A;Educación Artística,Arte Cultura y Sociales;brizio123
-virginia.gardella@institutolamerced.edu.ar;Virginia;Gardella;profe;1° A,3° A,4° A,4° B;Lengua;vir123
-alejandra.pissane@institutolamerced.edu.ar;María Alejandra;Pissane;profe;1° A,1° B,2° A,3° A;Matemática;pissane123
-andrea.miretti@institutolamerced.edu.ar;Andrea;Miretti;profe;1° A,1° B,3° A,3° B,4° A,5° A,5° B;Geografía;miretti123
-gabriela.mugas@institutolamerced.edu.ar;Gabriela;Mugas;profe;1° A,1° B,2° A,3° A,5° A,6° B;Educación Religiosa Escolar;mugas123
-yanina.moya@institutolamerced.edu.ar;Yanina;Moya;profe;1° A,1° B,2° A,2° B,3° B;Ciudadanía y Participación,Lengua;moya123
-ivana.marioni@institutolamerced.edu.ar;Ivana;Marioni;profe;1° A,1° B,3° A;Inglés;marioni123
-facundo.gil@institutolamerced.edu.ar;Facundo;Gil;profe;1° A,1° B,2° A,2° B;Educación Tecnológica,TIC;gil123
-soledad.picard@institutolamerced.edu.ar;Soledad;Picard;profe;1° B,2° B;Biología,Física,Química;picard123
-gerardo.lemos@institutolamerced.edu.ar;Gerardo;Lemos;profe;2° A,2° B,3° A,3° B,5° A,5° B;Música;lemos123
-florencia.andino@institutolamerced.edu.ar;Florencia;Andino;profe;2° A,2° B,3° A,3° B,4° B,5° B;Historia;andino123
-mj.esposito@institutolamerced.edu.ar;María José;Esposito;profe;2° A,2° B;Educación Tecnológica;esposito123
-alicia.vocos@institutolamerced.edu.ar;Alicia;Vocos;profe;2° A,3° A,6° A;Química,Física;vocos123
-maria.guzman@institutolamerced.edu.ar;María Belén;Guzmán;profe;2° A,2° B;Inglés;guzman123
-milagros.bergonzo@institutolamerced.edu.ar;Milagros;Bergonzo;profe;2° A,2° B,3° A,3° B,6° A;Ciudadanía y Participación,Formación para la Vida y el Trabajo;bergonzo123
-paula.radichi@institutolamerced.edu.ar;Paula;Radichi;profe;1° B,2° B,3° B,5° B,6° B;Educación Religiosa Escolar,Formación para la Vida y el Trabajo;radichi123
-tamara.rochia@institutolamerced.edu.ar;Tamara;Rochia;profe;2° B,3° B,5° A;Matemática;rochia123
-carlos.clara@institutolamerced.edu.ar;Carlos;Clara;profe;3° A,3° B,4° B,5° B,6° B;Computación,Tecnologías Digitales,Robótica;clara123
-silvana.bravo@institutolamerced.edu.ar;Silvana;Bravo;profe;3° B,4° A,4° B,5° A;Historia;bravo123
-macarena.deyong@institutolamerced.edu.ar;Macarena;De Yong;profe;4° A,4° B,6° B;Biología,Química;deyong123
-romina.brizzio@institutolamerced.edu.ar;Romina;Brizzio;profe;4° A,6° A;Sociedad y Comunicación,Lengua;romina123
-eliana.cabrera@institutolamerced.edu.ar;Eliana;Cabrera;profe;4° A;Matemática;cabrera123
-analuz.torressi@institutolamerced.edu.ar;Ana Luz;Torressi;profe;4° A,4° B,6° A;Formación para la Vida y el Trabajo,Antropología;torressi123
-gustavo.mendoza@institutolamerced.edu.ar;Gustavo;Mendoza;profe;4° B,5° B;Sistemas Digitales;mendoza123
-marisa.ferrero@institutolamerced.edu.ar;Marisa;Ferrero;profe;5° A;Metodología;ferrero123
-ivana.lario@institutolamerced.edu.ar;Ivana;Lario;profe;5° A,6° A;Lengua;lario123
-laura.bertea@institutolamerced.edu.ar;Laura;Bertea;profe;5° B;Lengua;bertea123
-luciana.noriega@institutolamerced.edu.ar;Luciana;Noriega;profe;5° A,5° B,6° A;Psicología,Filosofía;noriega123
-evangelina.saravia@institutolamerced.edu.ar;Evangelina;Saravia;profe;5° A,6° A,6° B;Formación para la Vida y el Trabajo,Ciudadanía y Política;saravia123
-paola.auban@institutolamerced.edu.ar;Paola;Auban;profe;6° A;Economía Política;auban123
-santiago.romero@institutolamerced.edu.ar;Santiago;Romero;profe;6° B;Filosofía;romero123
-diamela.alvarez@institutolamerced.edu.ar;Diamela;Álvarez Novara;profe;6° B;Informática Aplicada a Empresas;alvarez123
+juanperez@insm.edu;Juan;Pérez;alumno;1° B;alumno123
+maria.lopez@insm.edu;María;López;alumno;1° A;alumno123
