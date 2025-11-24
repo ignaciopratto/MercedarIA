@@ -150,4 +150,4 @@
 150;Planilla EF;Rendir test físico.;6° B;Educación Física;profe12@insm.edu;2025-04-01
 151;Trabajo de Aplicaciones Informáticas;Armar planilla Excel.;6° B;Aplicaciones Informáticas;diamela.alvarez@institutolamerced.edu.ar;2025-04-02
 152;Lista de vocabulario;Aprender palabras Unidad 2.;6° B;Inglés;ivana.marioni@institutolamerced.edu.ar;2025-04-03
-153;1° B;Matemática;probando;nigas;enzoeara019@gmail.com;2025-11-24
+153;1° B;Matemática;probando;nigas;enzoeara019@gmail.com;2025-11-28
