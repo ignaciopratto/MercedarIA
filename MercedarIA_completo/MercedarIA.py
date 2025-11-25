@@ -250,25 +250,21 @@ if st.session_state.usuario is None and not st.session_state.modo_anonimo:
 
     # ---------- LOGIN ----------
     with col_login:
-        st.markdown("""
-        <div style="
-            border:2px solid white;
-            padding:18px;
-            border-radius:12px;
-            background-color:rgba(255,255,255,0.05);
-            margin-bottom:20px;">
-        """, unsafe_allow_html=True)
-    
         st.subheader("🔐 Iniciar sesión")
-    
+
         email = st.text_input("Email", key="login_email")
         pw = st.text_input("Contraseña", type="password", key="login_pw")
-    
+
         if st.button("Ingresar", key="btn_login"):
             usuarios = cargar_usuarios()
             user = next(
-                (u for u in usuarios if u["email"].lower() == email.lower() and u["password"] == pw),
-                None
+                (
+                    u
+                    for u in usuarios
+                    if u["email"].lower() == email.lower()
+                    and u["password"] == pw
+                ),
+                None,
             )
             if user:
                 st.session_state.usuario = user
@@ -276,43 +272,44 @@ if st.session_state.usuario is None and not st.session_state.modo_anonimo:
                 st.rerun()
             else:
                 st.error("Email o contraseña incorrectos.")
-    
-        st.markdown("</div>", unsafe_allow_html=True)
-    
-    
+                st.stop()
     # ---------- REGISTRO ----------
     with col_reg:
-        st.markdown("""
-        <div style="
-            border:2px solid white;
-            padding:18px;
-            border-radius:12px;
-            background-color:rgba(255,255,255,0.05);
-            margin-bottom:20px;">
-        """, unsafe_allow_html=True)
-    
         st.subheader("🧾 Crear cuenta")
-    
+
         new_email = st.text_input("Nuevo email", key="reg_email")
         new_nombre = st.text_input("Nombre", key="reg_nombre")
         new_apellido = st.text_input("Apellido", key="reg_apellido")
-    
-        tipo = st.selectbox("Tipo de cuenta", ["alumno", "profe"], key="reg_tipo_cuenta")
-    
+
+        tipo = st.selectbox(
+            "Tipo de cuenta", ["alumno", "profe"], key="reg_tipo_cuenta"
+        )
+
+        # Alumno => elige curso
         if tipo == "alumno":
-            new_curso = st.selectbox("Curso", sorted({c["curso"] for c in cursos}), key="reg_curso")
+            new_curso = st.selectbox(
+                "Curso",
+                sorted({c["curso"] for c in cursos}),
+                key="reg_curso",
+            )
         else:
             new_curso = "-"
-    
-        new_pw = st.text_input("Contraseña", type="password", key="reg_pw")
-    
+
+        new_pw = st.text_input(
+            "Contraseña", type="password", key="reg_password"
+        )
+
+        admin_key = ""
         if tipo == "profe":
-            admin_key = st.text_input("Contraseña de administrador", type="password", key="reg_admin")
-        else:
-            admin_key = ""
-    
-        if st.button("Crear cuenta", key="btn_registrar_cuenta"):
+            admin_key = st.text_input(
+                "Contraseña de administrador",
+                type="password",
+                key="reg_admin_password",
+            )
+
+        if st.button("Crear cuenta", key="btn_crear_cuenta"):
             usuarios = cargar_usuarios()
+
             if any(u["email"].lower() == new_email.lower() for u in usuarios):
                 st.error("Ya existe un usuario con ese email.")
             elif tipo == "profe" and admin_key != ADMIN_MASTER_KEY:
@@ -320,41 +317,26 @@ if st.session_state.usuario is None and not st.session_state.modo_anonimo:
             elif not new_email or not new_nombre or not new_apellido or not new_pw:
                 st.error("Completá todos los campos.")
             else:
-                usuarios.append({
-                    "email": new_email.strip(),
-                    "nombre": new_nombre.strip(),
-                    "apellido": new_apellido.strip(),
-                    "rol": tipo,
-                    "curso": new_curso.strip(),
-                    "password": new_pw.strip(),
-                })
+                usuarios.append(
+                    {
+                        "email": new_email.strip(),
+                        "nombre": new_nombre.strip(),
+                        "apellido": new_apellido.strip(),
+                        "rol": tipo,
+                        "curso": new_curso.strip(),
+                        "password": new_pw.strip(),
+                    }
+                )
                 guardar_usuarios(usuarios)
-                st.success("Cuenta creada. Podés iniciar sesión.")
+                st.success("Cuenta creada correctamente. Ya podés iniciar sesión.")
                 st.rerun()
-    
-        st.markdown("</div>", unsafe_allow_html=True)
-    
-    
+
     # ---------- INVITADO ----------
     with col_anon:
-        st.markdown("""
-        <div style="
-            border:2px solid white;
-            padding:18px;
-            border-radius:12px;
-            background-color:rgba(255,255,255,0.05);
-            margin-bottom:20px;
-            text-align:center;">
-        """, unsafe_allow_html=True)
-    
         st.subheader("👤 Invitado")
-    
         if st.button("Entrar como invitado", key="btn_anonimo"):
             st.session_state.modo_anonimo = True
             st.rerun()
-    
-        st.markdown("</div>", unsafe_allow_html=True)
-
 
 # ============================================
 # USUARIO ACTUAL
@@ -962,4 +944,3 @@ elif rol == "admin":
                 st.rerun()
         else:
             st.info("No hay bases específicas cargadas en memoria.")
-
