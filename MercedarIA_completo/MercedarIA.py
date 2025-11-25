@@ -717,7 +717,7 @@ elif rol == "profe":
 
                     col1, col2 = st.columns(2)
 
-                    # GUARDAR CAMBIOS (sin mostrar el id en el texto del botón)
+                    # GUARDAR CAMBIOS
                     with col1:
                         if st.button(
                             "Guardar cambios",
@@ -733,7 +733,7 @@ elif rol == "profe":
                             st.success("Tarea actualizada.")
                             st.rerun()
 
-                    # ELIMINAR TAREA (también sin número en el texto del botón)
+                    # ELIMINAR TAREA
                     with col2:
                         if st.button(
                             "Eliminar tarea",
@@ -746,6 +746,7 @@ elif rol == "profe":
                             guardar_tareas(tareas_actuales)
                             st.success("Tarea eliminada.")
                             st.rerun()
+
 
 # ================= ADMIN =====================
 
@@ -775,40 +776,44 @@ elif rol == "admin":
                 [u["email"] for u in usuarios],
                 key="admin_select_user",
             )
+
+            # usuario actualmente seleccionado
             user_sel = next(u for u in usuarios if u["email"] == email_sel)
 
+            # KEYS DINÁMICAS PARA QUE CAMBIEN AL ELEGIR OTRO USUARIO
             nom_edit = st.text_input(
                 "Nombre",
                 value=user_sel["nombre"],
-                key="admin_edit_nombre",
+                key=f"admin_edit_nombre_{email_sel}",
             )
             ape_edit = st.text_input(
                 "Apellido",
                 value=user_sel["apellido"],
-                key="admin_edit_apellido",
+                key=f"admin_edit_apellido_{email_sel}",
             )
             rol_edit = st.selectbox(
                 "Rol",
                 ["alumno", "profe", "admin"],
                 index=["alumno", "profe", "admin"].index(user_sel["rol"]),
-                key="admin_edit_rol",
+                key=f"admin_edit_rol_{email_sel}",
             )
             curso_edit = st.text_input(
                 "Curso (para alumnos, ej: 1° B; para otros poner -)",
                 value=user_sel["curso"],
-                key="admin_edit_curso",
+                key=f"admin_edit_curso_{email_sel}",
             )
             pw_edit = st.text_input(
                 "Contraseña",
                 value=user_sel["password"],
-                key="admin_edit_pw",
+                key=f"admin_edit_pw_{email_sel}",
             )
 
             col_u1, col_u2 = st.columns(2)
+
             with col_u1:
                 if st.button(
                     "💾 Guardar cambios usuario",
-                    key="btn_admin_guardar_user",
+                    key=f"btn_admin_guardar_user_{email_sel}",
                 ):
                     usuarios_actuales = cargar_usuarios()
                     for u in usuarios_actuales:
@@ -821,9 +826,11 @@ elif rol == "admin":
                     guardar_usuarios(usuarios_actuales)
                     st.success("Usuario actualizado.")
                     st.rerun()
+
             with col_u2:
                 if st.button(
-                    "🗑 Eliminar usuario", key="btn_admin_borrar_user"
+                    "🗑 Eliminar usuario",
+                    key=f"btn_admin_borrar_user_{email_sel}",
                 ):
                     usuarios_actuales = cargar_usuarios()
                     usuarios_actuales = [
@@ -994,5 +1001,3 @@ elif rol == "admin":
                 st.rerun()
         else:
             st.info("No hay bases específicas cargadas en memoria.")
-
-
