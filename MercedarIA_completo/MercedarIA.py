@@ -275,6 +275,12 @@ if st.session_state.usuario is None and not st.session_state.modo_anonimo:
 
     # ---------- LOGIN ----------
     with col_login:
+        st.markdown(
+            """
+            <div style="padding:18px; border:1px solid white; border-radius:12px;">
+            """,
+            unsafe_allow_html=True
+        )
         st.subheader("🔐 Iniciar sesión")
 
         email = st.text_input("Email", key="login_email")
@@ -297,9 +303,17 @@ if st.session_state.usuario is None and not st.session_state.modo_anonimo:
                 st.rerun()
             else:
                 st.error("Email o contraseña incorrectos.")
-                st.stop()
+        st.markdown("</div>", unsafe_allow_html=True)
+
     # ---------- REGISTRO ----------
     with col_reg:
+        st.markdown(
+            """
+            <div style="padding:18px; border:1px solid white; border-radius:12px;">
+            """,
+            unsafe_allow_html=True
+        )
+
         st.subheader("🧾 Crear cuenta")
 
         new_email = st.text_input("Nuevo email", key="reg_email")
@@ -310,38 +324,68 @@ if st.session_state.usuario is None and not st.session_state.modo_anonimo:
             "Tipo de cuenta", ["alumno", "profe"], key="reg_tipo_cuenta"
         )
 
-        # Alumno => elige curso
+        # ------------------------
+        # ALUMNO
+        # ------------------------
         if tipo == "alumno":
             new_curso = st.selectbox(
                 "Curso",
                 sorted({c["curso"] for c in cursos}),
                 key="reg_curso",
             )
+            materias_por_curso = {}   # no usado
+
+        # ------------------------
+        # PROFESOR → elegir cursos y materias
+        # ------------------------
         else:
-            new_curso = "-"
+            new_curso = "-"  # no aplica a profesores
 
-        new_pw = st.text_input(
-            "Contraseña", type="password", key="reg_password"
-        )
+            st.markdown("### 📘 Seleccionar cursos y materias")
+            cursos_disponibles = sorted({c["curso"] for c in cursos})
+            materias_por_curso = {}
 
-        admin_key = ""
-        if tipo == "profe":
+            for curso_x in cursos_disponibles:
+                materias_x = sorted({c["materia"] for c in cursos if c["curso"] == curso_x})
+
+                seleccion = st.multiselect(
+                    f"Materias para {curso_x}",
+                    materias_x,
+                    key=f"reg_materias_{curso_x}"
+                )
+
+                if seleccion:
+                    materias_por_curso[curso_x] = seleccion
+
             admin_key = st.text_input(
                 "Contraseña de administrador",
                 type="password",
                 key="reg_admin_password",
             )
 
+        new_pw = st.text_input(
+            "Contraseña", type="password", key="reg_password"
+        )
+
+        # ---------- BOTÓN CREAR CUENTA ----------
         if st.button("Crear cuenta", key="btn_crear_cuenta"):
+
             usuarios = cargar_usuarios()
 
+            # Validaciones
             if any(u["email"].lower() == new_email.lower() for u in usuarios):
                 st.error("Ya existe un usuario con ese email.")
+
             elif tipo == "profe" and admin_key != ADMIN_MASTER_KEY:
                 st.error("Contraseña de administrador incorrecta.")
+
             elif not new_email or not new_nombre or not new_apellido or not new_pw:
                 st.error("Completá todos los campos.")
+
             else:
+                # -------------------
+                # guardar usuario
+                # -------------------
                 usuarios.append(
                     {
                         "email": new_email.strip(),
@@ -353,15 +397,52 @@ if st.session_state.usuario is None and not st.session_state.modo_anonimo:
                     }
                 )
                 guardar_usuarios(usuarios)
+
+                # -------------------
+                # si es profesor → agregar a courses.txt
+                # -------------------
+                if tipo == "profe" and materias_por_curso:
+
+                    cursos_actuales = cargar_cursos()
+
+                    # calcular ID incremental único
+                    nuevo_id = max([int(c["id"]) for c in cursos_actuales] + [0]) + 1
+
+                    for curso_x, lista_mats in materias_por_curso.items():
+                        for mat in lista_mats:
+                            cursos_actuales.append(
+                                {
+                                    "id": str(nuevo_id),
+                                    "curso": curso_x,
+                                    "materia": mat,
+                                    "email": new_email.strip(),
+                                }
+                            )
+                            nuevo_id += 1
+
+                    guardar_cursos(cursos_actuales)
+
                 st.success("Cuenta creada correctamente. Ya podés iniciar sesión.")
                 st.rerun()
 
+        st.markdown("</div>", unsafe_allow_html=True)
+
     # ---------- INVITADO ----------
     with col_anon:
+        st.markdown(
+            """
+            <div style="padding:18px; border:1px solid white; border-radius:12px;">
+            """,
+            unsafe_allow_html=True
+        )
+
         st.subheader("👤 Invitado")
         if st.button("Entrar como invitado", key="btn_anonimo"):
             st.session_state.modo_anonimo = True
             st.rerun()
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
 
 # ============================================
 # USUARIO ACTUAL
@@ -986,4 +1067,5 @@ elif rol == "admin":
                 st.rerun()
         else:
             st.info("No hay bases específicas cargadas en memoria.")
+
 
