@@ -839,95 +839,80 @@ elif rol == "admin":
                     guardar_usuarios(usuarios_actuales)
                     st.success("Usuario eliminado.")
                     st.rerun()
-
+    
     # ---------- TAB CURSOS ----------
     with tab_courses:
-        st.subheader("Cursos y materias existentes")
-
-        for c_obj in cursos:
-            st.markdown(
-                f"- **{c_obj['curso']} — {c_obj['materia']}** "
-                f"(prof: {c_obj['email']})"
-            )
-
+    
+        st.subheader("📘 Asignar materias a profesores")
+    
+        profesores = [u for u in usuarios if u["rol"] == "profe"]
+    
+        if not profesores:
+            st.info("No hay profesores registrados.")
+            st.stop()
+    
+        # Seleccionar profesor
+        prof_sel = st.selectbox(
+            "Elegí un profesor",
+            [f"{p['email']} — {p['nombre']} {p['apellido']}" for p in profesores],
+            key="admin_prof_select",
+        )
+    
+        email_profesor = prof_sel.split(" — ")[0]
+        profesor_obj = next(p for p in profesores if p["email"] == email_profesor)
+    
+        st.markdown(f"### Materias asignadas actualmente a **{profesor_obj['nombre']} {profesor_obj['apellido']}**")
+    
+        cursos_actuales = cargar_cursos()
+    
+        materias_prof = [c for c in cursos_actuales if c["email"] == email_profesor]
+    
+        if not materias_prof:
+            st.info("Este profesor no tiene materias asignadas.")
+        else:
+            for c in materias_prof:
+                st.markdown(f"- 📘 **{c['curso']} — {c['materia']}** (ID: {c['id']})")
+    
         st.markdown("---")
-        st.subheader("Agregar curso/materia")
-
-        idc = st.text_input("ID del curso (número)", key="admin_id_curso")
-        curso_n = st.text_input("Curso (ej: 1° B)", key="admin_curso_nombre")
-        materia_n = st.text_input(
-            "Materia (ej: Matemática)", key="admin_materia_nombre"
-        )
-        prof_n = st.text_input(
-            "Email del profesor", key="admin_prof_email"
-        )
-
-        if st.button("Crear materia nueva", key="btn_admin_crear_materia"):
+        st.markdown("## ➕ Asignar nueva materia")
+    
+        nuevo_id = st.text_input("ID (número o código)", key="admin_new_course_id")
+        nuevo_curso = st.text_input("Curso (ej: 6° B)", key="admin_new_course_name")
+        nueva_materia = st.text_input("Materia (ej: Matemática)", key="admin_new_materia")
+    
+        if st.button("Asignar materia", key="admin_asignar_materia_btn"):
             cursos_actuales = cargar_cursos()
             cursos_actuales.append(
                 {
-                    "id": idc.strip(),
-                    "curso": normalizar(curso_n.strip()),
-                    "materia": normalizar(materia_n.strip()),
-                    "email": prof_n.strip(),
+                    "id": nuevo_id.strip(),
+                    "curso": normalizar(nuevo_curso.strip()),
+                    "materia": normalizar(nueva_materia.strip()),
+                    "email": email_profesor,
                 }
             )
             guardar_cursos(cursos_actuales)
-            st.success("Materia agregada.")
+            st.success("Materia asignada correctamente.")
             st.rerun()
-
+    
         st.markdown("---")
-        st.subheader("Editar / eliminar materia")
-
-        if cursos:
+        st.markdown("## ❌ Eliminar materia asignada")
+    
+        if materias_prof:
             mat_sel = st.selectbox(
-                "Elegí materia",
-                [f"{c['id']} — {c['curso']} — {c['materia']}" for c in cursos],
-                key="admin_course_sel",
+                "Elegí una materia para eliminar",
+                [f"{m['id']} — {m['curso']} — {m['materia']}" for m in materias_prof],
+                key="admin_delete_course_select",
             )
+    
+            id_borrar = mat_sel.split(" — ")[0]
+    
+            if st.button("Eliminar materia seleccionada", key="admin_btn_delete_materia"):
+                cursos_actuales = cargar_cursos()
+                cursos_actuales = [c for c in cursos_actuales if c["id"] != id_borrar]
+                guardar_cursos(cursos_actuales)
+                st.success("Materia eliminada correctamente.")
+                st.rerun()
 
-            idsel = mat_sel.split(" — ")[0]
-            course_obj = next(c for c in cursos if c["id"] == idsel)
-
-            ec_id = st.text_input(
-                "ID:", course_obj["id"], key="admin_edit_id"
-            )
-            ec_curso = st.text_input(
-                "Curso:", course_obj["curso"], key="admin_edit_curso2"
-            )
-            ec_mat = st.text_input(
-                "Materia:", course_obj["materia"], key="admin_edit_materia"
-            )
-            ec_prof = st.text_input(
-                "Profesor:", course_obj["email"], key="admin_edit_prof"
-            )
-
-            colc1, colc2 = st.columns(2)
-
-            with colc1:
-                if st.button(
-                    "Guardar materia", key="btn_admin_guardar_materia"
-                ):
-                    cursos_actuales = cargar_cursos()
-                    for c in cursos_actuales:
-                        if c["id"] == idsel:
-                            c["id"] = ec_id.strip()
-                            c["curso"] = normalizar(ec_curso.strip())
-                            c["materia"] = normalizar(ec_mat.strip())
-                            c["email"] = ec_prof.strip()
-                    guardar_cursos(cursos_actuales)
-                    st.success("Materia actualizada.")
-                    st.rerun()
-
-            with colc2:
-                if st.button(
-                    "Eliminar materia", key="btn_admin_borrar_materia"
-                ):
-                    cursos_actuales = cargar_cursos()
-                    cursos_actuales = [c for c in cursos_actuales if c["id"] != idsel]
-                    guardar_cursos(cursos_actuales)
-                    st.success("Materia eliminada.")
-                    st.rerun()
 
     # ---------- TAB BASES ----------
     with tab_bases:
@@ -1001,3 +986,4 @@ elif rol == "admin":
                 st.rerun()
         else:
             st.info("No hay bases específicas cargadas en memoria.")
+
