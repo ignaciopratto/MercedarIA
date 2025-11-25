@@ -37,3 +37,4 @@ juanperez@insm.edu;Juan;Pérez;alumno;1° B;alumno123
 maria.lopez@insm.edu;María;López;alumno;1° A;alumno123
 iprattoaghemo@gmail.com;Ignacio;Pratto;alumno;6° B;alumno123
 iprattaghemo@gmail.com;ignacio;pratto;alumno;1° A;alumno123
+ignaciopratto90@gmail.com;ignacio;pratto;profe;-;profe123
