@@ -231,7 +231,66 @@ BASE_GENERAL_DEFAULT = [
 ]
 
 BASES_ESPECIFICAS_DEFAULT = {
-    # (las listas completas siguen sin cambios, idénticas a tu código original)
+    "1° A": [
+        ("¿Qué materias tengo?", "Biología, Educación en Artes Visuales, Lengua y Literatura, Física, Geografía, Educación Tecnológica, Matemática, Educación Religiosa Escolar, Ciudadanía y Participación, Inglés y Educación Física."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física y Educación Tecnológica."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "1° B": [
+        ("¿Qué materias tengo?", "Física, Matemática, Educación en Artes Visuales, Inglés, Educación Religiosa Escolar, Lengua y Literatura, Geografía, Ciudadanía y Participación, Educación Tecnológica, Biología y Educación Física."),
+        ("¿Cuáles son mis contraturnos?", "Educación Tecnológica y Educación Física."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "2° A": [
+        ("¿Qué materias tengo?", "Matemática, Lengua y Literatura, Educación Religiosa Escolar, Música, Historia, Educación Tecnológica, Química, Computación, Ciudadanía y Participación, Biología, Inglés y Educación Física."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "2° B": [
+        ("¿Qué materias tengo?", "Música, Historia, Educación Religiosa Escolar, Ciudadanía y Participación, Inglés, Matemática, Lengua y Literatura, Educación Tecnológica, Química, Biología y Educación Física."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "3° A": [
+        ("¿Qué materias tengo?", "Lengua y Literatura, Inglés, Historia, Geografía, Química, Educación Tecnológica, Física, Educación Religiosa Escolar, Formación para la Vida y el Trabajo, Matemática, Educación Artística Visual, Música, Computación y Educación Física."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física y Formación para la Vida y el Trabajo."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "3° B": [
+        ("¿Qué materias tengo?", "Lengua y Literatura, Formación para la Vida y el Trabajo, Física, Historia, Geografía, Educación Artística Visual, Música, Matemática, Educación Tecnológica, Química, Computación, Educación Religiosa Escolar, Educación Física e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
+        ("¿A qué hora son los recreos?", "14:40, 16:05, 17:40 hs.")
+    ],
+    "4° A": [
+        ("¿Qué materias tengo?", "Historia, Lengua y Literatura, Biología, ERE, Matemática, Geografía, Educ. Artística, FVT, TIC, Sociedad y Comunicación, Antropología, Educación Física e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ],
+    "4° B": [
+        ("¿Qué materias tengo?", "Lengua y Literatura, Biología, ERE, Historia, Programación, Geografía, Matemática, Sistemas Digitales, FVT, Educación Artística, Educación Física e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "Educación Física e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ],
+    "5° A": [
+        ("¿Qué materias tengo?", "Metodología, Historia, Física, Geografía, Arte Cultural y Social, ERE, Lengua y Literatura, FVT, Matemática, EF, Psicología, Sociología e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Psicología, Sociología e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ],
+    "5° B": [
+        ("¿Qué materias tengo?", "Robótica, Música, Física, Matemática, Historia, Lengua y Literatura, FVT, Sistemas Digitales, Geografía, Psicología, EF, Desarrollo Informático e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Sistemas Digitales, Desarrollo Informático e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ],
+    "6° A": [
+        ("¿Qué materias tengo?", "Ciudadanía y Política, Economía Política, Matemática, Geografía, Filosofía, Química, Lengua y Literatura, Historia, ERE, Sociedad y Comunicación, Teatro, FVT, EF e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Sociedad y Comunicación e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ],
+    "6° B": [
+        ("¿Qué materias tengo?", "Lengua y Literatura, Comunicación Audiovisual, Desarrollo de Soluciones Informáticas, Informática Aplicada, Filosofía, Formación para la Vida y el Trabajo, Química, Matemática, ERE, Ciudadanía y Política, Teatro, EF, Aplicaciones Informáticas e Inglés."),
+        ("¿Cuáles son mis contraturnos?", "EF, Aplicaciones Informáticas e Inglés."),
+        ("¿A qué hora son los recreos?", "8:35, 10:00, 11:35 hs.")
+    ]
 }
 
 # Estado en memoria
@@ -1067,5 +1126,6 @@ elif rol == "admin":
                 st.rerun()
         else:
             st.info("No hay bases específicas cargadas en memoria.")
+
 
 
