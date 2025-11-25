@@ -34,16 +34,41 @@ def github_raw_url(path):
 
 def github_api_url(path):
     return f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/contents/{path}"
-
-
+    
 def leer_archivo_github(path):
+    """
+    Lectura ultra rápida sin cache.
+    GitHub siempre devuelve la versión más reciente.
+    """
+
+    raw = github_raw_url(path)
+
+    # Primer intento: sin cache
     try:
-        r = requests.get(github_raw_url(path), timeout=10)
+        r = requests.get(
+            raw,
+            headers={
+                "Cache-Control": "no-cache",
+                "Pragma": "no-cache"
+            },
+            timeout=10
+        )
         if r.status_code == 200:
             return r.text
-        return ""
-    except Exception:
-        return ""
+    except:
+        pass
+
+    # Segundo intento: fuerza actualización agregando timestamp único
+    try:
+        url_force = f"{raw}?{datetime.now().timestamp()}"
+        r = requests.get(url_force, timeout=10)
+        if r.status_code == 200:
+            return r.text
+    except:
+        pass
+
+    return ""
+
 
 
 def escribir_archivo_github(path, contenido):
@@ -969,4 +994,5 @@ elif rol == "admin":
                 st.rerun()
         else:
             st.info("No hay bases específicas cargadas en memoria.")
+
 
