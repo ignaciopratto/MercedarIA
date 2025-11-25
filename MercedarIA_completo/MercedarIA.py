@@ -582,14 +582,39 @@ if rol == "alumno":
         for t in tareas_curso:
             st.markdown(
                 f"""
-### 📚 {t['titulo']}
-**Materia:** {t['materia']}  
-**Descripción:** {t['descripcion']}  
-**Fecha límite:** {t['fecha_limite']}  
-**Profesor:** {t['creador']}  
----
-"""
+<style>
+.card {{
+    background-color:#1d2535;
+    padding:18px;
+    border-radius:12px;
+    margin-bottom:18px;
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow:0 0 12px rgba(0,0,0,0.35);
+}}
+.card-title {{
+    font-size:20px;
+    font-weight:700;
+    margin-bottom:8px;
+}}
+.card-line {{
+    margin:2px 0;
+}}
+</style>
+
+<div class="card">
+
+<div class="card-title">📚 {t['titulo']}</div>
+
+<div class="card-line"><b>Materia:</b> {t['materia']}</div>
+<div class="card-line"><b>Descripción:</b> {t['descripcion']}</div>
+<div class="card-line"><b>Fecha límite:</b> {t['fecha_limite']}</div>
+<div class="card-line"><b>Profesor:</b> {t['creador']}</div>
+
+</div>
+""",
+                unsafe_allow_html=True,
             )
+
 
 # ================= PROFESOR ==================
 
@@ -944,3 +969,4 @@ elif rol == "admin":
                 st.rerun()
         else:
             st.info("No hay bases específicas cargadas en memoria.")
+
